@@ -1,4 +1,4 @@
-# omophub <a href="https://omophub.github.io/omophub-R/"><img src="man/figures/logo.png" align="right" height="139" alt="omophub website" /></a>
+# OMOPHub R SDK
 
 <!-- badges: start -->
 [![R-CMD-check](https://github.com/omopHub/omophub-R/actions/workflows/R-CMD-check.yaml/badge.svg)](https://github.com/omopHub/omophub-R/actions/workflows/R-CMD-check.yaml)
