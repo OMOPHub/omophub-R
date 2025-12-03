@@ -1,0 +1,58 @@
+on:
+  push:
+    branches: [main, master, develop]
+  pull_request:
+    branches: [main, master, develop]
+  workflow_dispatch:  # Allow manual triggering
+
+name: integration-tests
+
+jobs:
+  integration:
+    runs-on: ubuntu-latest
+    env:
+      GITHUB_PAT: ${{ secrets.GITHUB_TOKEN }}
+      OMOPHUB_API_KEY: ${{ secrets.OMOPHUB_API_KEY }}
+      TEST_API_KEY: ${{ secrets.TEST_API_KEY }}
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: r-lib/actions/setup-r@v2
+        with:
+          r-version: 'release'
+          use-public-rspm: true
+
+      - uses: r-lib/actions/setup-r-dependencies@v2
+        with:
+          extra-packages: any::testthat, any::devtools
+          needs: check
+
+      - name: Run integration tests
+        run: |
+          devtools::load_all()
+          integration_files <- list.files(
+            "tests/testthat",
+            pattern = "^test-.*-integration[.]R$",
+            full.names = TRUE
+          )
+          cat("Found", length(integration_files), "integration test files\n")
+          results <- lapply(integration_files, function(f) {
+            cat("\n========================================\n")
+            cat("Running:", basename(f), "\n")
+            cat("========================================\n\n")
+            testthat::test_file(f)
+          })
+          # Check for failures
+          failures <- sum(sapply(results, function(r) sum(as.data.frame(r)$failed)))
+          if (failures > 0) {
+            stop(paste(failures, "test(s) failed"))
+          }
+        shell: Rscript {0}
+
+      - name: Upload test results
+        if: failure()
+        uses: actions/upload-artifact@v4
+        with:
+          name: integration-test-failures
+          path: tests/testthat/

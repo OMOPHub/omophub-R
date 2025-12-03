@@ -1,0 +1,45 @@
+url: https://omophub.github.io/omophub-R
+
+template:
+  bootstrap: 5
+  bootswatch: flatly
+
+navbar:
+  structure:
+    left: [intro, reference, articles]
+    right: [search, github]
+  components:
+    github:
+      icon: fab fa-github
+      href: https://github.com/omopHub/omophub-R
+      aria-label: GitHub
+
+reference:
+  - title: Client
+    desc: Create and configure API clients
+    contents:
+      - OMOPHubClient
+      - get_api_key
+      - set_api_key
+
+  - title: Response Classes
+    desc: S3 classes for API responses
+    contents:
+      - starts_with("print.omophub")
+      - starts_with("as.data.frame.omophub")
+
+articles:
+  - title: Getting Started
+    navbar: ~
+    contents:
+      - getting-started
+
+  - title: Advanced Usage
+    contents:
+      - authentication
+      - concepts
+      - pagination
+
+authors:
+  OMOPHub Team:
+    href: https://omophub.com

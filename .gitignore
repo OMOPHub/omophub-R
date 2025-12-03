@@ -1,0 +1,39 @@
+# R package specific
+*.Rproj.user
+.Rproj.user/
+.Rhistory
+.RData
+.Ruserdata
+*.Rcheck/
+*.tar.gz
+
+# Build artifacts
+docs/
+NAMESPACE.bak
+
+# Test artifacts
+tests/testthat/_snaps/
+*.html
+*.pdf
+
+# IDE
+.idea/
+*.swp
+*.swo
+*~
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Coverage
+covr/
+*.gcov
+*.gcno
+*.gcda
+codecov.yml
+
+.env
+.env.local
+.env.production
+cran-comments.md

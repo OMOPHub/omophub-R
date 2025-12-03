@@ -1,0 +1,37 @@
+Package: omophub
+Title: R Client for the OMOPHub Medical Vocabulary API
+Version: 1.0.0
+Authors@R:
+    person("OMOPHub", "Team", email = "support@omophub.com",
+           role = c("aut", "cre", "cph"))
+Description: Provides an R interface to the OMOPHub API for accessing
+    OHDSI ATHENA standardized medical vocabularies. Supports concept search,
+    vocabulary exploration, hierarchy navigation, relationship queries, and
+    concept mappings with automatic pagination and rate limiting.
+License: MIT + file LICENSE
+URL: https://github.com/omopHub/omophub-R,
+    https://docs.omophub.com
+BugReports: https://github.com/omopHub/omophub-R/issues
+Depends: R (>= 4.1)
+Imports:
+    httr2 (>= 1.0.0),
+    R6,
+    rlang (>= 1.0.0),
+    cli,
+    tibble,
+    purrr,
+    glue,
+    checkmate
+Suggests:
+    testthat (>= 3.0.0),
+    httptest2,
+    webmockr,
+    knitr,
+    rmarkdown,
+    keyring,
+    withr
+Config/testthat/edition: 3
+Encoding: UTF-8
+Roxygen: list(markdown = TRUE)
+RoxygenNote: 7.3.2
+VignetteBuilder: knitr

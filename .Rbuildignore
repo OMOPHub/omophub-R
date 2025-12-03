@@ -1,0 +1,12 @@
+^\.github$
+^LICENSE\.md$
+^_pkgdown\.yml$
+^docs$
+^pkgdown$
+^codecov\.yml$
+^\.lintr$
+^R-requirements\.md$
+^.*\.Rproj$
+^\.Rproj\.user$
+^\.env$
+^cran-comments\.md$
