@@ -21,6 +21,7 @@ reference:
       - OMOPHubClient
       - get_api_key
       - set_api_key
+      - has_api_key
 
   - title: Response Classes
     desc: S3 classes for API responses
@@ -33,12 +34,6 @@ articles:
     navbar: ~
     contents:
       - getting-started
-
-  - title: Advanced Usage
-    contents:
-      - authentication
-      - concepts
-      - pagination
 
 authors:
   OMOPHub Team:
