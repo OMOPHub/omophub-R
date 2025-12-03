@@ -1,4 +1,4 @@
-# omophub [![omophub website](reference/figures/logo.png)](https://omophub.github.io/omophub-R/)
+# OMOPHub R SDK
 
 R client for the [OMOPHub API](https://docs.omophub.com), providing
 access to OHDSI ATHENA standardized medical vocabularies.
