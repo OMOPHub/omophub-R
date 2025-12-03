@@ -115,12 +115,30 @@ tryCatch(
 )
 ```
 
+## Examples
+
+The package includes comprehensive examples in `inst/examples/`:
+
+| Example | Description |
+|---------|-------------|
+| [`basic_usage.R`](inst/examples/basic_usage.R) | Getting started - client setup, concept lookup, search |
+| [`search_concepts.R`](inst/examples/search_concepts.R) | Search capabilities - filters, autocomplete, pagination |
+| [`navigate_hierarchy.R`](inst/examples/navigate_hierarchy.R) | Hierarchy navigation - ancestors, descendants, relationships |
+| [`map_between_vocabularies.R`](inst/examples/map_between_vocabularies.R) | Vocabulary mapping - ICD-10, SNOMED, batch mapping |
+| [`error_handling.R`](inst/examples/error_handling.R) | Error handling patterns - tryCatch, retry logic |
+
+Run an example:
+```r
+# After installing the package
+example_path <- system.file("examples", "basic_usage.R", package = "omophub")
+source(example_path)
+```
 
 ## Documentation
 
 - [Full Documentation](https://docs.omophub.com/sdks/r/overview)
 - [API Reference](https://docs.omophub.com/api-reference)
-- [Examples](https://github.com/omopHub/omophub-r/tree/main/examples)
+- [Examples](https://github.com/omopHub/omophub-r/tree/main/inst/examples)
 
 ## License
 
