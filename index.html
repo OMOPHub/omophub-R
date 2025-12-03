@@ -188,12 +188,54 @@
 <span><span class="op">)</span></span></code></pre></div>
 </div>
 <div class="section level2">
+<h2 id="examples">Examples<a class="anchor" aria-label="anchor" href="#examples"></a>
+</h2>
+<p>The package includes comprehensive examples in <code>inst/examples/</code>:</p>
+<table class="table">
+<colgroup>
+<col width="40%">
+<col width="59%">
+</colgroup>
+<thead><tr class="header">
+<th>Example</th>
+<th>Description</th>
+</tr></thead>
+<tbody>
+<tr class="odd">
+<td><a href="inst/examples/basic_usage.R"><code>basic_usage.R</code></a></td>
+<td>Getting started - client setup, concept lookup, search</td>
+</tr>
+<tr class="even">
+<td><a href="inst/examples/search_concepts.R"><code>search_concepts.R</code></a></td>
+<td>Search capabilities - filters, autocomplete, pagination</td>
+</tr>
+<tr class="odd">
+<td><a href="inst/examples/navigate_hierarchy.R"><code>navigate_hierarchy.R</code></a></td>
+<td>Hierarchy navigation - ancestors, descendants, relationships</td>
+</tr>
+<tr class="even">
+<td><a href="inst/examples/map_between_vocabularies.R"><code>map_between_vocabularies.R</code></a></td>
+<td>Vocabulary mapping - ICD-10, SNOMED, batch mapping</td>
+</tr>
+<tr class="odd">
+<td><a href="inst/examples/error_handling.R"><code>error_handling.R</code></a></td>
+<td>Error handling patterns - tryCatch, retry logic</td>
+</tr>
+</tbody>
+</table>
+<p>Run an example:</p>
+<div class="sourceCode" id="cb7"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="co"># After installing the package</span></span>
+<span><span class="va">example_path</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/system.file.html" class="external-link">system.file</a></span><span class="op">(</span><span class="st">"examples"</span>, <span class="st">"basic_usage.R"</span>, package <span class="op">=</span> <span class="st">"omophub"</span><span class="op">)</span></span>
+<span><span class="kw"><a href="https://rdrr.io/r/base/source.html" class="external-link">source</a></span><span class="op">(</span><span class="va">example_path</span><span class="op">)</span></span></code></pre></div>
+</div>
+<div class="section level2">
 <h2 id="documentation">Documentation<a class="anchor" aria-label="anchor" href="#documentation"></a>
 </h2>
 <ul>
 <li><a href="https://docs.omophub.com/sdks/r/overview" class="external-link">Full Documentation</a></li>
 <li><a href="https://docs.omophub.com/api-reference" class="external-link">API Reference</a></li>
-<li><a href="https://github.com/omopHub/omophub-r/tree/main/examples" class="external-link">Examples</a></li>
+<li><a href="https://github.com/omopHub/omophub-r/tree/main/inst/examples" class="external-link">Examples</a></li>
 </ul>
 </div>
 <div class="section level2">
