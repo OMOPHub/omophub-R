@@ -226,5 +226,5 @@ tryCatch(
 ## Further Resources
 
 - [OMOPHub API Documentation](https://docs.omophub.com)
-- [Package Documentation](https://omophub.github.io/omophub-R)
+- [Package Documentation](https://omophub.github.io/omophub-R/)
 - [GitHub Repository](https://github.com/omophub/omophub-R)

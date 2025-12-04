@@ -1,17 +1,17 @@
 Package: omophub
-Title: R Client for the OMOPHub Medical Vocabulary API
+Title: R Client for the 'OMOPHub' Medical Vocabulary API
 Version: 1.0.0
 Authors@R:
     person("OMOPHub", "Team", email = "support@omophub.com",
            role = c("aut", "cre", "cph"))
-Description: Provides an R interface to the OMOPHub API for accessing
-    OHDSI ATHENA standardized medical vocabularies. Supports concept search,
+Description: Provides an R interface to the 'OMOPHub' API for accessing
+    'OHDSI ATHENA' standardized medical vocabularies. Supports concept search,
     vocabulary exploration, hierarchy navigation, relationship queries, and
     concept mappings with automatic pagination and rate limiting.
 License: MIT + file LICENSE
 URL: https://github.com/omopHub/omophub-R,
     https://docs.omophub.com,
-    https://omophub.github.io/omophub-R
+    https://omophub.github.io/omophub-R/
 BugReports: https://github.com/omopHub/omophub-R/issues
 Depends: R (>= 4.1)
 Imports:
