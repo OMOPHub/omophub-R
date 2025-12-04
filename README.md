@@ -3,7 +3,10 @@
 <!-- badges: start -->
 [![R-CMD-check](https://github.com/omopHub/omophub-R/actions/workflows/R-CMD-check.yaml/badge.svg)](https://github.com/omopHub/omophub-R/actions/workflows/R-CMD-check.yaml)
 [![Codecov test coverage](https://codecov.io/gh/omopHub/omophub-R/branch/main/graph/badge.svg)](https://app.codecov.io/gh/omopHub/omophub-R?branch=main)
+[![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg)](https://opensource.org/licenses/MIT)
 [![CRAN status](https://www.r-pkg.org/badges/version/omophub)](https://CRAN.R-project.org/package=omophub)
+[![CRAN_Status_Badge](https://cranlogs.r-pkg.org/badges/DatabaseConnector)](https://cran.r-project.org/package=DatabaseConnector)
+
 <!-- badges: end -->
 
 R client for the [OMOPHub API](https://docs.omophub.com), providing access to OHDSI ATHENA standardized medical vocabularies.
