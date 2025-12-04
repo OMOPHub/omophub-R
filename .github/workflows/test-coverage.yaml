@@ -30,18 +30,10 @@ jobs:
           covr::codecov(
             quiet = FALSE,
             clean = FALSE,
+            token = "${{ secrets.CODECOV_TOKEN }}"
             install_path = file.path(normalizePath(Sys.getenv("RUNNER_TEMP"), winslash = "/"), "package")
           )
         shell: Rscript {0}
-
-      - name: Upload test coverage to Codecov
-        uses: codecov/codecov-action@v4
-        with:
-          token: ${{ secrets.CODECOV_TOKEN }}
-          files: ./coverage.xml
-          flags: unittests
-          verbose: true
-          fail_ci_if_error: false
 
       - name: Show testthat output
         if: always()
