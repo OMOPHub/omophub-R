@@ -1,5 +1,17 @@
 # Changelog
 
+## omophub 1.1.0
+
+### New Features
+
+- Added `include_synonyms` and `include_relationships` parameters to
+  `get_by_code()` for retrieving concept synonyms and relationships in a
+  single request.
+
+### Changes
+
+- User-Agent header updated to `OMOPHub-SDK-R/{version}`.
+
 ## omophub 1.0.0
 
 ### Initial CRAN Release
