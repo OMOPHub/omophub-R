@@ -47,15 +47,29 @@ ConceptsResource <- R6::R6Class(
     #'
     #' @param vocabulary_id The vocabulary ID (e.g., "SNOMED", "ICD10CM").
     #' @param concept_code The concept code within the vocabulary.
+    #' @param include_relationships Include related concepts. Default `FALSE`.
+    #' @param include_synonyms Include concept synonyms. Default `FALSE`.
     #'
-    #' @returns A list containing the concept data with mappings.
-    get_by_code = function(vocabulary_id, concept_code) {
+    #' @returns A list containing the concept data with optional relationships and synonyms.
+    get_by_code = function(vocabulary_id,
+                           concept_code,
+                           include_relationships = FALSE,
+                           include_synonyms = FALSE) {
       checkmate::assert_string(vocabulary_id, min.chars = 1)
       checkmate::assert_string(concept_code, min.chars = 1)
 
+      query <- list()
+      if (isTRUE(include_relationships)) {
+        query$include_relationships <- "true"
+      }
+      if (isTRUE(include_synonyms)) {
+        query$include_synonyms <- "true"
+      }
+
       perform_get(
         private$.base_req,
-        paste0("concepts/by-code/", vocabulary_id, "/", concept_code)
+        paste0("concepts/by-code/", vocabulary_id, "/", concept_code),
+        query = if (length(query) > 0) query else NULL
       )
     },
 

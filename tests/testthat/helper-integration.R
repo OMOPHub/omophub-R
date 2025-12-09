@@ -51,6 +51,7 @@ get_integration_api_key <- function() {
 integration_client <- function() {
   skip_if_no_integration_key()
   key <- get_integration_api_key()
+  Sys.sleep(1)  # Rate limit delay between tests
   OMOPHubClient$new(api_key = key)
 }
 
