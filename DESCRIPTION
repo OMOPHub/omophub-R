@@ -1,9 +1,9 @@
 Package: omophub
 Title: R Client for the 'OMOPHub' Medical Vocabulary API
 Version: 1.1.0
-Authors@R:
-    person("OMOPHub", "Team", email = "support@omophub.com",
-           role = c("aut", "cre", "cph"))
+Authors@R: c(
+    person("Alex", "Chen", email = "alex@omophub.com", role = c("aut", "cre", "cph")),
+    person("Observational Health Data Science and Informatics", role = c("cph")),
 Description: Provides an R interface to the 'OMOPHub' API for accessing
     'OHDSI ATHENA' standardized medical vocabularies. Supports concept search,
     vocabulary exploration, hierarchy navigation, relationship queries, and
