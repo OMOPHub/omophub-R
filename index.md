@@ -9,6 +9,10 @@ You can install the development version of omophub from
 [GitHub](https://github.com/omopHub/omophub-R):
 
 ``` r
+install.packages("omophub")
+
+# OR install from GitHub
+
 # install.packages("pak")
 pak::pak("omopHub/omophub-R")
 ```
@@ -147,3 +151,4 @@ for details.
 
 - [GitHub Issues](https://github.com/omopHub/omophub-r/issues)
 - [Documentation](https://docs.omophub.com)
+- [Website](https://omophub.com)

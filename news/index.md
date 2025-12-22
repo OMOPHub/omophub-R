@@ -2,6 +2,8 @@
 
 ## omophub 1.1.0
 
+CRAN release: 2025-12-17
+
 ### New Features
 
 - Added `include_synonyms` and `include_relationships` parameters to
