@@ -228,14 +228,12 @@ tryCatch({
 
 ## Compared to Alternatives
 
-| Feature             | OMOPHub SDK         | ATHENA Download       | OHDSI WebAPI       |
-|---------------------|---------------------|-----------------------|--------------------|
-| Setup time          | 1 minute            | Hours                 | Hours              |
-| Infrastructure      | None                | PostgreSQL required   | Full OHDSI stack   |
-| Updates             | Automatic           | Manual download       | Manual             |
-| Programmatic access | Native R            | SQL/DatabaseConnector | REST API           |
-| Offline support     | No                  | Yes                   | Depends            |
-| Cost                | Free tier available | Free                  | Free (self-hosted) |
+| Feature             | OMOPHub SDK | ATHENA Download       | OHDSI WebAPI     |
+|---------------------|-------------|-----------------------|------------------|
+| Setup time          | 1 minute    | Hours                 | Hours            |
+| Infrastructure      | None        | PostgreSQL required   | Full OHDSI stack |
+| Updates             | Automatic   | Manual download       | Manual           |
+| Programmatic access | Native R    | SQL/DatabaseConnector | REST API         |
 
 **Best for:** R users who need quick, programmatic access to OMOP
 vocabularies without infrastructure overhead.
