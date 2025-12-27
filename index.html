@@ -54,36 +54,74 @@
   <main id="main" class="col-md-9"><div class="section level1">
 <div class="page-header"><h1 id="omophub-r-sdk">OMOPHub R SDK<a class="anchor" aria-label="anchor" href="#omophub-r-sdk"></a>
 </h1></div>
-<!-- badges: start -->
-
-<!-- badges: end -->
-<p>R client for the <a href="https://docs.omophub.com" class="external-link">OMOPHub API</a>, providing access to OHDSI ATHENA standardized medical vocabularies.</p>
+<p><strong>Query millions of standardized medical concepts from R</strong></p>
+<p>Access SNOMED CT, ICD-10, RxNorm, LOINC, and 90+ OHDSI ATHENA vocabularies without downloading, installing, or maintaining local databases.</p>
+<p><a href="https://CRAN.R-project.org/package=omophub" class="external-link"><img src="https://www.r-pkg.org/badges/version/omophub" alt="CRAN status"></a> <a href="https://cran.r-project.org/package=omophub" class="external-link"><img src="https://cranlogs.r-pkg.org/badges/omophub" alt="CRAN downloads"></a> <a href="https://github.com/omopHub/omophub-R/actions/workflows/R-CMD-check.yaml" class="external-link"><img src="https://github.com/omopHub/omophub-R/actions/workflows/R-CMD-check.yaml/badge.svg" alt="R-CMD-check"></a> <a href="https://app.codecov.io/gh/omopHub/omophub-R?branch=main" class="external-link"><img src="https://codecov.io/gh/omopHub/omophub-R/branch/main/graph/badge.svg" alt="Codecov"></a> <a href="https://opensource.org/licenses/MIT" class="external-link"><img src="https://img.shields.io/badge/License-MIT-blue.svg" alt="License: MIT"></a></p>
+<p><strong><a href="https://docs.omophub.com/sdks/r/overview" class="external-link">Documentation</a></strong> · <strong><a href="https://docs.omophub.com/api-reference" class="external-link">API Reference</a></strong> · <strong><a href="https://github.com/omopHub/omophub-R/tree/main/inst/examples" class="external-link">Examples</a></strong></p>
+<hr>
+<div class="section level2">
+<h2 id="why-omophub">Why OMOPHub?<a class="anchor" aria-label="anchor" href="#why-omophub"></a>
+</h2>
+<p>Working with OHDSI ATHENA vocabularies traditionally requires downloading multi-gigabyte files, setting up a database, and writing complex SQL queries. <strong>OMOPHub eliminates this friction.</strong></p>
+<table class="table">
+<colgroup>
+<col width="60%">
+<col width="40%">
+</colgroup>
+<thead><tr class="header">
+<th>Traditional Approach</th>
+<th>With OMOPHub</th>
+</tr></thead>
+<tbody>
+<tr class="odd">
+<td>Download 5GB+ ATHENA vocabulary files</td>
+<td><code>install.packages("omophub")</code></td>
+</tr>
+<tr class="even">
+<td>Set up and maintain database instance</td>
+<td>One API call</td>
+</tr>
+<tr class="odd">
+<td>Write complex SQL with multiple JOINs</td>
+<td>Simple R functions</td>
+</tr>
+<tr class="even">
+<td>Manually update vocabularies quarterly</td>
+<td>Always current data</td>
+</tr>
+<tr class="odd">
+<td>Local infrastructure required</td>
+<td>Works anywhere R runs</td>
+</tr>
+</tbody>
+</table>
+</div>
 <div class="section level2">
 <h2 id="installation">Installation<a class="anchor" aria-label="anchor" href="#installation"></a>
 </h2>
-<p>You can install the development version of omophub from <a href="https://github.com/omopHub/omophub-R" class="external-link">GitHub</a>:</p>
 <div class="sourceCode" id="cb1"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/utils/install.packages.html" class="external-link">install.packages</a></span><span class="op">(</span><span class="st">"omophub"</span><span class="op">)</span></span>
+<code class="sourceCode R"><span><span class="co"># Install from CRAN</span></span>
+<span><span class="fu"><a href="https://rdrr.io/r/utils/install.packages.html" class="external-link">install.packages</a></span><span class="op">(</span><span class="st">"omophub"</span><span class="op">)</span></span>
 <span></span>
-<span><span class="co"># OR install from GitHub</span></span>
-<span></span>
+<span><span class="co"># Or install development version from GitHub</span></span>
 <span><span class="co"># install.packages("pak")</span></span>
 <span><span class="fu">pak</span><span class="fu">::</span><span class="fu"><a href="https://pak.r-lib.org/reference/pak.html" class="external-link">pak</a></span><span class="op">(</span><span class="st">"omopHub/omophub-R"</span><span class="op">)</span></span></code></pre></div>
 </div>
 <div class="section level2">
 <h2 id="authentication">Authentication<a class="anchor" aria-label="anchor" href="#authentication"></a>
 </h2>
-<p>Set your API key using one of these methods:</p>
 <div class="sourceCode" id="cb2"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="co"># Option 1: Environment variable (recommended)</span></span>
-<span><span class="fu"><a href="https://rdrr.io/r/base/Sys.setenv.html" class="external-link">Sys.setenv</a></span><span class="op">(</span>OMOPHUB_API_KEY <span class="op">=</span> <span class="st">"your_api_key"</span><span class="op">)</span></span>
+<code class="sourceCode R"><span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="https://github.com/omopHub/omophub-R" class="external-link">omophub</a></span><span class="op">)</span></span>
 <span></span>
-<span><span class="co"># Option 2: Use the helper function</span></span>
-<span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="https://github.com/omopHub/omophub-R" class="external-link">omophub</a></span><span class="op">)</span></span>
-<span><span class="fu"><a href="reference/set_api_key.html">set_api_key</a></span><span class="op">(</span><span class="st">"your_api_key"</span><span class="op">)</span></span>
+<span><span class="co"># Option 1: Environment variable (recommended)</span></span>
+<span><span class="fu"><a href="https://rdrr.io/r/base/Sys.setenv.html" class="external-link">Sys.setenv</a></span><span class="op">(</span>OMOPHUB_API_KEY <span class="op">=</span> <span class="st">"oh_xxxxxxxxx"</span><span class="op">)</span></span>
+<span></span>
+<span><span class="co"># Option 2: Use helper function</span></span>
+<span><span class="fu"><a href="reference/set_api_key.html">set_api_key</a></span><span class="op">(</span><span class="st">"oh_xxxxxxxxx"</span><span class="op">)</span></span>
 <span></span>
 <span><span class="co"># Option 3: Store securely in system keyring</span></span>
-<span><span class="fu"><a href="reference/set_api_key.html">set_api_key</a></span><span class="op">(</span><span class="st">"your_api_key"</span>, store <span class="op">=</span> <span class="st">"keyring"</span><span class="op">)</span></span></code></pre></div>
+<span><span class="fu"><a href="reference/set_api_key.html">set_api_key</a></span><span class="op">(</span><span class="st">"oh_xxxxxxxxx"</span>, store <span class="op">=</span> <span class="st">"keyring"</span><span class="op">)</span></span></code></pre></div>
+<p>Get your API key from the <a href="https://dashboard.omophub.com/api-keys" class="external-link">OMOPHub Dashboard</a>.</p>
 </div>
 <div class="section level2">
 <h2 id="quick-start">Quick Start<a class="anchor" aria-label="anchor" href="#quick-start"></a>
@@ -91,67 +129,165 @@
 <div class="sourceCode" id="cb3"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="https://github.com/omopHub/omophub-R" class="external-link">omophub</a></span><span class="op">)</span></span>
 <span></span>
-<span><span class="co"># Create a client</span></span>
+<span><span class="co"># Create client</span></span>
 <span><span class="va">client</span> <span class="op">&lt;-</span> <span class="va"><a href="reference/OMOPHubClient.html">OMOPHubClient</a></span><span class="op">$</span><span class="fu">new</span><span class="op">(</span><span class="op">)</span></span>
 <span></span>
-<span><span class="co"># Search for concepts</span></span>
-<span><span class="va">results</span> <span class="op">&lt;-</span> <span class="va">client</span><span class="op">$</span><span class="va">search</span><span class="op">$</span><span class="fu">basic</span><span class="op">(</span><span class="st">"diabetes"</span><span class="op">)</span></span>
-<span><span class="va">results</span><span class="op">$</span><span class="va">data</span></span>
-<span></span>
-<span><span class="co"># Get a specific concept</span></span>
+<span><span class="co"># Get a concept by ID</span></span>
 <span><span class="va">concept</span> <span class="op">&lt;-</span> <span class="va">client</span><span class="op">$</span><span class="va">concepts</span><span class="op">$</span><span class="fu">get</span><span class="op">(</span><span class="fl">201826</span><span class="op">)</span></span>
 <span><span class="va">concept</span><span class="op">$</span><span class="va">concept_name</span></span>
 <span><span class="co"># [1] "Type 2 diabetes mellitus"</span></span>
 <span></span>
+<span><span class="co"># Search for concepts</span></span>
+<span><span class="va">results</span> <span class="op">&lt;-</span> <span class="va">client</span><span class="op">$</span><span class="va">search</span><span class="op">$</span><span class="fu">basic</span><span class="op">(</span><span class="st">"metformin"</span>, vocabulary_ids <span class="op">=</span> <span class="st">"RxNorm"</span><span class="op">)</span></span>
+<span><span class="va">results</span><span class="op">$</span><span class="va">data</span></span>
+<span></span>
 <span><span class="co"># Get concept by vocabulary code</span></span>
-<span><span class="va">concept</span> <span class="op">&lt;-</span> <span class="va">client</span><span class="op">$</span><span class="va">concepts</span><span class="op">$</span><span class="fu">get_by_code</span><span class="op">(</span><span class="st">"SNOMED"</span>, <span class="st">"44054006"</span><span class="op">)</span></span>
+<span><span class="va">snomed_concept</span> <span class="op">&lt;-</span> <span class="va">client</span><span class="op">$</span><span class="va">concepts</span><span class="op">$</span><span class="fu">get_by_code</span><span class="op">(</span><span class="st">"SNOMED"</span>, <span class="st">"44054006"</span><span class="op">)</span></span>
 <span></span>
-<span><span class="co"># Batch lookup multiple concepts</span></span>
-<span><span class="va">batch</span> <span class="op">&lt;-</span> <span class="va">client</span><span class="op">$</span><span class="va">concepts</span><span class="op">$</span><span class="fu">batch</span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">201826</span>, <span class="fl">320128</span>, <span class="fl">4329847</span><span class="op">)</span><span class="op">)</span></span>
+<span><span class="co"># Map to another vocabulary</span></span>
+<span><span class="va">mappings</span> <span class="op">&lt;-</span> <span class="va">client</span><span class="op">$</span><span class="va">mappings</span><span class="op">$</span><span class="fu">get</span><span class="op">(</span><span class="fl">201826</span>, target_vocabularies <span class="op">=</span> <span class="st">"ICD10CM"</span><span class="op">)</span></span>
 <span></span>
-<span><span class="co"># Get concept ancestors (hierarchy)</span></span>
-<span><span class="va">ancestors</span> <span class="op">&lt;-</span> <span class="va">client</span><span class="op">$</span><span class="va">hierarchy</span><span class="op">$</span><span class="fu">ancestors</span><span class="op">(</span><span class="fl">201826</span><span class="op">)</span></span>
-<span></span>
-<span><span class="co"># Get concept mappings to another vocabulary</span></span>
-<span><span class="va">mappings</span> <span class="op">&lt;-</span> <span class="va">client</span><span class="op">$</span><span class="va">mappings</span><span class="op">$</span><span class="fu">get</span><span class="op">(</span><span class="fl">201826</span>, target_vocabularies <span class="op">=</span> <span class="st">"ICD10CM"</span><span class="op">)</span></span></code></pre></div>
+<span><span class="co"># Navigate hierarchy</span></span>
+<span><span class="va">ancestors</span> <span class="op">&lt;-</span> <span class="va">client</span><span class="op">$</span><span class="va">hierarchy</span><span class="op">$</span><span class="fu">ancestors</span><span class="op">(</span><span class="fl">201826</span>, max_levels <span class="op">=</span> <span class="fl">3</span><span class="op">)</span></span></code></pre></div>
 </div>
 <div class="section level2">
-<h2 id="resources">Resources<a class="anchor" aria-label="anchor" href="#resources"></a>
+<h2 id="use-cases">Use Cases<a class="anchor" aria-label="anchor" href="#use-cases"></a>
 </h2>
-<p>The client provides access to these resources:</p>
+<div class="section level3">
+<h3 id="etl--data-pipelines">ETL &amp; Data Pipelines<a class="anchor" aria-label="anchor" href="#etl--data-pipelines"></a>
+</h3>
+<p>Validate and map clinical codes during OMOP CDM transformations:</p>
+<div class="sourceCode" id="cb4"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="co"># Validate source codes and find standard equivalents</span></span>
+<span><span class="va">validate_and_map</span> <span class="op">&lt;-</span> <span class="kw">function</span><span class="op">(</span><span class="va">source_vocab</span>, <span class="va">source_code</span><span class="op">)</span> <span class="op">{</span></span>
+<span>  <span class="va">concept</span> <span class="op">&lt;-</span> <span class="va">client</span><span class="op">$</span><span class="va">concepts</span><span class="op">$</span><span class="fu">get_by_code</span><span class="op">(</span><span class="va">source_vocab</span>, <span class="va">source_code</span><span class="op">)</span></span>
+<span>  </span>
+<span>  <span class="kw">if</span> <span class="op">(</span><span class="va">concept</span><span class="op">$</span><span class="va">standard_concept</span> <span class="op">!=</span> <span class="st">"S"</span><span class="op">)</span> <span class="op">{</span></span>
+<span>    <span class="va">mappings</span> <span class="op">&lt;-</span> <span class="va">client</span><span class="op">$</span><span class="va">mappings</span><span class="op">$</span><span class="fu">get</span><span class="op">(</span></span>
+<span>      <span class="va">concept</span><span class="op">$</span><span class="va">concept_id</span>, </span>
+<span>      target_vocabularies <span class="op">=</span> <span class="st">"SNOMED"</span></span>
+<span>    <span class="op">)</span></span>
+<span>    <span class="kw"><a href="https://rdrr.io/r/base/function.html" class="external-link">return</a></span><span class="op">(</span><span class="va">mappings</span><span class="op">$</span><span class="va">mappings</span><span class="op">[[</span><span class="fl">1</span><span class="op">]</span><span class="op">]</span><span class="op">$</span><span class="va">target_concept_id</span><span class="op">)</span></span>
+<span>  <span class="op">}</span></span>
+<span>  </span>
+<span>  <span class="va">concept</span><span class="op">$</span><span class="va">concept_id</span></span>
+<span><span class="op">}</span></span>
+<span></span>
+<span><span class="co"># Example: Map ICD-10 to SNOMED</span></span>
+<span><span class="va">standard_id</span> <span class="op">&lt;-</span> <span class="fu">validate_and_map</span><span class="op">(</span><span class="st">"ICD10CM"</span>, <span class="st">"E11.9"</span><span class="op">)</span></span></code></pre></div>
+</div>
+<div class="section level3">
+<h3 id="data-quality-checks">Data Quality Checks<a class="anchor" aria-label="anchor" href="#data-quality-checks"></a>
+</h3>
+<p>Verify codes exist and are valid:</p>
+<div class="sourceCode" id="cb5"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="co"># Check if condition codes are valid</span></span>
+<span><span class="va">condition_codes</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"E11.9"</span>, <span class="st">"I10"</span>, <span class="st">"J44.9"</span><span class="op">)</span></span>
+<span></span>
+<span><span class="kw">for</span> <span class="op">(</span><span class="va">code</span> <span class="kw">in</span> <span class="va">condition_codes</span><span class="op">)</span> <span class="op">{</span></span>
+<span>  <span class="kw"><a href="https://rdrr.io/r/base/conditions.html" class="external-link">tryCatch</a></span><span class="op">(</span><span class="op">{</span></span>
+<span>    <span class="va">concept</span> <span class="op">&lt;-</span> <span class="va">client</span><span class="op">$</span><span class="va">concepts</span><span class="op">$</span><span class="fu">get_by_code</span><span class="op">(</span><span class="st">"ICD10CM"</span>, <span class="va">code</span><span class="op">)</span></span>
+<span>    <span class="fu"><a href="https://rdrr.io/r/base/message.html" class="external-link">message</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/sprintf.html" class="external-link">sprintf</a></span><span class="op">(</span><span class="st">"OK %s: %s"</span>, <span class="va">code</span>, <span class="va">concept</span><span class="op">$</span><span class="va">concept_name</span><span class="op">)</span><span class="op">)</span></span>
+<span>  <span class="op">}</span>, omophub_api_error <span class="op">=</span> <span class="kw">function</span><span class="op">(</span><span class="va">e</span><span class="op">)</span> <span class="op">{</span></span>
+<span>    <span class="fu"><a href="https://rdrr.io/r/base/message.html" class="external-link">message</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/sprintf.html" class="external-link">sprintf</a></span><span class="op">(</span><span class="st">"ERROR %s: Invalid code!"</span>, <span class="va">code</span><span class="op">)</span><span class="op">)</span></span>
+<span>  <span class="op">}</span><span class="op">)</span></span>
+<span><span class="op">}</span></span></code></pre></div>
+</div>
+<div class="section level3">
+<h3 id="phenotype-development">Phenotype Development<a class="anchor" aria-label="anchor" href="#phenotype-development"></a>
+</h3>
+<p>Explore hierarchies to build comprehensive concept sets:</p>
+<div class="sourceCode" id="cb6"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="co"># Get all descendants for phenotype definition</span></span>
+<span><span class="va">descendants</span> <span class="op">&lt;-</span> <span class="va">client</span><span class="op">$</span><span class="va">hierarchy</span><span class="op">$</span><span class="fu">descendants</span><span class="op">(</span></span>
+<span>  <span class="fl">201826</span>,  <span class="co"># Type 2 diabetes mellitus</span></span>
+<span>  max_levels <span class="op">=</span> <span class="fl">5</span>,</span>
+<span>  standard_only <span class="op">=</span> <span class="cn">TRUE</span></span>
+<span><span class="op">)</span></span>
+<span></span>
+<span><span class="va">concept_set</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/lapply.html" class="external-link">sapply</a></span><span class="op">(</span><span class="va">descendants</span><span class="op">$</span><span class="va">concepts</span>, <span class="kw">function</span><span class="op">(</span><span class="va">x</span><span class="op">)</span> <span class="va">x</span><span class="op">$</span><span class="va">concept_id</span><span class="op">)</span></span>
+<span><span class="fu"><a href="https://rdrr.io/r/base/message.html" class="external-link">message</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/sprintf.html" class="external-link">sprintf</a></span><span class="op">(</span><span class="st">"Found %d concepts for T2DM phenotype"</span>, <span class="fu"><a href="https://rdrr.io/r/base/length.html" class="external-link">length</a></span><span class="op">(</span><span class="va">concept_set</span><span class="op">)</span><span class="op">)</span><span class="op">)</span></span></code></pre></div>
+</div>
+<div class="section level3">
+<h3 id="integration-with-tidyverse">Integration with tidyverse<a class="anchor" aria-label="anchor" href="#integration-with-tidyverse"></a>
+</h3>
+<div class="sourceCode" id="cb7"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="https://dplyr.tidyverse.org" class="external-link">dplyr</a></span><span class="op">)</span></span>
+<span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="https://purrr.tidyverse.org/" class="external-link">purrr</a></span><span class="op">)</span></span>
+<span></span>
+<span><span class="co"># Search and convert to tibble</span></span>
+<span><span class="va">results</span> <span class="op">&lt;-</span> <span class="va">client</span><span class="op">$</span><span class="va">search</span><span class="op">$</span><span class="fu">basic</span><span class="op">(</span><span class="st">"hypertension"</span>, page_size <span class="op">=</span> <span class="fl">100</span><span class="op">)</span></span>
+<span></span>
+<span><span class="va">concepts_df</span> <span class="op">&lt;-</span> <span class="va">results</span><span class="op">$</span><span class="va">data</span> <span class="op"><a href="https://magrittr.tidyverse.org/reference/pipe.html" class="external-link">%&gt;%</a></span></span>
+<span>  <span class="fu"><a href="https://purrr.tidyverse.org/reference/map_dfr.html" class="external-link">map_dfr</a></span><span class="op">(</span><span class="op">~</span> <span class="fu">tibble</span><span class="op">(</span></span>
+<span>    concept_id <span class="op">=</span> <span class="va">.x</span><span class="op">$</span><span class="va">concept_id</span>,</span>
+<span>    concept_name <span class="op">=</span> <span class="va">.x</span><span class="op">$</span><span class="va">concept_name</span>,</span>
+<span>    vocabulary_id <span class="op">=</span> <span class="va">.x</span><span class="op">$</span><span class="va">vocabulary_id</span>,</span>
+<span>    domain_id <span class="op">=</span> <span class="va">.x</span><span class="op">$</span><span class="va">domain_id</span></span>
+<span>  <span class="op">)</span><span class="op">)</span></span>
+<span></span>
+<span><span class="co"># Filter and analyze</span></span>
+<span><span class="va">concepts_df</span> <span class="op"><a href="https://magrittr.tidyverse.org/reference/pipe.html" class="external-link">%&gt;%</a></span></span>
+<span>  <span class="fu"><a href="https://rdrr.io/r/stats/filter.html" class="external-link">filter</a></span><span class="op">(</span><span class="va">vocabulary_id</span> <span class="op">==</span> <span class="st">"SNOMED"</span><span class="op">)</span> <span class="op"><a href="https://magrittr.tidyverse.org/reference/pipe.html" class="external-link">%&gt;%</a></span></span>
+<span>  <span class="fu">count</span><span class="op">(</span><span class="va">domain_id</span><span class="op">)</span></span></code></pre></div>
+</div>
+</div>
+<div class="section level2">
+<h2 id="api-resources">API Resources<a class="anchor" aria-label="anchor" href="#api-resources"></a>
+</h2>
 <table class="table">
+<colgroup>
+<col width="27%">
+<col width="36%">
+<col width="36%">
+</colgroup>
 <thead><tr class="header">
 <th>Resource</th>
 <th>Description</th>
+<th>Key Methods</th>
 </tr></thead>
 <tbody>
 <tr class="odd">
 <td><code>concepts</code></td>
-<td>Concept lookup, batch operations, suggestions</td>
+<td>Concept lookup and batch operations</td>
+<td>
+<code><a href="https://rdrr.io/r/base/get.html" class="external-link">get()</a></code>, <code>get_by_code()</code>, <code>batch()</code>, <code>suggest()</code>
+</td>
 </tr>
 <tr class="even">
 <td><code>search</code></td>
-<td>Basic and advanced concept search</td>
-</tr>
-<tr class="odd">
-<td><code>vocabularies</code></td>
-<td>Vocabulary listing and details</td>
-</tr>
-<tr class="even">
-<td><code>domains</code></td>
-<td>Domain listing and concept filtering</td>
+<td>Full-text and semantic search</td>
+<td>
+<code>basic()</code>, <code>advanced()</code>, <code>basic_all()</code>
+</td>
 </tr>
 <tr class="odd">
 <td><code>hierarchy</code></td>
-<td>Ancestor and descendant navigation</td>
+<td>Navigate concept relationships</td>
+<td>
+<code>ancestors()</code>, <code>descendants()</code>
+</td>
 </tr>
 <tr class="even">
-<td><code>relationships</code></td>
-<td>Concept relationships</td>
+<td><code>mappings</code></td>
+<td>Cross-vocabulary mappings</td>
+<td>
+<code><a href="https://rdrr.io/r/base/get.html" class="external-link">get()</a></code>, <code><a href="https://purrr.tidyverse.org/reference/map.html" class="external-link">map()</a></code>
+</td>
 </tr>
 <tr class="odd">
-<td><code>mappings</code></td>
-<td>Concept mappings between vocabularies</td>
+<td><code>vocabularies</code></td>
+<td>Vocabulary metadata</td>
+<td>
+<code><a href="https://rdrr.io/r/base/list.html" class="external-link">list()</a></code>, <code><a href="https://rdrr.io/r/base/get.html" class="external-link">get()</a></code>, <code>stats()</code>
+</td>
+</tr>
+<tr class="even">
+<td><code>domains</code></td>
+<td>Domain information</td>
+<td>
+<code><a href="https://rdrr.io/r/base/list.html" class="external-link">list()</a></code>, <code><a href="https://rdrr.io/r/base/get.html" class="external-link">get()</a></code>, <code>concepts()</code>
+</td>
 </tr>
 </tbody>
 </table>
@@ -159,38 +295,94 @@
 <div class="section level2">
 <h2 id="pagination">Pagination<a class="anchor" aria-label="anchor" href="#pagination"></a>
 </h2>
-<p>For large result sets, use automatic pagination:</p>
-<div class="sourceCode" id="cb4"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="co"># Fetch all results automatically</span></span>
+<div class="sourceCode" id="cb8"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="co"># Automatic pagination - fetch all results</span></span>
 <span><span class="va">all_results</span> <span class="op">&lt;-</span> <span class="va">client</span><span class="op">$</span><span class="va">search</span><span class="op">$</span><span class="fu">basic_all</span><span class="op">(</span><span class="st">"diabetes"</span>, page_size <span class="op">=</span> <span class="fl">100</span><span class="op">)</span></span>
 <span></span>
-<span><span class="co"># Or paginate manually</span></span>
+<span><span class="co"># Manual pagination</span></span>
 <span><span class="va">page1</span> <span class="op">&lt;-</span> <span class="va">client</span><span class="op">$</span><span class="va">search</span><span class="op">$</span><span class="fu">basic</span><span class="op">(</span><span class="st">"diabetes"</span>, page <span class="op">=</span> <span class="fl">1</span>, page_size <span class="op">=</span> <span class="fl">20</span><span class="op">)</span></span>
 <span><span class="va">page2</span> <span class="op">&lt;-</span> <span class="va">client</span><span class="op">$</span><span class="va">search</span><span class="op">$</span><span class="fu">basic</span><span class="op">(</span><span class="st">"diabetes"</span>, page <span class="op">=</span> <span class="fl">2</span>, page_size <span class="op">=</span> <span class="fl">20</span><span class="op">)</span></span></code></pre></div>
 </div>
 <div class="section level2">
-<h2 id="vocabulary-versioning">Vocabulary Versioning<a class="anchor" aria-label="anchor" href="#vocabulary-versioning"></a>
+<h2 id="configuration">Configuration<a class="anchor" aria-label="anchor" href="#configuration"></a>
 </h2>
-<p>Specify a vocabulary version when creating the client:</p>
-<div class="sourceCode" id="cb5"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="va">client</span> <span class="op">&lt;-</span> <span class="va"><a href="reference/OMOPHubClient.html">OMOPHubClient</a></span><span class="op">$</span><span class="fu">new</span><span class="op">(</span>vocab_version <span class="op">=</span> <span class="st">"2025.2"</span><span class="op">)</span></span></code></pre></div>
+<div class="sourceCode" id="cb9"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="co"># Specify vocabulary version</span></span>
+<span><span class="va">client</span> <span class="op">&lt;-</span> <span class="va"><a href="reference/OMOPHubClient.html">OMOPHubClient</a></span><span class="op">$</span><span class="fu">new</span><span class="op">(</span>vocab_version <span class="op">=</span> <span class="st">"2025.2"</span><span class="op">)</span></span>
+<span></span>
+<span><span class="co"># Custom configuration</span></span>
+<span><span class="va">client</span> <span class="op">&lt;-</span> <span class="va"><a href="reference/OMOPHubClient.html">OMOPHubClient</a></span><span class="op">$</span><span class="fu">new</span><span class="op">(</span></span>
+<span>  api_key <span class="op">=</span> <span class="st">"oh_xxx"</span>,</span>
+<span>  base_url <span class="op">=</span> <span class="st">"https://api.omophub.com/v1"</span>,</span>
+<span>  timeout <span class="op">=</span> <span class="fl">30</span></span>
+<span><span class="op">)</span></span></code></pre></div>
 </div>
 <div class="section level2">
 <h2 id="error-handling">Error Handling<a class="anchor" aria-label="anchor" href="#error-handling"></a>
 </h2>
-<p>The package uses structured error classes:</p>
-<div class="sourceCode" id="cb6"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="kw"><a href="https://rdrr.io/r/base/conditions.html" class="external-link">tryCatch</a></span><span class="op">(</span></span>
-<span>  <span class="op">{</span></span>
-<span>    <span class="va">result</span> <span class="op">&lt;-</span> <span class="va">client</span><span class="op">$</span><span class="va">concepts</span><span class="op">$</span><span class="fu">get</span><span class="op">(</span><span class="fl">999999999</span><span class="op">)</span></span>
-<span>  <span class="op">}</span>,</span>
-<span>  omophub_api_error <span class="op">=</span> <span class="kw">function</span><span class="op">(</span><span class="va">e</span><span class="op">)</span> <span class="op">{</span></span>
-<span>    <span class="fu"><a href="https://rdrr.io/r/base/message.html" class="external-link">message</a></span><span class="op">(</span><span class="st">"API error: "</span>, <span class="fu"><a href="https://rdrr.io/r/base/conditions.html" class="external-link">conditionMessage</a></span><span class="op">(</span><span class="va">e</span><span class="op">)</span><span class="op">)</span></span>
-<span>  <span class="op">}</span>,</span>
-<span>  omophub_auth_error <span class="op">=</span> <span class="kw">function</span><span class="op">(</span><span class="va">e</span><span class="op">)</span> <span class="op">{</span></span>
-<span>    <span class="fu"><a href="https://rdrr.io/r/base/message.html" class="external-link">message</a></span><span class="op">(</span><span class="st">"Authentication failed"</span><span class="op">)</span></span>
-<span>  <span class="op">}</span></span>
-<span><span class="op">)</span></span></code></pre></div>
+<div class="sourceCode" id="cb10"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="kw"><a href="https://rdrr.io/r/base/conditions.html" class="external-link">tryCatch</a></span><span class="op">(</span><span class="op">{</span></span>
+<span>  <span class="va">result</span> <span class="op">&lt;-</span> <span class="va">client</span><span class="op">$</span><span class="va">concepts</span><span class="op">$</span><span class="fu">get</span><span class="op">(</span><span class="fl">999999999</span><span class="op">)</span></span>
+<span><span class="op">}</span>, omophub_not_found_error <span class="op">=</span> <span class="kw">function</span><span class="op">(</span><span class="va">e</span><span class="op">)</span> <span class="op">{</span></span>
+<span>  <span class="fu"><a href="https://rdrr.io/r/base/message.html" class="external-link">message</a></span><span class="op">(</span><span class="st">"Concept not found: "</span>, <span class="fu"><a href="https://rdrr.io/r/base/conditions.html" class="external-link">conditionMessage</a></span><span class="op">(</span><span class="va">e</span><span class="op">)</span><span class="op">)</span></span>
+<span><span class="op">}</span>, omophub_auth_error <span class="op">=</span> <span class="kw">function</span><span class="op">(</span><span class="va">e</span><span class="op">)</span> <span class="op">{</span></span>
+<span>  <span class="fu"><a href="https://rdrr.io/r/base/message.html" class="external-link">message</a></span><span class="op">(</span><span class="st">"Check your API key"</span><span class="op">)</span></span>
+<span><span class="op">}</span>, omophub_rate_limit_error <span class="op">=</span> <span class="kw">function</span><span class="op">(</span><span class="va">e</span><span class="op">)</span> <span class="op">{</span></span>
+<span>  <span class="fu"><a href="https://rdrr.io/r/base/message.html" class="external-link">message</a></span><span class="op">(</span><span class="st">"Rate limited, please wait"</span><span class="op">)</span></span>
+<span><span class="op">}</span>, omophub_api_error <span class="op">=</span> <span class="kw">function</span><span class="op">(</span><span class="va">e</span><span class="op">)</span> <span class="op">{</span></span>
+<span>  <span class="fu"><a href="https://rdrr.io/r/base/message.html" class="external-link">message</a></span><span class="op">(</span><span class="st">"API error: "</span>, <span class="fu"><a href="https://rdrr.io/r/base/conditions.html" class="external-link">conditionMessage</a></span><span class="op">(</span><span class="va">e</span><span class="op">)</span><span class="op">)</span></span>
+<span><span class="op">}</span><span class="op">)</span></span></code></pre></div>
+</div>
+<div class="section level2">
+<h2 id="compared-to-alternatives">Compared to Alternatives<a class="anchor" aria-label="anchor" href="#compared-to-alternatives"></a>
+</h2>
+<table class="table">
+<thead><tr class="header">
+<th>Feature</th>
+<th>OMOPHub SDK</th>
+<th>ATHENA Download</th>
+<th>OHDSI WebAPI</th>
+</tr></thead>
+<tbody>
+<tr class="odd">
+<td>Setup time</td>
+<td>1 minute</td>
+<td>Hours</td>
+<td>Hours</td>
+</tr>
+<tr class="even">
+<td>Infrastructure</td>
+<td>None</td>
+<td>PostgreSQL required</td>
+<td>Full OHDSI stack</td>
+</tr>
+<tr class="odd">
+<td>Updates</td>
+<td>Automatic</td>
+<td>Manual download</td>
+<td>Manual</td>
+</tr>
+<tr class="even">
+<td>Programmatic access</td>
+<td>Native R</td>
+<td>SQL/DatabaseConnector</td>
+<td>REST API</td>
+</tr>
+<tr class="odd">
+<td>Offline support</td>
+<td>No</td>
+<td>Yes</td>
+<td>Depends</td>
+</tr>
+<tr class="even">
+<td>Cost</td>
+<td>Free tier available</td>
+<td>Free</td>
+<td>Free (self-hosted)</td>
+</tr>
+</tbody>
+</table>
+<p><strong>Best for:</strong> R users who need quick, programmatic access to OMOP vocabularies without infrastructure overhead.</p>
 </div>
 <div class="section level2">
 <h2 id="examples">Examples<a class="anchor" aria-label="anchor" href="#examples"></a>
@@ -207,31 +399,30 @@
 </tr></thead>
 <tbody>
 <tr class="odd">
-<td><a href="inst/examples/basic_usage.R"><code>basic_usage.R</code></a></td>
+<td><code>basic_usage.R</code></td>
 <td>Getting started - client setup, concept lookup, search</td>
 </tr>
 <tr class="even">
-<td><a href="inst/examples/search_concepts.R"><code>search_concepts.R</code></a></td>
+<td><code>search_concepts.R</code></td>
 <td>Search capabilities - filters, autocomplete, pagination</td>
 </tr>
 <tr class="odd">
-<td><a href="inst/examples/navigate_hierarchy.R"><code>navigate_hierarchy.R</code></a></td>
-<td>Hierarchy navigation - ancestors, descendants, relationships</td>
+<td><code>navigate_hierarchy.R</code></td>
+<td>Hierarchy navigation - ancestors, descendants</td>
 </tr>
 <tr class="even">
-<td><a href="inst/examples/map_between_vocabularies.R"><code>map_between_vocabularies.R</code></a></td>
-<td>Vocabulary mapping - ICD-10, SNOMED, batch mapping</td>
+<td><code>map_between_vocabularies.R</code></td>
+<td>Cross-vocabulary mapping</td>
 </tr>
 <tr class="odd">
-<td><a href="inst/examples/error_handling.R"><code>error_handling.R</code></a></td>
-<td>Error handling patterns - tryCatch, retry logic</td>
+<td><code>error_handling.R</code></td>
+<td>Error handling patterns</td>
 </tr>
 </tbody>
 </table>
 <p>Run an example:</p>
-<div class="sourceCode" id="cb7"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="co"># After installing the package</span></span>
-<span><span class="va">example_path</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/system.file.html" class="external-link">system.file</a></span><span class="op">(</span><span class="st">"examples"</span>, <span class="st">"basic_usage.R"</span>, package <span class="op">=</span> <span class="st">"omophub"</span><span class="op">)</span></span>
+<div class="sourceCode" id="cb11"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="va">example_path</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/system.file.html" class="external-link">system.file</a></span><span class="op">(</span><span class="st">"examples"</span>, <span class="st">"basic_usage.R"</span>, package <span class="op">=</span> <span class="st">"omophub"</span><span class="op">)</span></span>
 <span><span class="kw"><a href="https://rdrr.io/r/base/source.html" class="external-link">source</a></span><span class="op">(</span><span class="va">example_path</span><span class="op">)</span></span></code></pre></div>
 </div>
 <div class="section level2">
@@ -240,22 +431,43 @@
 <ul>
 <li><a href="https://docs.omophub.com/sdks/r/overview" class="external-link">Full Documentation</a></li>
 <li><a href="https://docs.omophub.com/api-reference" class="external-link">API Reference</a></li>
-<li><a href="https://github.com/omopHub/omophub-r/tree/main/inst/examples" class="external-link">Examples</a></li>
+<li><a href="https://github.com/omopHub/omophub-R/tree/main/inst/examples" class="external-link">Examples</a></li>
+<li><a href="https://dashboard.omophub.com/api-keys" class="external-link">Get API Key</a></li>
+</ul>
+</div>
+<div class="section level2">
+<h2 id="contributing">Contributing<a class="anchor" aria-label="anchor" href="#contributing"></a>
+</h2>
+<p>We welcome contributions!</p>
+<div class="sourceCode" id="cb12"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="co"># Clone and install for development</span></span>
+<span><span class="co"># install.packages("devtools")</span></span>
+<span><span class="fu">devtools</span><span class="fu">::</span><span class="fu"><a href="https://remotes.r-lib.org/reference/install_github.html" class="external-link">install_github</a></span><span class="op">(</span><span class="st">"omopHub/omophub-R"</span><span class="op">)</span></span>
+<span></span>
+<span><span class="co"># Run tests</span></span>
+<span><span class="fu">devtools</span><span class="fu">::</span><span class="fu"><a href="https://devtools.r-lib.org/reference/test.html" class="external-link">test</a></span><span class="op">(</span><span class="op">)</span></span>
+<span></span>
+<span><span class="co"># Check package</span></span>
+<span><span class="fu">devtools</span><span class="fu">::</span><span class="fu"><a href="https://devtools.r-lib.org/reference/check.html" class="external-link">check</a></span><span class="op">(</span><span class="op">)</span></span></code></pre></div>
+</div>
+<div class="section level2">
+<h2 id="support">Support<a class="anchor" aria-label="anchor" href="#support"></a>
+</h2>
+<ul>
+<li><a href="https://github.com/omopHub/omophub-R/issues" class="external-link">GitHub Issues</a></li>
+<li><a href="https://github.com/omopHub/omophub-R/discussions" class="external-link">GitHub Discussions</a></li>
+<li>Email: <a href="mailto:support@omophub.com" class="email">support@omophub.com</a>
+</li>
+<li>Website: <a href="https://omophub.com" class="external-link">omophub.com</a>
+</li>
 </ul>
 </div>
 <div class="section level2">
 <h2 id="license">License<a class="anchor" aria-label="anchor" href="#license"></a>
 </h2>
 <p>MIT License - see <a href="LICENSE">LICENSE</a> for details.</p>
-</div>
-<div class="section level2">
-<h2 id="support">Support<a class="anchor" aria-label="anchor" href="#support"></a>
-</h2>
-<ul>
-<li><a href="https://github.com/omopHub/omophub-r/issues" class="external-link">GitHub Issues</a></li>
-<li><a href="https://docs.omophub.com" class="external-link">Documentation</a></li>
-<li><a href="https://omophub.com" class="external-link">Website</a></li>
-</ul>
+<hr>
+<p><em>Built for the OHDSI community</em></p>
 </div>
 </div>
   </main><aside class="col-md-3"><div class="links">
@@ -291,16 +503,7 @@
 </ul>
 </div>
 
-<div class="dev-status">
-<h2 data-toc-skip>Dev status</h2>
-<ul class="list-unstyled">
-<li><a href="https://github.com/omopHub/omophub-R/actions/workflows/R-CMD-check.yaml" class="external-link"><img src="https://github.com/omopHub/omophub-R/actions/workflows/R-CMD-check.yaml/badge.svg" alt="R-CMD-check"></a></li>
-<li><a href="https://app.codecov.io/gh/omopHub/omophub-R?branch=main" class="external-link"><img src="https://codecov.io/gh/omopHub/omophub-R/branch/main/graph/badge.svg" alt="Codecov test coverage"></a></li>
-<li><a href="https://opensource.org/licenses/MIT" class="external-link"><img src="https://img.shields.io/badge/License-MIT-blue.svg" alt="License: MIT"></a></li>
-<li><a href="https://CRAN.R-project.org/package=omophub" class="external-link"><img src="https://www.r-pkg.org/badges/version/omophub" alt="CRAN status"></a></li>
-<li><a href="https://cran.r-project.org/package=omophub" class="external-link"><img src="https://cranlogs.r-pkg.org/badges/omophub" alt="CRAN_Status_Badge"></a></li>
-</ul>
-</div>
+
 
   </aside>
 </div>

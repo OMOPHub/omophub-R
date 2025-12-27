@@ -123,7 +123,7 @@ Get mappings for a concept.
 
 ------------------------------------------------------------------------
 
-### Method `map()`
+### Method [`map()`](https://purrr.tidyverse.org/reference/map.html)
 
 Map concepts to a target vocabulary.
 
