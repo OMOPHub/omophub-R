@@ -225,8 +225,6 @@ tryCatch({
 | Infrastructure | None | PostgreSQL required | Full OHDSI stack |
 | Updates | Automatic | Manual download | Manual |
 | Programmatic access | Native R | SQL/DatabaseConnector | REST API |
-| Offline support | No | Yes | Depends |
-| Cost | Free tier available | Free | Free (self-hosted) |
 
 **Best for:** R users who need quick, programmatic access to OMOP vocabularies without infrastructure overhead.
 
