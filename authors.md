@@ -10,7 +10,7 @@
 ## Citation
 
 Source:
-[`DESCRIPTION`](https://github.com/omopHub/omophub-R/blob/main/DESCRIPTION)
+[`DESCRIPTION`](https://github.com/omopHub/omophub-R/blob/v1.3.0/DESCRIPTION)
 
 Chen A (2026). *omophub: R Client for the 'OMOPHub' Medical Vocabulary
 API*. R package version 1.3.0, <https://github.com/omopHub/omophub-R>.
