@@ -18,79 +18,35 @@ MappingsResource <- R6::R6Class(
     #' Get mappings for a concept.
     #'
     #' @param concept_id The concept ID.
-    #' @param target_vocabularies Filter by target vocabularies.
-    #' @param mapping_types Filter by mapping types.
-    #' @param direction Mapping direction ("outgoing", "incoming", "both"). Default "both".
-    #' @param include_indirect Include indirect mappings. Default `FALSE`.
-    #' @param standard_only Only standard concept mappings. Default `FALSE`.
-    #' @param include_mapping_quality Include quality metrics. Default `FALSE`.
-    #' @param include_synonyms Include synonyms. Default `FALSE`.
-    #' @param include_context Include mapping context. Default `FALSE`.
-    #' @param active_only Only active mappings. Default `TRUE`.
-    #' @param sort_by Sort field.
-    #' @param sort_order Sort order.
-    #' @param page Page number. Default 1.
-    #' @param page_size Results per page. Default 50.
+    #' @param target_vocabulary Filter to a specific target vocabulary (e.g., "ICD10CM").
+    #' @param include_invalid Include invalid/deprecated mappings. Default `FALSE`.
+    #' @param vocab_release Specific vocabulary release version (e.g., "2025.1"). Default `NULL`.
     #'
-    #' @returns Mappings with summary.
+    #' @returns Mappings for the concept.
     get = function(concept_id,
-                   target_vocabularies = NULL,
-                   mapping_types = NULL,
-                   direction = "both",
-                   include_indirect = FALSE,
-                   standard_only = FALSE,
-                   include_mapping_quality = FALSE,
-                   include_synonyms = FALSE,
-                   include_context = FALSE,
-                   active_only = TRUE,
-                   sort_by = NULL,
-                   sort_order = NULL,
-                   page = 1,
-                   page_size = 50) {
+                   target_vocabulary = NULL,
+                   include_invalid = FALSE,
+                   vocab_release = NULL) {
       concept_id <- validate_concept_id(concept_id)
-      pag <- validate_pagination(page, page_size)
 
-      params <- list(
-        direction = direction,
-        page = pag$page,
-        page_size = pag$page_size
-      )
+      params <- list()
 
-      if (!is.null(target_vocabularies)) {
-        params$target_vocabularies <- join_params(target_vocabularies)
+      if (!is.null(target_vocabulary)) {
+        checkmate::assert_string(target_vocabulary, min.chars = 1)
+        params$target_vocabulary <- target_vocabulary
       }
-      if (!is.null(mapping_types)) {
-        params$mapping_types <- join_params(mapping_types)
+      if (isTRUE(include_invalid)) {
+        params$include_invalid <- "true"
       }
-      if (isTRUE(include_indirect)) {
-        params$include_indirect <- "true"
-      }
-      if (isTRUE(standard_only)) {
-        params$standard_only <- "true"
-      }
-      if (isTRUE(include_mapping_quality)) {
-        params$include_mapping_quality <- "true"
-      }
-      if (isTRUE(include_synonyms)) {
-        params$include_synonyms <- "true"
-      }
-      if (isTRUE(include_context)) {
-        params$include_context <- "true"
-      }
-      if (!isTRUE(active_only)) {
-        params$active_only <- "false"
-      }
-      if (!is.null(sort_by)) {
-        params$sort_by <- sort_by
-      }
-      if (!is.null(sort_order)) {
-        params$sort_order <- sort_order
+      if (!is.null(vocab_release)) {
+        checkmate::assert_string(vocab_release, min.chars = 1)
+        params$vocab_release <- vocab_release
       }
 
       perform_get(
         private$.base_req,
         paste0("concepts/", concept_id, "/mappings"),
-        query = params
+        query = if (length(params) > 0) params else NULL
       )
     },
 
@@ -101,12 +57,14 @@ MappingsResource <- R6::R6Class(
     #' @param target_vocabulary Target vocabulary ID (e.g., "ICD10CM", "SNOMED").
     #' @param mapping_type Mapping type (direct, equivalent, broader, narrower).
     #' @param include_invalid Include invalid mappings. Default `FALSE`.
+    #' @param vocab_release Specific vocabulary release version (e.g., "2025.1"). Default `NULL`.
     #'
     #' @returns Mapping results with summary.
     map = function(source_concepts,
                    target_vocabulary,
                    mapping_type = NULL,
-                   include_invalid = FALSE) {
+                   include_invalid = FALSE,
+                   vocab_release = NULL) {
       checkmate::assert_integerish(source_concepts, min.len = 1)
       checkmate::assert_string(target_vocabulary, min.chars = 1)
 
@@ -122,7 +80,12 @@ MappingsResource <- R6::R6Class(
         body$include_invalid <- TRUE
       }
 
-      perform_post(private$.base_req, "concepts/map", body = body)
+      query <- list()
+      if (!is.null(vocab_release)) {
+        query$vocab_release <- vocab_release
+      }
+
+      perform_post(private$.base_req, "concepts/map", body = body, query = if (length(query) > 0) query else NULL)
     },
 
     #' @description

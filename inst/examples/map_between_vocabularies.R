@@ -54,7 +54,7 @@ cat("----------------------------\n")
 # Get only ICD-10-CM mappings
 icd_mappings <- client$mappings$get(
   DIABETES_CONCEPT_ID,
-  target_vocabularies = c("ICD10CM")
+  target_vocabulary = "ICD10CM"
 )
 
 cat("ICD-10-CM mappings for Type 2 diabetes:\n")
@@ -68,29 +68,29 @@ for (m in mapping_list) {
 cat("\n")
 
 # ============================================================================
-# Get Mappings with Quality Information
+# Get Mappings Including Invalid/Deprecated
 # ============================================================================
 
-cat("3. Mappings with quality scores\n")
-cat("--------------------------------\n")
+cat("3. Mappings including invalid concepts\n")
+cat("--------------------------------------\n")
 
-# Include mapping quality information
-quality_mappings <- client$mappings$get(
+# Include invalid/deprecated mappings
+all_mappings <- client$mappings$get(
   DIABETES_CONCEPT_ID,
-  include_mapping_quality = TRUE
+  include_invalid = TRUE
 )
 
-cat("Mappings with quality information:\n")
-mapping_list <- quality_mappings$mappings %||% quality_mappings$data %||% quality_mappings
+cat("All mappings (including invalid):\n")
+mapping_list <- all_mappings$mappings %||% all_mappings$data %||% all_mappings
 for (m in mapping_list) {
   target <- m$target_concept %||% m
-  quality <- m$mapping_quality %||% m$quality %||% list()
-  confidence <- quality$confidence_score %||% quality$score %||% "N/A"
+  invalid_status <- target$invalid_reason %||% m$invalid_reason %||% ""
+  status_str <- if (nzchar(invalid_status)) sprintf(" [%s]", invalid_status) else ""
 
-  cat(sprintf("  [%s] %s\n",
+  cat(sprintf("  [%s] %s%s\n",
               target$vocabulary_id %||% m$target_vocabulary_id %||% "?",
-              target$concept_name %||% m$target_concept_name %||% "Unknown"))
-  cat(sprintf("    Confidence: %s\n", confidence))
+              target$concept_name %||% m$target_concept_name %||% "Unknown",
+              status_str))
 }
 cat("\n")
 
@@ -164,31 +164,22 @@ cat(sprintf("  Domain: %s\n", snomed_concept$domain_id))
 cat("\n")
 
 # ============================================================================
-# Bidirectional Mapping Check
+# Mapping with Specific Vocabulary Release
 # ============================================================================
 
-cat("6. Checking bidirectional mappings\n")
-cat("-----------------------------------\n")
+cat("6. Mapping with specific vocabulary release\n")
+cat("-------------------------------------------\n")
 
-# Get outgoing mappings (from SNOMED to others)
-outgoing <- client$mappings$get(
+# Get mappings from a specific vocabulary release version
+# This is useful for reproducibility and working with specific data versions
+versioned_mappings <- client$mappings$get(
   DIABETES_CONCEPT_ID,
-  direction = "outgoing"
+  vocab_release = "2025.1"
 )
 
-cat("Outgoing mappings (SNOMED -> other):\n")
-mapping_list <- outgoing$mappings %||% outgoing$data %||% outgoing
-cat(sprintf("  Found %d outgoing mappings\n", length(mapping_list)))
-
-# Get incoming mappings (from others to SNOMED)
-incoming <- client$mappings$get(
-  DIABETES_CONCEPT_ID,
-  direction = "incoming"
-)
-
-cat("Incoming mappings (other -> SNOMED):\n")
-mapping_list <- incoming$mappings %||% incoming$data %||% incoming
-cat(sprintf("  Found %d incoming mappings\n", length(mapping_list)))
+cat("Mappings from vocabulary release 2025.1:\n")
+mapping_list <- versioned_mappings$mappings %||% versioned_mappings$data %||% versioned_mappings
+cat(sprintf("  Found %d mappings\n", length(mapping_list)))
 cat("\n")
 
 # ============================================================================

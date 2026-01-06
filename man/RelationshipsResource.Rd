@@ -4,9 +4,9 @@
 \alias{RelationshipsResource}
 \title{Relationships Resource}
 \value{
-Relationships with summary.
+Relationships data with pagination metadata.
 
-Relationship types with metadata.
+Relationship types with pagination metadata.
 }
 \description{
 R6 class providing access to relationship operations.
@@ -47,11 +47,15 @@ Get relationships for a concept.
 \subsection{Usage}{
 \if{html}{\out{<div class="r">}}\preformatted{RelationshipsResource$get(
   concept_id,
-  relationship_type = NULL,
-  target_vocabulary = NULL,
+  relationship_ids = NULL,
+  vocabulary_ids = NULL,
+  domain_ids = NULL,
   include_invalid = FALSE,
+  standard_only = FALSE,
+  include_reverse = FALSE,
   page = 1,
-  page_size = 50
+  page_size = 100,
+  vocab_release = NULL
 )}\if{html}{\out{</div>}}
 }
 
@@ -60,15 +64,23 @@ Get relationships for a concept.
 \describe{
 \item{\code{concept_id}}{The concept ID.}
 
-\item{\code{relationship_type}}{Filter by relationship type.}
+\item{\code{relationship_ids}}{Filter by relationship type IDs (character vector or comma-separated string).}
 
-\item{\code{target_vocabulary}}{Filter by target vocabulary.}
+\item{\code{vocabulary_ids}}{Filter by target vocabulary IDs (character vector or comma-separated string).}
 
-\item{\code{include_invalid}}{Include invalid relationships. Default \code{FALSE}.}
+\item{\code{domain_ids}}{Filter by target domain IDs (character vector or comma-separated string).}
+
+\item{\code{include_invalid}}{Include relationships to invalid concepts. Default \code{FALSE}.}
+
+\item{\code{standard_only}}{Only include relationships to standard concepts. Default \code{FALSE}.}
+
+\item{\code{include_reverse}}{Include reverse relationships. Default \code{FALSE}.}
 
 \item{\code{page}}{Page number. Default 1.}
 
-\item{\code{page_size}}{Results per page. Default 50.}
+\item{\code{page_size}}{Results per page (max 1000). Default 100.}
+
+\item{\code{vocab_release}}{Specific vocabulary release version. Default \code{NULL}.}
 }
 \if{html}{\out{</div>}}
 }
@@ -77,41 +89,17 @@ Get relationships for a concept.
 \if{html}{\out{<a id="method-RelationshipsResource-types"></a>}}
 \if{latex}{\out{\hypertarget{method-RelationshipsResource-types}{}}}
 \subsection{Method \code{types()}}{
-Get available relationship types.
+Get available relationship types from the OMOP CDM.
 \subsection{Usage}{
-\if{html}{\out{<div class="r">}}\preformatted{RelationshipsResource$types(
-  vocabulary_ids = NULL,
-  include_reverse = FALSE,
-  include_usage_stats = FALSE,
-  include_examples = FALSE,
-  category = NULL,
-  is_defining = NULL,
-  standard_only = FALSE,
-  page = 1,
-  page_size = 100
-)}\if{html}{\out{</div>}}
+\if{html}{\out{<div class="r">}}\preformatted{RelationshipsResource$types(page = 1, page_size = 100)}\if{html}{\out{</div>}}
 }
 
 \subsection{Arguments}{
 \if{html}{\out{<div class="arguments">}}
 \describe{
-\item{\code{vocabulary_ids}}{Filter by vocabularies.}
-
-\item{\code{include_reverse}}{Include reverse relationships. Default \code{FALSE}.}
-
-\item{\code{include_usage_stats}}{Include usage statistics. Default \code{FALSE}.}
-
-\item{\code{include_examples}}{Include example concepts. Default \code{FALSE}.}
-
-\item{\code{category}}{Filter by category.}
-
-\item{\code{is_defining}}{Filter by defining status.}
-
-\item{\code{standard_only}}{Only standard relationships. Default \code{FALSE}.}
-
 \item{\code{page}}{Page number. Default 1.}
 
-\item{\code{page_size}}{Results per page. Default 100.}
+\item{\code{page_size}}{Results per page (max 500). Default 100.}
 }
 \if{html}{\out{</div>}}
 }

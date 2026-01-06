@@ -82,9 +82,9 @@ cat("------------------------------------\n")
 # Get only SNOMED ancestors
 ancestors_snomed <- client$hierarchy$ancestors(
   DIABETES_CONCEPT_ID,
-  vocabulary_id = "SNOMED",
+  vocabulary_ids = c("SNOMED"),
   max_levels = 5,
-  standard_only = TRUE
+  include_invalid = FALSE
 )
 
 cat("SNOMED ancestors only:\n")
@@ -105,10 +105,7 @@ cat("4. Exploring concept relationships\n")
 cat("----------------------------------\n")
 
 # Get all relationships for a concept
-relationships <- client$concepts$relationships(
-  DIABETES_CONCEPT_ID,
-  page_size = 20
-)
+relationships <- client$concepts$relationships(DIABETES_CONCEPT_ID)
 
 cat(sprintf("Relationships for concept %d:\n", DIABETES_CONCEPT_ID))
 
@@ -144,8 +141,7 @@ cat("----------------------------------------\n")
 # Get concepts related by semantic similarity
 related <- client$concepts$related(
   DIABETES_CONCEPT_ID,
-  max_results = 5,
-  include_scores = TRUE
+  page_size = 5
 )
 
 cat("Semantically related concepts:\n")

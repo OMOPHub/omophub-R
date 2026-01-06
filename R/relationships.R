@@ -18,19 +18,27 @@ RelationshipsResource <- R6::R6Class(
     #' Get relationships for a concept.
     #'
     #' @param concept_id The concept ID.
-    #' @param relationship_type Filter by relationship type.
-    #' @param target_vocabulary Filter by target vocabulary.
-    #' @param include_invalid Include invalid relationships. Default `FALSE`.
+    #' @param relationship_ids Filter by relationship type IDs (character vector or comma-separated string).
+    #' @param vocabulary_ids Filter by target vocabulary IDs (character vector or comma-separated string).
+    #' @param domain_ids Filter by target domain IDs (character vector or comma-separated string).
+    #' @param include_invalid Include relationships to invalid concepts. Default `FALSE`.
+    #' @param standard_only Only include relationships to standard concepts. Default `FALSE`.
+    #' @param include_reverse Include reverse relationships. Default `FALSE`.
     #' @param page Page number. Default 1.
-    #' @param page_size Results per page. Default 50.
+    #' @param page_size Results per page (max 1000). Default 100.
+    #' @param vocab_release Specific vocabulary release version. Default `NULL`.
     #'
-    #' @returns Relationships with summary.
+    #' @returns Relationships data with pagination metadata.
     get = function(concept_id,
-                   relationship_type = NULL,
-                   target_vocabulary = NULL,
+                   relationship_ids = NULL,
+                   vocabulary_ids = NULL,
+                   domain_ids = NULL,
                    include_invalid = FALSE,
+                   standard_only = FALSE,
+                   include_reverse = FALSE,
                    page = 1,
-                   page_size = 50) {
+                   page_size = 100,
+                   vocab_release = NULL) {
       concept_id <- validate_concept_id(concept_id)
       pag <- validate_pagination(page, page_size)
 
@@ -39,14 +47,38 @@ RelationshipsResource <- R6::R6Class(
         page_size = pag$page_size
       )
 
-      if (!is.null(relationship_type)) {
-        params$relationship_type <- relationship_type
+      if (!is.null(relationship_ids)) {
+        params$relationship_ids <- if (length(relationship_ids) > 1) {
+          paste(relationship_ids, collapse = ",")
+        } else {
+          relationship_ids
+        }
       }
-      if (!is.null(target_vocabulary)) {
-        params$target_vocabulary <- target_vocabulary
+      if (!is.null(vocabulary_ids)) {
+        params$vocabulary_ids <- if (length(vocabulary_ids) > 1) {
+          paste(vocabulary_ids, collapse = ",")
+        } else {
+          vocabulary_ids
+        }
+      }
+      if (!is.null(domain_ids)) {
+        params$domain_ids <- if (length(domain_ids) > 1) {
+          paste(domain_ids, collapse = ",")
+        } else {
+          domain_ids
+        }
       }
       if (isTRUE(include_invalid)) {
         params$include_invalid <- "true"
+      }
+      if (isTRUE(standard_only)) {
+        params$standard_only <- "true"
+      }
+      if (isTRUE(include_reverse)) {
+        params$include_reverse <- "true"
+      }
+      if (!is.null(vocab_release)) {
+        params$vocab_release <- vocab_release
       }
 
       perform_get(
@@ -57,27 +89,13 @@ RelationshipsResource <- R6::R6Class(
     },
 
     #' @description
-    #' Get available relationship types.
+    #' Get available relationship types from the OMOP CDM.
     #'
-    #' @param vocabulary_ids Filter by vocabularies.
-    #' @param include_reverse Include reverse relationships. Default `FALSE`.
-    #' @param include_usage_stats Include usage statistics. Default `FALSE`.
-    #' @param include_examples Include example concepts. Default `FALSE`.
-    #' @param category Filter by category.
-    #' @param is_defining Filter by defining status.
-    #' @param standard_only Only standard relationships. Default `FALSE`.
     #' @param page Page number. Default 1.
-    #' @param page_size Results per page. Default 100.
+    #' @param page_size Results per page (max 500). Default 100.
     #'
-    #' @returns Relationship types with metadata.
-    types = function(vocabulary_ids = NULL,
-                     include_reverse = FALSE,
-                     include_usage_stats = FALSE,
-                     include_examples = FALSE,
-                     category = NULL,
-                     is_defining = NULL,
-                     standard_only = FALSE,
-                     page = 1,
+    #' @returns Relationship types with pagination metadata.
+    types = function(page = 1,
                      page_size = 100) {
       pag <- validate_pagination(page, page_size)
 
@@ -85,28 +103,6 @@ RelationshipsResource <- R6::R6Class(
         page = pag$page,
         page_size = pag$page_size
       )
-
-      if (!is.null(vocabulary_ids)) {
-        params$vocabulary_ids <- join_params(vocabulary_ids)
-      }
-      if (isTRUE(include_reverse)) {
-        params$include_reverse <- "true"
-      }
-      if (isTRUE(include_usage_stats)) {
-        params$include_usage_stats <- "true"
-      }
-      if (isTRUE(include_examples)) {
-        params$include_examples <- "true"
-      }
-      if (!is.null(category)) {
-        params$category <- category
-      }
-      if (!is.null(is_defining)) {
-        params$is_defining <- bool_to_str(is_defining)
-      }
-      if (isTRUE(standard_only)) {
-        params$standard_only <- "true"
-      }
 
       perform_get(private$.base_req, "relationships/types", query = params)
     },

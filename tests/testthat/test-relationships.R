@@ -66,13 +66,13 @@ test_that("relationships$get includes optional filters", {
 
   resource$get(
     201826,
-    relationship_type = "Is a",
-    target_vocabulary = "SNOMED",
+    relationship_ids = "Is a",
+    vocabulary_ids = "SNOMED",
     include_invalid = TRUE
   )
 
-  expect_equal(called_with$query$relationship_type, "Is a")
-  expect_equal(called_with$query$target_vocabulary, "SNOMED")
+  expect_equal(called_with$query$relationship_ids, "Is a")
+  expect_equal(called_with$query$vocabulary_ids, "SNOMED")
   expect_equal(called_with$query$include_invalid, "true")
 })
 
@@ -99,7 +99,7 @@ test_that("relationships$types calls correct endpoint", {
   expect_equal(called_with$query$page_size, 100L)
 })
 
-test_that("relationships$types includes vocabulary filter", {
+test_that("relationships$types includes pagination options", {
   base_req <- httr2::request("https://api.omophub.com/v1")
   resource <- RelationshipsResource$new(base_req)
 
@@ -111,50 +111,8 @@ test_that("relationships$types includes vocabulary filter", {
     }
   )
 
-  resource$types(vocabulary_ids = c("SNOMED", "RxNorm"))
+  resource$types(page = 2, page_size = 50)
 
-  expect_equal(called_with$query$vocabulary_ids, "SNOMED,RxNorm")
-})
-
-test_that("relationships$types includes boolean options", {
-  base_req <- httr2::request("https://api.omophub.com/v1")
-  resource <- RelationshipsResource$new(base_req)
-
-  called_with <- NULL
-  local_mocked_bindings(
-    perform_get = function(req, path, query = NULL) {
-      called_with <<- list(query = query)
-      list(relationship_types = list())
-    }
-  )
-
-  resource$types(
-    include_reverse = TRUE,
-    include_usage_stats = TRUE,
-    include_examples = TRUE,
-    standard_only = TRUE
-  )
-
-  expect_equal(called_with$query$include_reverse, "true")
-  expect_equal(called_with$query$include_usage_stats, "true")
-  expect_equal(called_with$query$include_examples, "true")
-  expect_equal(called_with$query$standard_only, "true")
-})
-
-test_that("relationships$types includes category and is_defining filters", {
-  base_req <- httr2::request("https://api.omophub.com/v1")
-  resource <- RelationshipsResource$new(base_req)
-
-  called_with <- NULL
-  local_mocked_bindings(
-    perform_get = function(req, path, query = NULL) {
-      called_with <<- list(query = query)
-      list(relationship_types = list())
-    }
-  )
-
-  resource$types(category = "hierarchical", is_defining = TRUE)
-
-  expect_equal(called_with$query$category, "hierarchical")
-  expect_equal(called_with$query$is_defining, "true")
+  expect_equal(called_with$query$page, 2L)
+  expect_equal(called_with$query$page_size, 50L)
 })

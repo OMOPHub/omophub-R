@@ -110,7 +110,7 @@ cat("4. Autocomplete suggestions\n")
 cat("---------------------------\n")
 
 # Get suggestions for partial text
-suggestions <- client$concepts$suggest("diab", limit = 5)
+suggestions <- client$concepts$suggest("diab", page_size = 5)
 
 cat("Suggestions for 'diab':\n")
 suggestion_list <- suggestions$suggestions %||% suggestions

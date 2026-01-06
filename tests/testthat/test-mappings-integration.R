@@ -17,8 +17,7 @@ test_that("get mappings to ICD-10 works", {
 
   result <- client$mappings$get(
     DIABETES_CONCEPT_ID,
-    target_vocabularies = "ICD10CM",
-    direction = "outgoing"
+    target_vocabulary = "ICD10CM"
   )
 
   mappings <- extract_data(result, "mappings")
@@ -31,9 +30,7 @@ test_that("get mappings with options works", {
 
   result <- client$mappings$get(
     DIABETES_CONCEPT_ID,
-    include_mapping_quality = TRUE,
-    include_context = TRUE,
-    page_size = 50
+    include_invalid = TRUE
   )
 
   mappings <- extract_data(result, "mappings")

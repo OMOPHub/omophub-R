@@ -54,7 +54,7 @@ test_that("suggest concepts works", {
   skip_if_no_integration_key()
   client <- integration_client()
 
-  result <- client$concepts$suggest("diabetes", limit = 5)
+  result <- client$concepts$suggest("diabetes", page_size = 5)
 
   # Extract suggestions
   suggestions <- extract_data(result, "suggestions")
@@ -79,9 +79,9 @@ test_that("suggest concepts with filters works", {
 
   result <- client$concepts$suggest(
     "aspirin",
-    vocabulary = "RxNorm",
-    domain = "Drug",
-    limit = 10
+    vocabulary_ids = "RxNorm",
+    domain_ids = "Drug",
+    page_size = 10
   )
 
   suggestions <- extract_data(result, "suggestions")
@@ -94,7 +94,7 @@ test_that("get related concepts works", {
 
   result <- client$concepts$related(
     DIABETES_CONCEPT_ID,
-    max_results = 10
+    page_size = 10
   )
 
   related <- extract_data(result, "related_concepts")
@@ -105,10 +105,7 @@ test_that("get concept relationships works", {
   skip_if_no_integration_key()
   client <- integration_client()
 
-  result <- client$concepts$relationships(
-    DIABETES_CONCEPT_ID,
-    page_size = 20
-  )
+  result <- client$concepts$relationships(DIABETES_CONCEPT_ID)
 
   relationships <- extract_data(result, "relationships")
   expect_true(is.list(relationships))

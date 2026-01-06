@@ -6,15 +6,17 @@
 \value{
 A list containing the concept data.
 
-A list containing the concept data with mappings.
+A list containing the concept data with optional relationships and synonyms.
 
 A list with \code{concepts} and any \code{failures}.
 
-A list of suggestions.
+A list with suggestions and pagination metadata.
 
-Related concepts with scores and analysis.
+Related concepts with relationship scores.
 
-Relationships with summary.
+Relationships data.
+
+Recommendations grouped by source concept ID with pagination metadata.
 }
 \description{
 R6 class providing access to concept operations.
@@ -30,6 +32,7 @@ R6 class providing access to concept operations.
 \item \href{#method-ConceptsResource-suggest}{\code{ConceptsResource$suggest()}}
 \item \href{#method-ConceptsResource-related}{\code{ConceptsResource$related()}}
 \item \href{#method-ConceptsResource-relationships}{\code{ConceptsResource$relationships()}}
+\item \href{#method-ConceptsResource-recommended}{\code{ConceptsResource$recommended()}}
 \item \href{#method-ConceptsResource-print}{\code{ConceptsResource$print()}}
 \item \href{#method-ConceptsResource-clone}{\code{ConceptsResource$clone()}}
 }
@@ -60,7 +63,9 @@ Get a concept by ID.
 \if{html}{\out{<div class="r">}}\preformatted{ConceptsResource$get(
   concept_id,
   include_relationships = FALSE,
-  include_synonyms = FALSE
+  include_synonyms = FALSE,
+  include_hierarchy = FALSE,
+  vocab_release = NULL
 )}\if{html}{\out{</div>}}
 }
 
@@ -69,9 +74,13 @@ Get a concept by ID.
 \describe{
 \item{\code{concept_id}}{The OMOP concept ID.}
 
-\item{\code{include_relationships}}{Include related concepts. Default \code{FALSE}.}
+\item{\code{include_relationships}}{Include related concepts (parents/children). Default \code{FALSE}.}
 
 \item{\code{include_synonyms}}{Include concept synonyms. Default \code{FALSE}.}
+
+\item{\code{include_hierarchy}}{Include hierarchy information. Default \code{FALSE}.}
+
+\item{\code{vocab_release}}{Specific vocabulary release (e.g., "2025.2"). Default \code{NULL}.}
 }
 \if{html}{\out{</div>}}
 }
@@ -82,7 +91,14 @@ Get a concept by ID.
 \subsection{Method \code{get_by_code()}}{
 Get a concept by vocabulary and code.
 \subsection{Usage}{
-\if{html}{\out{<div class="r">}}\preformatted{ConceptsResource$get_by_code(vocabulary_id, concept_code)}\if{html}{\out{</div>}}
+\if{html}{\out{<div class="r">}}\preformatted{ConceptsResource$get_by_code(
+  vocabulary_id,
+  concept_code,
+  include_relationships = FALSE,
+  include_synonyms = FALSE,
+  include_hierarchy = FALSE,
+  vocab_release = NULL
+)}\if{html}{\out{</div>}}
 }
 
 \subsection{Arguments}{
@@ -91,6 +107,14 @@ Get a concept by vocabulary and code.
 \item{\code{vocabulary_id}}{The vocabulary ID (e.g., "SNOMED", "ICD10CM").}
 
 \item{\code{concept_code}}{The concept code within the vocabulary.}
+
+\item{\code{include_relationships}}{Include related concepts (parents/children). Default \code{FALSE}.}
+
+\item{\code{include_synonyms}}{Include concept synonyms. Default \code{FALSE}.}
+
+\item{\code{include_hierarchy}}{Include hierarchy information. Default \code{FALSE}.}
+
+\item{\code{vocab_release}}{Specific vocabulary release (e.g., "2025.2"). Default \code{NULL}.}
 }
 \if{html}{\out{</div>}}
 }
@@ -107,14 +131,14 @@ Get multiple concepts by IDs.
   include_synonyms = FALSE,
   include_mappings = FALSE,
   vocabulary_filter = NULL,
-  standard_only = FALSE
+  standard_only = TRUE
 )}\if{html}{\out{</div>}}
 }
 
 \subsection{Arguments}{
 \if{html}{\out{<div class="arguments">}}
 \describe{
-\item{\code{concept_ids}}{Vector of concept IDs (max 1000).}
+\item{\code{concept_ids}}{Vector of concept IDs (max 100).}
 
 \item{\code{include_relationships}}{Include related concepts. Default \code{FALSE}.}
 
@@ -124,7 +148,7 @@ Get multiple concepts by IDs.
 
 \item{\code{vocabulary_filter}}{Filter results to specific vocabularies.}
 
-\item{\code{standard_only}}{Only return standard concepts. Default \code{FALSE}.}
+\item{\code{standard_only}}{Only return standard concepts. Default \code{TRUE}.}
 }
 \if{html}{\out{</div>}}
 }
@@ -135,19 +159,30 @@ Get multiple concepts by IDs.
 \subsection{Method \code{suggest()}}{
 Get concept suggestions (autocomplete).
 \subsection{Usage}{
-\if{html}{\out{<div class="r">}}\preformatted{ConceptsResource$suggest(query, vocabulary = NULL, domain = NULL, limit = 10)}\if{html}{\out{</div>}}
+\if{html}{\out{<div class="r">}}\preformatted{ConceptsResource$suggest(
+  query,
+  page = 1,
+  page_size = 10,
+  vocabulary_ids = NULL,
+  domain_ids = NULL,
+  vocab_release = NULL
+)}\if{html}{\out{</div>}}
 }
 
 \subsection{Arguments}{
 \if{html}{\out{<div class="arguments">}}
 \describe{
-\item{\code{query}}{Search query (min 2 characters).}
+\item{\code{query}}{Search query (min 2 characters, max 100 characters).}
 
-\item{\code{vocabulary}}{Filter to specific vocabulary.}
+\item{\code{page}}{Page number (default 1).}
 
-\item{\code{domain}}{Filter to specific domain.}
+\item{\code{page_size}}{Number of suggestions per page (default 10, max 100).}
 
-\item{\code{limit}}{Maximum suggestions (default 10, max 50).}
+\item{\code{vocabulary_ids}}{Filter to specific vocabularies (character vector).}
+
+\item{\code{domain_ids}}{Filter to specific domains (character vector).}
+
+\item{\code{vocab_release}}{Specific vocabulary release (e.g., "2025.2").}
 }
 \if{html}{\out{</div>}}
 }
@@ -160,13 +195,10 @@ Get related concepts.
 \subsection{Usage}{
 \if{html}{\out{<div class="r">}}\preformatted{ConceptsResource$related(
   concept_id,
-  relatedness_types = NULL,
-  vocabulary_ids = NULL,
-  domain_ids = NULL,
-  min_relatedness_score = NULL,
-  max_results = 50,
-  include_scores = TRUE,
-  standard_concepts_only = FALSE
+  relationship_types = NULL,
+  min_score = NULL,
+  page_size = 20,
+  vocab_release = NULL
 )}\if{html}{\out{</div>}}
 }
 
@@ -175,19 +207,13 @@ Get related concepts.
 \describe{
 \item{\code{concept_id}}{The source concept ID.}
 
-\item{\code{relatedness_types}}{Types of relatedness (hierarchical, semantic, etc.).}
+\item{\code{relationship_types}}{Filter by relationship types (e.g., c("Is a", "Maps to")).}
 
-\item{\code{vocabulary_ids}}{Filter to specific vocabularies.}
+\item{\code{min_score}}{Minimum relationship score (0.0-1.0).}
 
-\item{\code{domain_ids}}{Filter to specific domains.}
+\item{\code{page_size}}{Maximum number of results (default 20, max 100).}
 
-\item{\code{min_relatedness_score}}{Minimum relatedness score.}
-
-\item{\code{max_results}}{Maximum results (default 50, max 200).}
-
-\item{\code{include_scores}}{Include score breakdown. Default \code{TRUE}.}
-
-\item{\code{standard_concepts_only}}{Only return standard concepts. Default \code{FALSE}.}
+\item{\code{vocab_release}}{Specific vocabulary release (e.g., "2025.1").}
 }
 \if{html}{\out{</div>}}
 }
@@ -200,11 +226,13 @@ Get concept relationships.
 \subsection{Usage}{
 \if{html}{\out{<div class="r">}}\preformatted{ConceptsResource$relationships(
   concept_id,
-  relationship_type = NULL,
-  target_vocabulary = NULL,
+  relationship_ids = NULL,
+  vocabulary_ids = NULL,
+  domain_ids = NULL,
   include_invalid = FALSE,
-  page = 1,
-  page_size = 20
+  standard_only = FALSE,
+  include_reverse = FALSE,
+  vocab_release = NULL
 )}\if{html}{\out{</div>}}
 }
 
@@ -213,15 +241,59 @@ Get concept relationships.
 \describe{
 \item{\code{concept_id}}{The concept ID.}
 
-\item{\code{relationship_type}}{Filter by relationship type.}
+\item{\code{relationship_ids}}{Filter by relationship type IDs (character vector or comma-separated string).}
 
-\item{\code{target_vocabulary}}{Filter by target vocabulary.}
+\item{\code{vocabulary_ids}}{Filter by target vocabulary IDs (character vector or comma-separated string).}
 
-\item{\code{include_invalid}}{Include invalid relationships. Default \code{FALSE}.}
+\item{\code{domain_ids}}{Filter by target domain IDs (character vector or comma-separated string).}
+
+\item{\code{include_invalid}}{Include relationships to invalid concepts. Default \code{FALSE}.}
+
+\item{\code{standard_only}}{Only include relationships to standard concepts. Default \code{FALSE}.}
+
+\item{\code{include_reverse}}{Include reverse relationships. Default \code{FALSE}.}
+
+\item{\code{vocab_release}}{Specific vocabulary release version. Default \code{NULL}.}
+}
+\if{html}{\out{</div>}}
+}
+}
+\if{html}{\out{<hr>}}
+\if{html}{\out{<a id="method-ConceptsResource-recommended"></a>}}
+\if{latex}{\out{\hypertarget{method-ConceptsResource-recommended}{}}}
+\subsection{Method \code{recommended()}}{
+Get recommended concepts using OHDSI Phoebe algorithm.
+\subsection{Usage}{
+\if{html}{\out{<div class="r">}}\preformatted{ConceptsResource$recommended(
+  concept_ids,
+  relationship_types = NULL,
+  vocabulary_ids = NULL,
+  domain_ids = NULL,
+  standard_only = TRUE,
+  include_invalid = FALSE,
+  page = 1,
+  page_size = 100
+)}\if{html}{\out{</div>}}
+}
+
+\subsection{Arguments}{
+\if{html}{\out{<div class="arguments">}}
+\describe{
+\item{\code{concept_ids}}{Vector of source concept IDs (1-100).}
+
+\item{\code{relationship_types}}{Filter by relationship types (max 20).}
+
+\item{\code{vocabulary_ids}}{Filter to specific vocabularies (max 50).}
+
+\item{\code{domain_ids}}{Filter to specific domains (max 50).}
+
+\item{\code{standard_only}}{Only return standard concepts. Default \code{TRUE}.}
+
+\item{\code{include_invalid}}{Include invalid/deprecated concepts. Default \code{FALSE}.}
 
 \item{\code{page}}{Page number. Default 1.}
 
-\item{\code{page_size}}{Items per page. Default 20.}
+\item{\code{page_size}}{Results per page (default 100, max 1000).}
 }
 \if{html}{\out{</div>}}
 }

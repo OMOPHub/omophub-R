@@ -4,6 +4,9 @@
 \alias{HierarchyResource}
 \title{Hierarchy Resource}
 \value{
+For flat format: ancestors, descendants arrays with level/total counts.
+For graph format: nodes and edges arrays for visualization.
+
 Ancestors with hierarchy summary.
 
 Descendants with hierarchy summary.
@@ -16,6 +19,7 @@ R6 class providing access to hierarchy operations (ancestors and descendants).
 \subsection{Public methods}{
 \itemize{
 \item \href{#method-HierarchyResource-new}{\code{HierarchyResource$new()}}
+\item \href{#method-HierarchyResource-get}{\code{HierarchyResource$get()}}
 \item \href{#method-HierarchyResource-ancestors}{\code{HierarchyResource$ancestors()}}
 \item \href{#method-HierarchyResource-descendants}{\code{HierarchyResource$descendants()}}
 \item \href{#method-HierarchyResource-print}{\code{HierarchyResource$print()}}
@@ -40,6 +44,46 @@ Create a new HierarchyResource.
 }
 }
 \if{html}{\out{<hr>}}
+\if{html}{\out{<a id="method-HierarchyResource-get"></a>}}
+\if{latex}{\out{\hypertarget{method-HierarchyResource-get}{}}}
+\subsection{Method \code{get()}}{
+Get complete concept hierarchy (ancestors and descendants).
+\subsection{Usage}{
+\if{html}{\out{<div class="r">}}\preformatted{HierarchyResource$get(
+  concept_id,
+  format = "flat",
+  vocabulary_ids = NULL,
+  domain_ids = NULL,
+  max_levels = 10,
+  max_results = NULL,
+  relationship_types = NULL,
+  include_invalid = FALSE
+)}\if{html}{\out{</div>}}
+}
+
+\subsection{Arguments}{
+\if{html}{\out{<div class="arguments">}}
+\describe{
+\item{\code{concept_id}}{The concept ID.}
+
+\item{\code{format}}{Response format - "flat" (default) or "graph" for visualization.}
+
+\item{\code{vocabulary_ids}}{Filter to specific vocabularies (character vector).}
+
+\item{\code{domain_ids}}{Filter to specific domains (character vector).}
+
+\item{\code{max_levels}}{Maximum hierarchy levels to traverse in both directions (default 10).}
+
+\item{\code{max_results}}{Maximum results per direction for performance optimization.}
+
+\item{\code{relationship_types}}{Relationship types to follow (default: "Is a").}
+
+\item{\code{include_invalid}}{Include deprecated/invalid concepts. Default \code{FALSE}.}
+}
+\if{html}{\out{</div>}}
+}
+}
+\if{html}{\out{<hr>}}
 \if{html}{\out{<a id="method-HierarchyResource-ancestors"></a>}}
 \if{latex}{\out{\hypertarget{method-HierarchyResource-ancestors}{}}}
 \subsection{Method \code{ancestors()}}{
@@ -47,13 +91,12 @@ Get concept ancestors.
 \subsection{Usage}{
 \if{html}{\out{<div class="r">}}\preformatted{HierarchyResource$ancestors(
   concept_id,
-  vocabulary_id = NULL,
+  vocabulary_ids = NULL,
   max_levels = NULL,
   relationship_types = NULL,
   include_paths = FALSE,
   include_distance = TRUE,
-  standard_only = FALSE,
-  include_deprecated = FALSE,
+  include_invalid = FALSE,
   page = 1,
   page_size = 100
 )}\if{html}{\out{</div>}}
@@ -64,7 +107,7 @@ Get concept ancestors.
 \describe{
 \item{\code{concept_id}}{The concept ID.}
 
-\item{\code{vocabulary_id}}{Filter to specific vocabulary.}
+\item{\code{vocabulary_ids}}{Filter to specific vocabularies (character vector).}
 
 \item{\code{max_levels}}{Maximum hierarchy levels to traverse.}
 
@@ -74,9 +117,7 @@ Get concept ancestors.
 
 \item{\code{include_distance}}{Include distance from source. Default \code{TRUE}.}
 
-\item{\code{standard_only}}{Only return standard concepts. Default \code{FALSE}.}
-
-\item{\code{include_deprecated}}{Include deprecated concepts. Default \code{FALSE}.}
+\item{\code{include_invalid}}{Include deprecated/invalid concepts. Default \code{FALSE}.}
 
 \item{\code{page}}{Page number. Default 1.}
 
@@ -93,15 +134,13 @@ Get concept descendants.
 \subsection{Usage}{
 \if{html}{\out{<div class="r">}}\preformatted{HierarchyResource$descendants(
   concept_id,
-  vocabulary_id = NULL,
+  vocabulary_ids = NULL,
   max_levels = 10,
   relationship_types = NULL,
   include_distance = TRUE,
-  standard_only = FALSE,
-  include_deprecated = FALSE,
+  include_paths = FALSE,
+  include_invalid = FALSE,
   domain_ids = NULL,
-  concept_class_ids = NULL,
-  include_synonyms = FALSE,
   page = 1,
   page_size = 100
 )}\if{html}{\out{</div>}}
@@ -112,23 +151,19 @@ Get concept descendants.
 \describe{
 \item{\code{concept_id}}{The concept ID.}
 
-\item{\code{vocabulary_id}}{Filter to specific vocabulary.}
+\item{\code{vocabulary_ids}}{Filter to specific vocabularies (character vector).}
 
-\item{\code{max_levels}}{Maximum hierarchy levels (default 10, max 10).}
+\item{\code{max_levels}}{Maximum hierarchy levels (default 10, max 20).}
 
 \item{\code{relationship_types}}{Relationship types to follow.}
 
 \item{\code{include_distance}}{Include distance from source. Default \code{TRUE}.}
 
-\item{\code{standard_only}}{Only return standard concepts. Default \code{FALSE}.}
+\item{\code{include_paths}}{Include path information. Default \code{FALSE}.}
 
-\item{\code{include_deprecated}}{Include deprecated concepts. Default \code{FALSE}.}
+\item{\code{include_invalid}}{Include deprecated/invalid concepts. Default \code{FALSE}.}
 
 \item{\code{domain_ids}}{Filter by domains.}
-
-\item{\code{concept_class_ids}}{Filter by concept classes.}
-
-\item{\code{include_synonyms}}{Include synonyms. Default \code{FALSE}.}
 
 \item{\code{page}}{Page number. Default 1.}
 

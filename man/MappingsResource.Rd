@@ -4,7 +4,7 @@
 \alias{MappingsResource}
 \title{Mappings Resource}
 \value{
-Mappings with summary.
+Mappings for the concept.
 
 Mapping results with summary.
 }
@@ -47,19 +47,9 @@ Get mappings for a concept.
 \subsection{Usage}{
 \if{html}{\out{<div class="r">}}\preformatted{MappingsResource$get(
   concept_id,
-  target_vocabularies = NULL,
-  mapping_types = NULL,
-  direction = "both",
-  include_indirect = FALSE,
-  standard_only = FALSE,
-  include_mapping_quality = FALSE,
-  include_synonyms = FALSE,
-  include_context = FALSE,
-  active_only = TRUE,
-  sort_by = NULL,
-  sort_order = NULL,
-  page = 1,
-  page_size = 50
+  target_vocabulary = NULL,
+  include_invalid = FALSE,
+  vocab_release = NULL
 )}\if{html}{\out{</div>}}
 }
 
@@ -68,31 +58,11 @@ Get mappings for a concept.
 \describe{
 \item{\code{concept_id}}{The concept ID.}
 
-\item{\code{target_vocabularies}}{Filter by target vocabularies.}
+\item{\code{target_vocabulary}}{Filter to a specific target vocabulary (e.g., "ICD10CM").}
 
-\item{\code{mapping_types}}{Filter by mapping types.}
+\item{\code{include_invalid}}{Include invalid/deprecated mappings. Default \code{FALSE}.}
 
-\item{\code{direction}}{Mapping direction ("outgoing", "incoming", "both"). Default "both".}
-
-\item{\code{include_indirect}}{Include indirect mappings. Default \code{FALSE}.}
-
-\item{\code{standard_only}}{Only standard concept mappings. Default \code{FALSE}.}
-
-\item{\code{include_mapping_quality}}{Include quality metrics. Default \code{FALSE}.}
-
-\item{\code{include_synonyms}}{Include synonyms. Default \code{FALSE}.}
-
-\item{\code{include_context}}{Include mapping context. Default \code{FALSE}.}
-
-\item{\code{active_only}}{Only active mappings. Default \code{TRUE}.}
-
-\item{\code{sort_by}}{Sort field.}
-
-\item{\code{sort_order}}{Sort order.}
-
-\item{\code{page}}{Page number. Default 1.}
-
-\item{\code{page_size}}{Results per page. Default 50.}
+\item{\code{vocab_release}}{Specific vocabulary release version (e.g., "2025.1"). Default \code{NULL}.}
 }
 \if{html}{\out{</div>}}
 }
@@ -107,7 +77,8 @@ Map concepts to a target vocabulary.
   source_concepts,
   target_vocabulary,
   mapping_type = NULL,
-  include_invalid = FALSE
+  include_invalid = FALSE,
+  vocab_release = NULL
 )}\if{html}{\out{</div>}}
 }
 
@@ -121,6 +92,8 @@ Map concepts to a target vocabulary.
 \item{\code{mapping_type}}{Mapping type (direct, equivalent, broader, narrower).}
 
 \item{\code{include_invalid}}{Include invalid mappings. Default \code{FALSE}.}
+
+\item{\code{vocab_release}}{Specific vocabulary release version (e.g., "2025.1"). Default \code{NULL}.}
 }
 \if{html}{\out{</div>}}
 }

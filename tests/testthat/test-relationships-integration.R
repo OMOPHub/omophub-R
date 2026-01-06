@@ -17,7 +17,7 @@ test_that("get relationships with type filter works", {
 
   result <- client$relationships$get(
     DIABETES_CONCEPT_ID,
-    relationship_type = "Is a",
+    relationship_ids = "Is a",
     page_size = 50
   )
 
@@ -31,7 +31,7 @@ test_that("get relationships with vocabulary filter works", {
 
   result <- client$relationships$get(
     DIABETES_CONCEPT_ID,
-    target_vocabulary = "SNOMED",
+    vocabulary_ids = "SNOMED",
     page_size = 100
   )
 
@@ -55,9 +55,6 @@ test_that("get relationship types with filters works", {
   client <- integration_client()
 
   result <- client$relationships$types(
-    vocabulary_ids = "SNOMED",
-    include_reverse = TRUE,
-    include_usage_stats = TRUE,
     page_size = 50
   )
 
@@ -69,10 +66,7 @@ test_that("get relationship types by category works", {
   skip_if_no_integration_key()
   client <- integration_client()
 
-  result <- client$relationships$types(
-    category = "hierarchy",
-    standard_only = TRUE
-  )
+  result <- client$relationships$types()
 
   types <- extract_data(result, "relationship_types")
   expect_true(is.list(types))

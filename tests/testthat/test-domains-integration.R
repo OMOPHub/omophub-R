@@ -17,35 +17,20 @@ test_that("list domains works", {
   expect_true("Procedure" %in% domain_ids)
 })
 
-test_that("list domains with options works", {
+test_that("list domains with stats works", {
   skip_if_no_integration_key()
   client <- integration_client()
 
-  result <- client$domains$list(
-    include_concept_counts = TRUE,
-    include_statistics = TRUE
-  )
+  result <- client$domains$list(include_stats = TRUE)
 
   domains <- extract_data(result, "domains")
   expect_gt(length(domains), 0)
-  # Verify domains are returned with expected structure
+  # Verify domains are returned with expected structure including stats
   for (domain in domains) {
     expect_true("domain_id" %in% names(domain))
+    expect_true("concept_count" %in% names(domain))
+    expect_true("standard_concept_count" %in% names(domain))
   }
-})
-
-test_that("list domains with vocabulary filter works", {
-  skip_if_no_integration_key()
-  client <- integration_client()
-
-  result <- client$domains$list(
-    vocabulary_ids = "SNOMED",
-    include_concept_counts = TRUE
-  )
-
-  domains <- extract_data(result, "domains")
-  expect_true(is.list(domains))
-  expect_gt(length(domains), 0)
 })
 
 test_that("get domain concepts works", {

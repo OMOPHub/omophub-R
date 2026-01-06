@@ -262,7 +262,7 @@ test_that("search$advanced calls correct endpoint with body", {
 
   resource$advanced("diabetes")
 
-  expect_equal(called_with$path, "concepts/search/advanced")
+  expect_equal(called_with$path, "search/advanced")
   expect_equal(called_with$body$query, "diabetes")
 })
 
@@ -280,16 +280,16 @@ test_that("search$advanced includes filters", {
 
   resource$advanced(
     "diabetes",
-    vocabularies = c("SNOMED", "ICD10CM"),
-    domains = c("Condition"),
-    concept_classes = c("Clinical Finding"),
+    vocabulary_ids = c("SNOMED", "ICD10CM"),
+    domain_ids = c("Condition"),
+    concept_class_ids = c("Clinical Finding"),
     standard_concepts_only = TRUE,
     include_invalid = TRUE
   )
 
-  expect_equal(called_with$body$vocabularies, c("SNOMED", "ICD10CM"))
-  expect_equal(called_with$body$domains, "Condition")
-  expect_equal(called_with$body$concept_classes, "Clinical Finding")
+  expect_equal(called_with$body$vocabulary_ids, c("SNOMED", "ICD10CM"))
+  expect_equal(called_with$body$domain_ids, "Condition")
+  expect_equal(called_with$body$concept_class_ids, "Clinical Finding")
   expect_true(called_with$body$standard_concepts_only)
   expect_true(called_with$body$include_invalid)
 })
@@ -306,13 +306,13 @@ test_that("search$advanced includes pagination params", {
     }
   )
 
-  resource$advanced("diabetes", limit = 50, offset = 100)
+  resource$advanced("diabetes", page = 3, page_size = 50)
 
-  expect_equal(called_with$body$limit, 50L)
-  expect_equal(called_with$body$offset, 100L)
+  expect_equal(called_with$body$page, 3L)
+  expect_equal(called_with$body$page_size, 50L)
 })
 
-test_that("search$advanced omits default limit", {
+test_that("search$advanced omits default page_size", {
   base_req <- httr2::request("https://api.omophub.com/v1")
   resource <- SearchResource$new(base_req)
 
@@ -324,9 +324,9 @@ test_that("search$advanced omits default limit", {
     }
   )
 
-  resource$advanced("diabetes", limit = 20)  # Default
+  resource$advanced("diabetes", page_size = 20)  # Default
 
-  expect_null(called_with$body$limit)
+  expect_null(called_with$body$page_size)
 })
 
 # ==============================================================================

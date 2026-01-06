@@ -145,14 +145,14 @@ Advanced concept search with facets.
 \subsection{Usage}{
 \if{html}{\out{<div class="r">}}\preformatted{SearchResource$advanced(
   query,
-  vocabularies = NULL,
-  domains = NULL,
-  concept_classes = NULL,
+  vocabulary_ids = NULL,
+  domain_ids = NULL,
+  concept_class_ids = NULL,
   standard_concepts_only = FALSE,
   include_invalid = FALSE,
   relationship_filters = NULL,
-  limit = 20,
-  offset = 0
+  page = 1,
+  page_size = 20
 )}\if{html}{\out{</div>}}
 }
 
@@ -161,11 +161,11 @@ Advanced concept search with facets.
 \describe{
 \item{\code{query}}{Search query string.}
 
-\item{\code{vocabularies}}{Filter by vocabularies.}
+\item{\code{vocabulary_ids}}{Filter by vocabulary IDs.}
 
-\item{\code{domains}}{Filter by domains.}
+\item{\code{domain_ids}}{Filter by domain IDs.}
 
-\item{\code{concept_classes}}{Filter by concept classes.}
+\item{\code{concept_class_ids}}{Filter by concept class IDs.}
 
 \item{\code{standard_concepts_only}}{Only return standard concepts. Default \code{FALSE}.}
 
@@ -173,9 +173,9 @@ Advanced concept search with facets.
 
 \item{\code{relationship_filters}}{Relationship-based filters.}
 
-\item{\code{limit}}{Maximum results. Default 20.}
+\item{\code{page}}{Page number (1-based). Default 1.}
 
-\item{\code{offset}}{Result offset. Default 0.}
+\item{\code{page_size}}{Results per page. Default 20.}
 }
 \if{html}{\out{</div>}}
 }

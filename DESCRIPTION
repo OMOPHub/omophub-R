@@ -1,6 +1,6 @@
 Package: omophub
 Title: R Client for the 'OMOPHub' Medical Vocabulary API
-Version: 1.1.0
+Version: 1.3.0
 Authors@R: c(
     person("Alex", "Chen", email = "alex@omophub.com", role = c("aut", "cre", "cph")),
     person("Observational Health Data Science and Informatics", role = c("cph"))

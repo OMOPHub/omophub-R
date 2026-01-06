@@ -17,46 +17,14 @@ DomainsResource <- R6::R6Class(
     #' @description
     #' List all domains.
     #'
-    #' @param vocabulary_ids Filter by vocabularies.
-    #' @param include_concept_counts Include concept counts. Default `TRUE`.
-    #' @param include_statistics Include detailed statistics. Default `FALSE`.
-    #' @param include_examples Include example concepts. Default `FALSE`.
-    #' @param standard_only Only standard concepts. Default `FALSE`.
-    #' @param active_only Only active domains. Default `TRUE`.
-    #' @param sort_by Sort field. Default "domain_id".
-    #' @param sort_order Sort order. Default "asc".
+    #' @param include_stats Include concept counts and vocabulary coverage. Default `FALSE`.
     #'
-    #' @returns Domain list with summary.
-    list = function(vocabulary_ids = NULL,
-                    include_concept_counts = TRUE,
-                    include_statistics = FALSE,
-                    include_examples = FALSE,
-                    standard_only = FALSE,
-                    active_only = TRUE,
-                    sort_by = "domain_id",
-                    sort_order = "asc") {
-      params <- list(
-        sort_by = sort_by,
-        sort_order = sort_order
-      )
+    #' @returns Domain list.
+    list = function(include_stats = FALSE) {
+      params <- list()
 
-      if (!is.null(vocabulary_ids)) {
-        params$vocabulary_ids <- join_params(vocabulary_ids)
-      }
-      if (isTRUE(include_concept_counts)) {
-        params$include_concept_counts <- "true"
-      }
-      if (isTRUE(include_statistics)) {
-        params$include_statistics <- "true"
-      }
-      if (isTRUE(include_examples)) {
-        params$include_examples <- "true"
-      }
-      if (isTRUE(standard_only)) {
-        params$standard_only <- "true"
-      }
-      if (!isTRUE(active_only)) {
-        params$active_only <- "false"
+      if (isTRUE(include_stats)) {
+        params$include_stats <- "true"
       }
 
       perform_get(private$.base_req, "domains", query = params)
@@ -67,16 +35,16 @@ DomainsResource <- R6::R6Class(
     #'
     #' @param domain_id The domain ID.
     #' @param vocabulary_ids Filter by vocabularies.
-    #' @param concept_class_ids Filter by concept classes.
     #' @param standard_only Only standard concepts. Default `FALSE`.
+    #' @param include_invalid Include invalid/deprecated concepts. Default `FALSE`.
     #' @param page Page number. Default 1.
     #' @param page_size Results per page. Default 50.
     #'
     #' @returns Paginated concepts.
     concepts = function(domain_id,
                         vocabulary_ids = NULL,
-                        concept_class_ids = NULL,
                         standard_only = FALSE,
+                        include_invalid = FALSE,
                         page = 1,
                         page_size = 50) {
       checkmate::assert_string(domain_id, min.chars = 1)
@@ -90,11 +58,11 @@ DomainsResource <- R6::R6Class(
       if (!is.null(vocabulary_ids)) {
         params$vocabulary_ids <- join_params(vocabulary_ids)
       }
-      if (!is.null(concept_class_ids)) {
-        params$concept_class_ids <- join_params(concept_class_ids)
-      }
       if (isTRUE(standard_only)) {
         params$standard_only <- "true"
+      }
+      if (isTRUE(include_invalid)) {
+        params$include_invalid <- "true"
       }
 
       perform_get(

@@ -66,22 +66,20 @@ test_that("hierarchy$ancestors includes optional params", {
 
   resource$ancestors(
     201826,
-    vocabulary_id = "SNOMED",
+    vocabulary_ids = c("SNOMED"),
     max_levels = 5,
     relationship_types = c("Is a", "Subsumes"),
     include_paths = TRUE,
     include_distance = TRUE,
-    standard_only = TRUE,
-    include_deprecated = TRUE
+    include_invalid = TRUE
   )
 
-  expect_equal(called_with$query$vocabulary_id, "SNOMED")
+  expect_equal(called_with$query$vocabulary_ids, "SNOMED")
   expect_equal(called_with$query$max_levels, 5L)
   expect_equal(called_with$query$relationship_types, "Is a,Subsumes")
   expect_equal(called_with$query$include_paths, "true")
   expect_equal(called_with$query$include_distance, "true")
-  expect_equal(called_with$query$standard_only, "true")
-  expect_equal(called_with$query$include_deprecated, "true")
+  expect_equal(called_with$query$include_invalid, "true")
 })
 
 # ==============================================================================
@@ -115,7 +113,7 @@ test_that("hierarchy$descendants calls correct endpoint", {
   expect_equal(called_with$query$page_size, 100L)
 })
 
-test_that("hierarchy$descendants limits max_levels to 10", {
+test_that("hierarchy$descendants limits max_levels to 20", {
   base_req <- httr2::request("https://api.omophub.com/v1")
   resource <- HierarchyResource$new(base_req)
 
@@ -127,9 +125,9 @@ test_that("hierarchy$descendants limits max_levels to 10", {
     }
   )
 
-  resource$descendants(201826, max_levels = 20)  # Request 20
+  resource$descendants(201826, max_levels = 50)  # Request 50
 
-  expect_equal(called_with$query$max_levels, 10L)  # Capped at 10
+  expect_equal(called_with$query$max_levels, 20L)  # Capped at 20
 })
 
 test_that("hierarchy$descendants includes optional params", {
@@ -146,24 +144,20 @@ test_that("hierarchy$descendants includes optional params", {
 
   resource$descendants(
     201826,
-    vocabulary_id = "SNOMED",
+    vocabulary_ids = c("SNOMED"),
     max_levels = 5,
     relationship_types = c("Is a"),
     include_distance = TRUE,
-    standard_only = TRUE,
-    include_deprecated = TRUE,
-    domain_ids = c("Condition"),
-    concept_class_ids = c("Clinical Finding"),
-    include_synonyms = TRUE
+    include_paths = TRUE,
+    include_invalid = TRUE,
+    domain_ids = c("Condition")
   )
 
-  expect_equal(called_with$query$vocabulary_id, "SNOMED")
+  expect_equal(called_with$query$vocabulary_ids, "SNOMED")
   expect_equal(called_with$query$max_levels, 5L)
   expect_equal(called_with$query$relationship_types, "Is a")
   expect_equal(called_with$query$include_distance, "true")
-  expect_equal(called_with$query$standard_only, "true")
-  expect_equal(called_with$query$include_deprecated, "true")
+  expect_equal(called_with$query$include_paths, "true")
+  expect_equal(called_with$query$include_invalid, "true")
   expect_equal(called_with$query$domain_ids, "Condition")
-  expect_equal(called_with$query$concept_class_ids, "Clinical Finding")
-  expect_equal(called_with$query$include_synonyms, "true")
 })

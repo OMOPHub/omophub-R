@@ -195,13 +195,13 @@ test_that("concepts$suggest calls correct endpoint", {
     }
   )
 
-  resource$suggest("diab", vocabulary = "SNOMED", domain = "Condition", limit = 5)
+  resource$suggest("diab", vocabulary_ids = "SNOMED", domain_ids = "Condition", page_size = 5)
 
   expect_equal(called_with$path, "concepts/suggest")
   expect_equal(called_with$query$query, "diab")
-  expect_equal(called_with$query$limit, 5L)
-  expect_equal(called_with$query$vocabulary, "SNOMED")
-  expect_equal(called_with$query$domain, "Condition")
+  expect_equal(called_with$query$page_size, 5L)
+  expect_equal(called_with$query$vocabulary_ids, "SNOMED")
+  expect_equal(called_with$query$domain_ids, "Condition")
 })
 
 # ==============================================================================
@@ -227,11 +227,10 @@ test_that("concepts$related calls correct endpoint", {
     }
   )
 
-  resource$related(201826, max_results = 10)
+  resource$related(201826, page_size = 10)
 
   expect_equal(called_with$path, "concepts/201826/related")
-  expect_equal(called_with$query$max_results, 10L)
-  expect_equal(called_with$query$include_scores, "true")
+  expect_equal(called_with$query$page_size, 10L)
 })
 
 test_that("concepts$related includes optional filters", {
@@ -248,18 +247,14 @@ test_that("concepts$related includes optional filters", {
 
   resource$related(
     201826,
-    relatedness_types = c("hierarchical", "semantic"),
-    vocabulary_ids = c("SNOMED"),
-    domain_ids = c("Condition"),
-    min_relatedness_score = 0.5,
-    standard_concepts_only = TRUE
+    relationship_types = c("Is a", "Maps to"),
+    min_score = 0.5,
+    page_size = 50
   )
 
-  expect_equal(called_with$query$relatedness_types, "hierarchical,semantic")
-  expect_equal(called_with$query$vocabulary_ids, "SNOMED")
-  expect_equal(called_with$query$domain_ids, "Condition")
-  expect_equal(called_with$query$min_relatedness_score, 0.5)
-  expect_equal(called_with$query$standard_concepts_only, "true")
+  expect_equal(called_with$query$relationship_types, "Is a,Maps to")
+  expect_equal(called_with$query$min_score, 0.5)
+  expect_equal(called_with$query$page_size, 50L)
 })
 
 # ==============================================================================
@@ -285,11 +280,9 @@ test_that("concepts$relationships calls correct endpoint", {
     }
   )
 
-  resource$relationships(201826, page = 2, page_size = 50)
+  resource$relationships(201826)
 
   expect_equal(called_with$path, "concepts/201826/relationships")
-  expect_equal(called_with$query$page, 2L)
-  expect_equal(called_with$query$page_size, 50L)
 })
 
 test_that("concepts$relationships includes optional filters", {
@@ -306,12 +299,12 @@ test_that("concepts$relationships includes optional filters", {
 
   resource$relationships(
     201826,
-    relationship_type = "Is a",
-    target_vocabulary = "SNOMED",
+    relationship_ids = "Is a",
+    vocabulary_ids = "SNOMED",
     include_invalid = TRUE
   )
 
-  expect_equal(called_with$query$relationship_type, "Is a")
-  expect_equal(called_with$query$target_vocabulary, "SNOMED")
+  expect_equal(called_with$query$relationship_ids, "Is a")
+  expect_equal(called_with$query$vocabulary_ids, "SNOMED")
   expect_equal(called_with$query$include_invalid, "true")
 })

@@ -4,9 +4,9 @@
 \name{omophub-package}
 \alias{omophub-package}
 \alias{omophub}
-\title{omophub: R Client for the OMOPHub Medical Vocabulary API}
+\title{omophub: R Client for the 'OMOPHub' Medical Vocabulary API}
 \description{
-Provides an R interface to the OMOPHub API for accessing OHDSI ATHENA standardized medical vocabularies. Supports concept search, vocabulary exploration, hierarchy navigation, relationship queries, and concept mappings with automatic pagination and rate limiting.
+Provides an R interface to the 'OMOPHub' API for accessing 'OHDSI ATHENA' standardized medical vocabularies. Supports concept search, vocabulary exploration, hierarchy navigation, relationship queries, and concept mappings with automatic pagination and rate limiting.
 
 Provides an R interface to the OMOPHub API for accessing OHDSI ATHENA
 standardized medical vocabularies. Supports concept search, vocabulary
@@ -58,12 +58,19 @@ Useful links:
 \itemize{
   \item \url{https://github.com/omopHub/omophub-R}
   \item \url{https://docs.omophub.com}
+  \item \url{https://omophub.github.io/omophub-R/}
+  \item \url{https://omophub.com}
   \item Report bugs at \url{https://github.com/omopHub/omophub-R/issues}
 }
 
 }
 \author{
-\strong{Maintainer}: OMOPHub Team \email{support@omophub.com} [copyright holder]
+\strong{Maintainer}: Alex Chen \email{alex@omophub.com} [copyright holder]
+
+Other contributors:
+\itemize{
+  \item Observational Health Data Science and Informatics [copyright holder]
+}
 
 }
 \keyword{internal}

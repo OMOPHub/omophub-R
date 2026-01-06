@@ -6,11 +6,17 @@
 \value{
 Paginated vocabulary list.
 
-Vocabulary details.
+Vocabulary details including vocabulary_id, vocabulary_name,
+vocabulary_reference, vocabulary_version, vocabulary_concept_id.
 
 Vocabulary statistics.
 
-Domain statistics for vocabularies.
+Domain statistics including concept counts and class breakdown.
+
+List of all available domains with domain_id, domain_name, and description.
+
+List of all available concept classes with concept_class_id,
+concept_class_name, and concept_class_concept_id.
 
 Paginated concepts.
 }
@@ -25,7 +31,9 @@ R6 class providing access to vocabulary operations.
 \item \href{#method-VocabulariesResource-list}{\code{VocabulariesResource$list()}}
 \item \href{#method-VocabulariesResource-get}{\code{VocabulariesResource$get()}}
 \item \href{#method-VocabulariesResource-stats}{\code{VocabulariesResource$stats()}}
+\item \href{#method-VocabulariesResource-domain_stats}{\code{VocabulariesResource$domain_stats()}}
 \item \href{#method-VocabulariesResource-domains}{\code{VocabulariesResource$domains()}}
+\item \href{#method-VocabulariesResource-concept_classes}{\code{VocabulariesResource$concept_classes()}}
 \item \href{#method-VocabulariesResource-concepts}{\code{VocabulariesResource$concepts()}}
 \item \href{#method-VocabulariesResource-print}{\code{VocabulariesResource$print()}}
 \item \href{#method-VocabulariesResource-clone}{\code{VocabulariesResource$clone()}}
@@ -88,21 +96,13 @@ List all vocabularies.
 \subsection{Method \code{get()}}{
 Get vocabulary details.
 \subsection{Usage}{
-\if{html}{\out{<div class="r">}}\preformatted{VocabulariesResource$get(
-  vocabulary_id,
-  include_stats = FALSE,
-  include_domains = FALSE
-)}\if{html}{\out{</div>}}
+\if{html}{\out{<div class="r">}}\preformatted{VocabulariesResource$get(vocabulary_id)}\if{html}{\out{</div>}}
 }
 
 \subsection{Arguments}{
 \if{html}{\out{<div class="arguments">}}
 \describe{
 \item{\code{vocabulary_id}}{The vocabulary ID.}
-
-\item{\code{include_stats}}{Include statistics. Default \code{FALSE}.}
-
-\item{\code{include_domains}}{Include domain breakdown. Default \code{FALSE}.}
 }
 \if{html}{\out{</div>}}
 }
@@ -125,25 +125,43 @@ Get vocabulary statistics.
 }
 }
 \if{html}{\out{<hr>}}
-\if{html}{\out{<a id="method-VocabulariesResource-domains"></a>}}
-\if{latex}{\out{\hypertarget{method-VocabulariesResource-domains}{}}}
-\subsection{Method \code{domains()}}{
-Get vocabulary domains.
+\if{html}{\out{<a id="method-VocabulariesResource-domain_stats"></a>}}
+\if{latex}{\out{\hypertarget{method-VocabulariesResource-domain_stats}{}}}
+\subsection{Method \code{domain_stats()}}{
+Get statistics for a specific domain within a vocabulary.
 \subsection{Usage}{
-\if{html}{\out{<div class="r">}}\preformatted{VocabulariesResource$domains(vocabulary_ids = NULL, page = 1, page_size = 50)}\if{html}{\out{</div>}}
+\if{html}{\out{<div class="r">}}\preformatted{VocabulariesResource$domain_stats(vocabulary_id, domain_id)}\if{html}{\out{</div>}}
 }
 
 \subsection{Arguments}{
 \if{html}{\out{<div class="arguments">}}
 \describe{
-\item{\code{vocabulary_ids}}{Filter by vocabulary IDs (optional).}
+\item{\code{vocabulary_id}}{The vocabulary ID (e.g., "SNOMED", "ICD10CM").}
 
-\item{\code{page}}{Page number. Default 1.}
-
-\item{\code{page_size}}{Results per page. Default 50.}
+\item{\code{domain_id}}{The domain ID (e.g., "Condition", "Drug", "Procedure").}
 }
 \if{html}{\out{</div>}}
 }
+}
+\if{html}{\out{<hr>}}
+\if{html}{\out{<a id="method-VocabulariesResource-domains"></a>}}
+\if{latex}{\out{\hypertarget{method-VocabulariesResource-domains}{}}}
+\subsection{Method \code{domains()}}{
+Get all standard OHDSI domains.
+\subsection{Usage}{
+\if{html}{\out{<div class="r">}}\preformatted{VocabulariesResource$domains()}\if{html}{\out{</div>}}
+}
+
+}
+\if{html}{\out{<hr>}}
+\if{html}{\out{<a id="method-VocabulariesResource-concept_classes"></a>}}
+\if{latex}{\out{\hypertarget{method-VocabulariesResource-concept_classes}{}}}
+\subsection{Method \code{concept_classes()}}{
+Get all concept classes.
+\subsection{Usage}{
+\if{html}{\out{<div class="r">}}\preformatted{VocabulariesResource$concept_classes()}\if{html}{\out{</div>}}
+}
+
 }
 \if{html}{\out{<hr>}}
 \if{html}{\out{<a id="method-VocabulariesResource-concepts"></a>}}
@@ -153,11 +171,15 @@ Get concepts in a vocabulary.
 \subsection{Usage}{
 \if{html}{\out{<div class="r">}}\preformatted{VocabulariesResource$concepts(
   vocabulary_id,
-  domain_id = NULL,
-  concept_class_id = NULL,
-  standard_only = FALSE,
+  search = NULL,
+  standard_concept = "all",
+  include_invalid = FALSE,
+  include_relationships = FALSE,
+  include_synonyms = FALSE,
+  sort_by = "name",
+  sort_order = "asc",
   page = 1,
-  page_size = 50
+  page_size = 20
 )}\if{html}{\out{</div>}}
 }
 
@@ -166,15 +188,23 @@ Get concepts in a vocabulary.
 \describe{
 \item{\code{vocabulary_id}}{The vocabulary ID.}
 
-\item{\code{domain_id}}{Filter by domain.}
+\item{\code{search}}{Search term to filter concepts by name or code.}
 
-\item{\code{concept_class_id}}{Filter by concept class.}
+\item{\code{standard_concept}}{Filter by standard concept status ('S', 'C', 'all'). Default "all".}
 
-\item{\code{standard_only}}{Only standard concepts. Default \code{FALSE}.}
+\item{\code{include_invalid}}{Include invalid or deprecated concepts. Default \code{FALSE}.}
+
+\item{\code{include_relationships}}{Include concept relationships. Default \code{FALSE}.}
+
+\item{\code{include_synonyms}}{Include concept synonyms. Default \code{FALSE}.}
+
+\item{\code{sort_by}}{Sort field ('name', 'concept_id', 'concept_code'). Default "name".}
+
+\item{\code{sort_order}}{Sort order ('asc' or 'desc'). Default "asc".}
 
 \item{\code{page}}{Page number. Default 1.}
 
-\item{\code{page_size}}{Results per page. Default 50.}
+\item{\code{page_size}}{Results per page (max 1000). Default 20.}
 }
 \if{html}{\out{</div>}}
 }

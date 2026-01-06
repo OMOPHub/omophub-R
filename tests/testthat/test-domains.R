@@ -40,11 +40,11 @@ test_that("domains$list calls correct endpoint", {
   resource$list()
 
   expect_equal(called_with$path, "domains")
-  expect_equal(called_with$query$sort_by, "domain_id")
-  expect_equal(called_with$query$sort_order, "asc")
+  # No params when include_stats is FALSE (default)
+  expect_equal(length(called_with$query), 0)
 })
 
-test_that("domains$list includes vocabulary filter", {
+test_that("domains$list includes include_stats parameter", {
   base_req <- httr2::request("https://api.omophub.com/v1")
   resource <- DomainsResource$new(base_req)
 
@@ -56,12 +56,12 @@ test_that("domains$list includes vocabulary filter", {
     }
   )
 
-  resource$list(vocabulary_ids = c("SNOMED", "ICD10CM"))
+  resource$list(include_stats = TRUE)
 
-  expect_equal(called_with$query$vocabulary_ids, "SNOMED,ICD10CM")
+  expect_equal(called_with$query$include_stats, "true")
 })
 
-test_that("domains$list includes boolean options", {
+test_that("domains$list without stats has no query params", {
   base_req <- httr2::request("https://api.omophub.com/v1")
   resource <- DomainsResource$new(base_req)
 
@@ -73,19 +73,10 @@ test_that("domains$list includes boolean options", {
     }
   )
 
-  resource$list(
-    include_concept_counts = TRUE,
-    include_statistics = TRUE,
-    include_examples = TRUE,
-    standard_only = TRUE,
-    active_only = FALSE
-  )
+  resource$list(include_stats = FALSE)
 
-  expect_equal(called_with$query$include_concept_counts, "true")
-  expect_equal(called_with$query$include_statistics, "true")
-  expect_equal(called_with$query$include_examples, "true")
-  expect_equal(called_with$query$standard_only, "true")
-  expect_equal(called_with$query$active_only, "false")
+  # Should not have include_stats in query when FALSE
+  expect_null(called_with$query$include_stats)
 })
 
 # ==============================================================================
@@ -134,11 +125,11 @@ test_that("domains$concepts includes optional filters", {
   resource$concepts(
     "Condition",
     vocabulary_ids = c("SNOMED"),
-    concept_class_ids = c("Clinical Finding"),
-    standard_only = TRUE
+    standard_only = TRUE,
+    include_invalid = TRUE
   )
 
   expect_equal(called_with$query$vocabulary_ids, "SNOMED")
-  expect_equal(called_with$query$concept_class_ids, "Clinical Finding")
   expect_equal(called_with$query$standard_only, "true")
+  expect_equal(called_with$query$include_invalid, "true")
 })

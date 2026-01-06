@@ -1,3 +1,43 @@
+# omophub 1.3.0
+
+## New Features
+
+* **Hierarchy `get()` method**: New method to retrieve complete concept hierarchy (ancestors and descendants) in a single call with support for "flat" or "graph" visualization formats.
+
+* **Vocabulary `domain_stats()` method**: New method to get statistics for a specific domain within a vocabulary.
+
+* **Vocabulary `concept_classes()` method**: New method to list all available concept classes.
+
+* Added `vocab_release` parameter to concepts, mappings, relationships, and hierarchy methods for explicit vocabulary version pinning.
+
+* Added `include_hierarchy` parameter to `concepts$get()` and `concepts$get_by_code()`.
+
+## Changes
+
+* **API parameter naming**: Updated to match OMOPHub API v1.3.0 specifications:
+  - `limit` → `page_size` for pagination
+  - `vocabulary`, `domain` → `vocabulary_ids`, `domain_ids` for filtering
+  - `max_results` → `page_size` for result limits
+  - `relationship_type` → `relationship_ids` for relationship filtering
+  - `target_vocabularies` → `target_vocabulary` (singular) in mappings
+  - `vocabulary_id` → `vocabulary_ids` (plural) in hierarchy methods
+
+* **API simplifications**: Several methods now have fewer parameters to match the simplified backend API:
+  - `mappings$get()`: Removed `direction`, `include_indirect`, `standard_only`, `include_mapping_quality`, `include_synonyms`, `include_context`, pagination
+  - `domains$list()`: Simplified to single `include_stats` parameter
+  - `vocabularies$get()`: Now takes only `vocabulary_id`
+  - `vocabularies$domains()`: Now takes no parameters
+
+* **Batch limits**: `concepts$batch()` maximum reduced from 1000 to 100 concepts per request.
+
+* **Default changes**:
+  - `concepts$batch()` `standard_only` default changed from `FALSE` to `TRUE`
+  - `relationships$get()` default `page_size` changed from 50 to 100
+
+## Bug Fixes
+
+* Fixed tests to use correct parameter names matching SDK implementation
+
 # omophub 1.1.0
 
 ## New Features

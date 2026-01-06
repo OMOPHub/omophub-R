@@ -141,37 +141,37 @@ SearchResource <- R6::R6Class(
     #' Advanced concept search with facets.
     #'
     #' @param query Search query string.
-    #' @param vocabularies Filter by vocabularies.
-    #' @param domains Filter by domains.
-    #' @param concept_classes Filter by concept classes.
+    #' @param vocabulary_ids Filter by vocabulary IDs.
+    #' @param domain_ids Filter by domain IDs.
+    #' @param concept_class_ids Filter by concept class IDs.
     #' @param standard_concepts_only Only return standard concepts. Default `FALSE`.
     #' @param include_invalid Include invalid concepts. Default `FALSE`.
     #' @param relationship_filters Relationship-based filters.
-    #' @param limit Maximum results. Default 20.
-    #' @param offset Result offset. Default 0.
+    #' @param page Page number (1-based). Default 1.
+    #' @param page_size Results per page. Default 20.
     #'
     #' @returns Search results with facets and metadata.
     advanced = function(query,
-                        vocabularies = NULL,
-                        domains = NULL,
-                        concept_classes = NULL,
+                        vocabulary_ids = NULL,
+                        domain_ids = NULL,
+                        concept_class_ids = NULL,
                         standard_concepts_only = FALSE,
                         include_invalid = FALSE,
                         relationship_filters = NULL,
-                        limit = 20,
-                        offset = 0) {
+                        page = 1,
+                        page_size = 20) {
       checkmate::assert_string(query, min.chars = 1)
 
       body <- list(query = query)
 
-      if (!is.null(vocabularies)) {
-        body$vocabularies <- as.character(vocabularies)
+      if (!is.null(vocabulary_ids)) {
+        body$vocabulary_ids <- as.character(vocabulary_ids)
       }
-      if (!is.null(domains)) {
-        body$domains <- as.character(domains)
+      if (!is.null(domain_ids)) {
+        body$domain_ids <- as.character(domain_ids)
       }
-      if (!is.null(concept_classes)) {
-        body$concept_classes <- as.character(concept_classes)
+      if (!is.null(concept_class_ids)) {
+        body$concept_class_ids <- as.character(concept_class_ids)
       }
       if (isTRUE(standard_concepts_only)) {
         body$standard_concepts_only <- TRUE
@@ -182,14 +182,14 @@ SearchResource <- R6::R6Class(
       if (!is.null(relationship_filters)) {
         body$relationship_filters <- relationship_filters
       }
-      if (limit != 20) {
-        body$limit <- as.integer(limit)
+      if (page != 1) {
+        body$page <- as.integer(page)
       }
-      if (offset > 0) {
-        body$offset <- as.integer(offset)
+      if (page_size != 20) {
+        body$page_size <- as.integer(page_size)
       }
 
-      perform_post(private$.base_req, "concepts/search/advanced", body = body)
+      perform_post(private$.base_req, "search/advanced", body = body)
     },
 
     #' @description

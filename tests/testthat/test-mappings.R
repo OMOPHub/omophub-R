@@ -45,15 +45,12 @@ test_that("mappings$get calls correct endpoint", {
     }
   )
 
-  resource$get(201826, page = 1, page_size = 50)
+  resource$get(201826)
 
   expect_equal(called_with$path, "concepts/201826/mappings")
-  expect_equal(called_with$query$direction, "both")
-  expect_equal(called_with$query$page, 1L)
-  expect_equal(called_with$query$page_size, 50L)
 })
 
-test_that("mappings$get includes target vocabularies filter", {
+test_that("mappings$get includes target vocabulary filter", {
   base_req <- httr2::request("https://api.omophub.com/v1")
   resource <- MappingsResource$new(base_req)
 
@@ -65,12 +62,12 @@ test_that("mappings$get includes target vocabularies filter", {
     }
   )
 
-  resource$get(201826, target_vocabularies = c("ICD10CM", "ICD9CM"))
+  resource$get(201826, target_vocabulary = "ICD10CM")
 
-  expect_equal(called_with$query$target_vocabularies, "ICD10CM,ICD9CM")
+  expect_equal(called_with$query$target_vocabulary, "ICD10CM")
 })
 
-test_that("mappings$get includes mapping types filter", {
+test_that("mappings$get includes include_invalid option", {
   base_req <- httr2::request("https://api.omophub.com/v1")
   resource <- MappingsResource$new(base_req)
 
@@ -82,12 +79,12 @@ test_that("mappings$get includes mapping types filter", {
     }
   )
 
-  resource$get(201826, mapping_types = c("equivalent", "broader"))
+  resource$get(201826, include_invalid = TRUE)
 
-  expect_equal(called_with$query$mapping_types, "equivalent,broader")
+  expect_equal(called_with$query$include_invalid, "true")
 })
 
-test_that("mappings$get includes direction parameter", {
+test_that("mappings$get includes vocab_release option", {
   base_req <- httr2::request("https://api.omophub.com/v1")
   resource <- MappingsResource$new(base_req)
 
@@ -99,57 +96,9 @@ test_that("mappings$get includes direction parameter", {
     }
   )
 
-  resource$get(201826, direction = "outgoing")
+  resource$get(201826, vocab_release = "2025.1")
 
-  expect_equal(called_with$query$direction, "outgoing")
-})
-
-test_that("mappings$get includes boolean options", {
-  base_req <- httr2::request("https://api.omophub.com/v1")
-  resource <- MappingsResource$new(base_req)
-
-  called_with <- NULL
-  local_mocked_bindings(
-    perform_get = function(req, path, query = NULL) {
-      called_with <<- list(query = query)
-      list(mappings = list())
-    }
-  )
-
-  resource$get(
-    201826,
-    include_indirect = TRUE,
-    standard_only = TRUE,
-    include_mapping_quality = TRUE,
-    include_synonyms = TRUE,
-    include_context = TRUE,
-    active_only = FALSE
-  )
-
-  expect_equal(called_with$query$include_indirect, "true")
-  expect_equal(called_with$query$standard_only, "true")
-  expect_equal(called_with$query$include_mapping_quality, "true")
-  expect_equal(called_with$query$include_synonyms, "true")
-  expect_equal(called_with$query$include_context, "true")
-  expect_equal(called_with$query$active_only, "false")
-})
-
-test_that("mappings$get includes sorting options", {
-  base_req <- httr2::request("https://api.omophub.com/v1")
-  resource <- MappingsResource$new(base_req)
-
-  called_with <- NULL
-  local_mocked_bindings(
-    perform_get = function(req, path, query = NULL) {
-      called_with <<- list(query = query)
-      list(mappings = list())
-    }
-  )
-
-  resource$get(201826, sort_by = "target_vocabulary_id", sort_order = "asc")
-
-  expect_equal(called_with$query$sort_by, "target_vocabulary_id")
-  expect_equal(called_with$query$sort_order, "asc")
+  expect_equal(called_with$query$vocab_release, "2025.1")
 })
 
 # ==============================================================================
@@ -178,8 +127,8 @@ test_that("mappings$map calls correct endpoint with body", {
 
   called_with <- NULL
   local_mocked_bindings(
-    perform_post = function(req, path, body = NULL) {
-      called_with <<- list(path = path, body = body)
+    perform_post = function(req, path, body = NULL, query = NULL) {
+      called_with <<- list(path = path, body = body, query = query)
       list(mappings = list(), summary = list())
     }
   )
@@ -197,8 +146,8 @@ test_that("mappings$map includes optional parameters", {
 
   called_with <- NULL
   local_mocked_bindings(
-    perform_post = function(req, path, body = NULL) {
-      called_with <<- list(body = body)
+    perform_post = function(req, path, body = NULL, query = NULL) {
+      called_with <<- list(body = body, query = query)
       list(mappings = list())
     }
   )

@@ -48,11 +48,7 @@ test_that("get vocabulary with options works", {
   skip_if_no_integration_key()
   client <- integration_client()
 
-  vocab <- client$vocabularies$get(
-    "SNOMED",
-    include_stats = TRUE,
-    include_domains = TRUE
-  )
+  vocab <- client$vocabularies$get("SNOMED")
 
   expect_equal(vocab$vocabulary_id, "SNOMED")
   expect_true("vocabulary_name" %in% names(vocab))
@@ -77,7 +73,7 @@ test_that("get vocabulary domains works", {
   skip_if_no_integration_key()
   client <- integration_client()
 
-  result <- client$vocabularies$domains(vocabulary_ids = "SNOMED")
+  result <- client$vocabularies$domains()
 
   domains <- extract_data(result, "domains")
   expect_true(is.list(domains))
@@ -89,8 +85,8 @@ test_that("get vocabulary concepts works", {
 
   result <- client$vocabularies$concepts(
     "SNOMED",
-    domain_id = "Condition",
-    standard_only = TRUE,
+    search = "diabetes",
+    standard_concept = "S",
     page_size = 10
   )
 

@@ -4,7 +4,7 @@
 \alias{DomainsResource}
 \title{Domains Resource}
 \value{
-Domain list with summary.
+Domain list.
 
 Paginated concepts.
 }
@@ -45,36 +45,13 @@ Create a new DomainsResource.
 \subsection{Method \code{list()}}{
 List all domains.
 \subsection{Usage}{
-\if{html}{\out{<div class="r">}}\preformatted{DomainsResource$list(
-  vocabulary_ids = NULL,
-  include_concept_counts = TRUE,
-  include_statistics = FALSE,
-  include_examples = FALSE,
-  standard_only = FALSE,
-  active_only = TRUE,
-  sort_by = "domain_id",
-  sort_order = "asc"
-)}\if{html}{\out{</div>}}
+\if{html}{\out{<div class="r">}}\preformatted{DomainsResource$list(include_stats = FALSE)}\if{html}{\out{</div>}}
 }
 
 \subsection{Arguments}{
 \if{html}{\out{<div class="arguments">}}
 \describe{
-\item{\code{vocabulary_ids}}{Filter by vocabularies.}
-
-\item{\code{include_concept_counts}}{Include concept counts. Default \code{TRUE}.}
-
-\item{\code{include_statistics}}{Include detailed statistics. Default \code{FALSE}.}
-
-\item{\code{include_examples}}{Include example concepts. Default \code{FALSE}.}
-
-\item{\code{standard_only}}{Only standard concepts. Default \code{FALSE}.}
-
-\item{\code{active_only}}{Only active domains. Default \code{TRUE}.}
-
-\item{\code{sort_by}}{Sort field. Default "domain_id".}
-
-\item{\code{sort_order}}{Sort order. Default "asc".}
+\item{\code{include_stats}}{Include concept counts and vocabulary coverage. Default \code{FALSE}.}
 }
 \if{html}{\out{</div>}}
 }
@@ -88,8 +65,8 @@ Get concepts in a domain.
 \if{html}{\out{<div class="r">}}\preformatted{DomainsResource$concepts(
   domain_id,
   vocabulary_ids = NULL,
-  concept_class_ids = NULL,
   standard_only = FALSE,
+  include_invalid = FALSE,
   page = 1,
   page_size = 50
 )}\if{html}{\out{</div>}}
@@ -102,9 +79,9 @@ Get concepts in a domain.
 
 \item{\code{vocabulary_ids}}{Filter by vocabularies.}
 
-\item{\code{concept_class_ids}}{Filter by concept classes.}
-
 \item{\code{standard_only}}{Only standard concepts. Default \code{FALSE}.}
+
+\item{\code{include_invalid}}{Include invalid/deprecated concepts. Default \code{FALSE}.}
 
 \item{\code{page}}{Page number. Default 1.}
 

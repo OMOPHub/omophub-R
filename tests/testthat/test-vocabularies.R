@@ -103,22 +103,22 @@ test_that("vocabularies$get calls correct endpoint", {
   expect_null(called_with$query)
 })
 
-test_that("vocabularies$get includes optional params", {
+test_that("vocabularies$get only accepts vocabulary_id", {
   base_req <- httr2::request("https://api.omophub.com/v1")
   resource <- VocabulariesResource$new(base_req)
 
   called_with <- NULL
   local_mocked_bindings(
     perform_get = function(req, path, query = NULL) {
-      called_with <<- list(query = query)
+      called_with <<- list(path = path, query = query)
       mock_vocabulary()
     }
   )
 
-  resource$get("SNOMED", include_stats = TRUE, include_domains = TRUE)
+  resource$get("SNOMED")
 
-  expect_equal(called_with$query$include_stats, "true")
-  expect_equal(called_with$query$include_domains, "true")
+  expect_equal(called_with$path, "vocabularies/SNOMED")
+  expect_null(called_with$query)
 })
 
 # ==============================================================================
@@ -165,28 +165,10 @@ test_that("vocabularies$domains calls correct endpoint", {
     }
   )
 
-  resource$domains(page = 1, page_size = 50)
+  resource$domains()
 
   expect_equal(called_with$path, "vocabularies/domains")
-  expect_equal(called_with$query$page, 1L)
-  expect_equal(called_with$query$page_size, 50L)
-})
-
-test_that("vocabularies$domains includes vocabulary filter", {
-  base_req <- httr2::request("https://api.omophub.com/v1")
-  resource <- VocabulariesResource$new(base_req)
-
-  called_with <- NULL
-  local_mocked_bindings(
-    perform_get = function(req, path, query = NULL) {
-      called_with <<- list(query = query)
-      list(domains = list())
-    }
-  )
-
-  resource$domains(vocabulary_ids = c("SNOMED", "ICD10CM"))
-
-  expect_equal(called_with$query$vocabulary_ids, "SNOMED,ICD10CM")
+  expect_null(called_with$query)
 })
 
 # ==============================================================================
@@ -212,11 +194,14 @@ test_that("vocabularies$concepts calls correct endpoint", {
     }
   )
 
-  resource$concepts("SNOMED", page = 1, page_size = 50)
+  resource$concepts("SNOMED", page = 1, page_size = 20)
 
   expect_equal(called_with$path, "vocabularies/SNOMED/concepts")
   expect_equal(called_with$query$page, 1L)
-  expect_equal(called_with$query$page_size, 50L)
+  expect_equal(called_with$query$page_size, 20L)
+  expect_equal(called_with$query$standard_concept, "all")
+  expect_equal(called_with$query$sort_by, "name")
+  expect_equal(called_with$query$sort_order, "asc")
 })
 
 test_that("vocabularies$concepts includes optional filters", {
@@ -233,12 +218,20 @@ test_that("vocabularies$concepts includes optional filters", {
 
   resource$concepts(
     "SNOMED",
-    domain_id = "Condition",
-    concept_class_id = "Clinical Finding",
-    standard_only = TRUE
+    search = "diabetes",
+    standard_concept = "S",
+    include_invalid = TRUE,
+    include_relationships = TRUE,
+    include_synonyms = TRUE,
+    sort_by = "concept_id",
+    sort_order = "desc"
   )
 
-  expect_equal(called_with$query$domain_id, "Condition")
-  expect_equal(called_with$query$concept_class_id, "Clinical Finding")
-  expect_equal(called_with$query$standard_only, "true")
+  expect_equal(called_with$query$search, "diabetes")
+  expect_equal(called_with$query$standard_concept, "S")
+  expect_equal(called_with$query$include_invalid, "true")
+  expect_equal(called_with$query$include_relationships, "true")
+  expect_equal(called_with$query$include_synonyms, "true")
+  expect_equal(called_with$query$sort_by, "concept_id")
+  expect_equal(called_with$query$sort_order, "desc")
 })

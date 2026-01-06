@@ -76,7 +76,7 @@ results$data
 snomed_concept <- client$concepts$get_by_code("SNOMED", "44054006")
 
 # Map to another vocabulary
-mappings <- client$mappings$get(201826, target_vocabularies = "ICD10CM")
+mappings <- client$mappings$get(201826, target_vocabulary = "ICD10CM")
 
 # Navigate hierarchy
 ancestors <- client$hierarchy$ancestors(201826, max_levels = 3)
@@ -95,8 +95,8 @@ validate_and_map <- function(source_vocab, source_code) {
   
   if (concept$standard_concept != "S") {
     mappings <- client$mappings$get(
-      concept$concept_id, 
-      target_vocabularies = "SNOMED"
+      concept$concept_id,
+      target_vocabulary = "SNOMED"
     )
     return(mappings$mappings[[1]]$target_concept_id)
   }
@@ -134,8 +134,7 @@ Explore hierarchies to build comprehensive concept sets:
 # Get all descendants for phenotype definition
 descendants <- client$hierarchy$descendants(
   201826,  # Type 2 diabetes mellitus
-  max_levels = 5,
-  standard_only = TRUE
+  max_levels = 5
 )
 
 concept_set <- sapply(descendants$concepts, function(x) x$concept_id)
