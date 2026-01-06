@@ -7,7 +7,7 @@
 
     <a class="navbar-brand me-2" href="../index.html">omophub</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">1.1.0</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">1.3.0</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -44,9 +44,13 @@
     <div class="section level2">
     <h2 id="value">Value<a class="anchor" aria-label="anchor" href="#value"></a></h2>
     <p>Paginated vocabulary list.</p>
-<p>Vocabulary details.</p>
+<p>Vocabulary details including vocabulary_id, vocabulary_name,
+vocabulary_reference, vocabulary_version, vocabulary_concept_id.</p>
 <p>Vocabulary statistics.</p>
-<p>Domain statistics for vocabularies.</p>
+<p>Domain statistics including concept counts and class breakdown.</p>
+<p>List of all available domains with domain_id, domain_name, and description.</p>
+<p>List of all available concept classes with concept_class_id,
+concept_class_name, and concept_class_concept_id.</p>
 <p>Paginated concepts.</p>
     </div>
     <div class="section level2">
@@ -59,7 +63,9 @@
 <li><p><a href="#method-VocabulariesResource-list"><code>VocabulariesResource$list()</code></a></p></li>
 <li><p><a href="#method-VocabulariesResource-get"><code>VocabulariesResource$get()</code></a></p></li>
 <li><p><a href="#method-VocabulariesResource-stats"><code>VocabulariesResource$stats()</code></a></p></li>
+<li><p><a href="#method-VocabulariesResource-domain_stats"><code>VocabulariesResource$domain_stats()</code></a></p></li>
 <li><p><a href="#method-VocabulariesResource-domains"><code>VocabulariesResource$domains()</code></a></p></li>
+<li><p><a href="#method-VocabulariesResource-concept_classes"><code>VocabulariesResource$concept_classes()</code></a></p></li>
 <li><p><a href="#method-VocabulariesResource-concepts"><code>VocabulariesResource$concepts()</code></a></p></li>
 <li><p><a href="#method-VocabulariesResource-print"><code>VocabulariesResource$print()</code></a></p></li>
 <li><p><a href="#method-VocabulariesResource-clone"><code>VocabulariesResource$clone()</code></a></p></li>
@@ -126,25 +132,13 @@
 <h3 id="method-get-">Method <code><a href="https://rdrr.io/r/base/get.html" class="external-link">get()</a></code><a class="anchor" aria-label="anchor" href="#method-get-"></a></h3>
 <p>Get vocabulary details.</p><div class="section">
 <h4 id="usage-2">Usage<a class="anchor" aria-label="anchor" href="#usage-2"></a></h4>
-<p></p><div class="r"><div class="sourceCode"><pre><code><span><span class="va">VocabulariesResource</span><span class="op">$</span><span class="fu">get</span><span class="op">(</span></span>
-<span>  <span class="va">vocabulary_id</span>,</span>
-<span>  include_stats <span class="op">=</span> <span class="cn">FALSE</span>,</span>
-<span>  include_domains <span class="op">=</span> <span class="cn">FALSE</span></span>
-<span><span class="op">)</span></span></code></pre></div><p></p></div>
+<p></p><div class="r"><div class="sourceCode"><pre><code><span><span class="va">VocabulariesResource</span><span class="op">$</span><span class="fu">get</span><span class="op">(</span><span class="va">vocabulary_id</span><span class="op">)</span></span></code></pre></div><p></p></div>
 </div>
 
 <div class="section">
 <h4 id="arguments-2">Arguments<a class="anchor" aria-label="anchor" href="#arguments-2"></a></h4>
 <p></p><div class="arguments"><dl><dt><code>vocabulary_id</code></dt>
 <dd><p>The vocabulary ID.</p></dd>
-
-
-<dt><code>include_stats</code></dt>
-<dd><p>Include statistics. Default <code>FALSE</code>.</p></dd>
-
-
-<dt><code>include_domains</code></dt>
-<dd><p>Include domain breakdown. Default <code>FALSE</code>.</p></dd>
 
 
 </dl><p></p></div>
@@ -166,41 +160,57 @@
 </dl><p></p></div>
 </div>
 
-</div><p></p><hr><a id="method-VocabulariesResource-domains"></a><div class="section">
-<h3 id="method-domains-">Method <code>domains()</code><a class="anchor" aria-label="anchor" href="#method-domains-"></a></h3>
-<p>Get vocabulary domains.</p><div class="section">
+</div><p></p><hr><a id="method-VocabulariesResource-domain_stats"></a><div class="section">
+<h3 id="method-domain-stats-">Method <code>domain_stats()</code><a class="anchor" aria-label="anchor" href="#method-domain-stats-"></a></h3>
+<p>Get statistics for a specific domain within a vocabulary.</p><div class="section">
 <h4 id="usage-4">Usage<a class="anchor" aria-label="anchor" href="#usage-4"></a></h4>
-<p></p><div class="r"><div class="sourceCode"><pre><code><span><span class="va">VocabulariesResource</span><span class="op">$</span><span class="fu">domains</span><span class="op">(</span>vocabulary_ids <span class="op">=</span> <span class="cn">NULL</span>, page <span class="op">=</span> <span class="fl">1</span>, page_size <span class="op">=</span> <span class="fl">50</span><span class="op">)</span></span></code></pre></div><p></p></div>
+<p></p><div class="r"><div class="sourceCode"><pre><code><span><span class="va">VocabulariesResource</span><span class="op">$</span><span class="fu">domain_stats</span><span class="op">(</span><span class="va">vocabulary_id</span>, <span class="va">domain_id</span><span class="op">)</span></span></code></pre></div><p></p></div>
 </div>
 
 <div class="section">
 <h4 id="arguments-4">Arguments<a class="anchor" aria-label="anchor" href="#arguments-4"></a></h4>
-<p></p><div class="arguments"><dl><dt><code>vocabulary_ids</code></dt>
-<dd><p>Filter by vocabulary IDs (optional).</p></dd>
+<p></p><div class="arguments"><dl><dt><code>vocabulary_id</code></dt>
+<dd><p>The vocabulary ID (e.g., "SNOMED", "ICD10CM").</p></dd>
 
 
-<dt><code>page</code></dt>
-<dd><p>Page number. Default 1.</p></dd>
-
-
-<dt><code>page_size</code></dt>
-<dd><p>Results per page. Default 50.</p></dd>
+<dt><code>domain_id</code></dt>
+<dd><p>The domain ID (e.g., "Condition", "Drug", "Procedure").</p></dd>
 
 
 </dl><p></p></div>
 </div>
 
+</div><p></p><hr><a id="method-VocabulariesResource-domains"></a><div class="section">
+<h3 id="method-domains-">Method <code>domains()</code><a class="anchor" aria-label="anchor" href="#method-domains-"></a></h3>
+<p>Get all standard OHDSI domains.</p><div class="section">
+<h4 id="usage-5">Usage<a class="anchor" aria-label="anchor" href="#usage-5"></a></h4>
+<p></p><div class="r"><div class="sourceCode"><pre><code><span><span class="va">VocabulariesResource</span><span class="op">$</span><span class="fu">domains</span><span class="op">(</span><span class="op">)</span></span></code></pre></div><p></p></div>
+</div>
+
+
+</div><p></p><hr><a id="method-VocabulariesResource-concept_classes"></a><div class="section">
+<h3 id="method-concept-classes-">Method <code>concept_classes()</code><a class="anchor" aria-label="anchor" href="#method-concept-classes-"></a></h3>
+<p>Get all concept classes.</p><div class="section">
+<h4 id="usage-6">Usage<a class="anchor" aria-label="anchor" href="#usage-6"></a></h4>
+<p></p><div class="r"><div class="sourceCode"><pre><code><span><span class="va">VocabulariesResource</span><span class="op">$</span><span class="fu">concept_classes</span><span class="op">(</span><span class="op">)</span></span></code></pre></div><p></p></div>
+</div>
+
+
 </div><p></p><hr><a id="method-VocabulariesResource-concepts"></a><div class="section">
 <h3 id="method-concepts-">Method <code>concepts()</code><a class="anchor" aria-label="anchor" href="#method-concepts-"></a></h3>
 <p>Get concepts in a vocabulary.</p><div class="section">
-<h4 id="usage-5">Usage<a class="anchor" aria-label="anchor" href="#usage-5"></a></h4>
+<h4 id="usage-7">Usage<a class="anchor" aria-label="anchor" href="#usage-7"></a></h4>
 <p></p><div class="r"><div class="sourceCode"><pre><code><span><span class="va">VocabulariesResource</span><span class="op">$</span><span class="fu">concepts</span><span class="op">(</span></span>
 <span>  <span class="va">vocabulary_id</span>,</span>
-<span>  domain_id <span class="op">=</span> <span class="cn">NULL</span>,</span>
-<span>  concept_class_id <span class="op">=</span> <span class="cn">NULL</span>,</span>
-<span>  standard_only <span class="op">=</span> <span class="cn">FALSE</span>,</span>
+<span>  search <span class="op">=</span> <span class="cn">NULL</span>,</span>
+<span>  standard_concept <span class="op">=</span> <span class="st">"all"</span>,</span>
+<span>  include_invalid <span class="op">=</span> <span class="cn">FALSE</span>,</span>
+<span>  include_relationships <span class="op">=</span> <span class="cn">FALSE</span>,</span>
+<span>  include_synonyms <span class="op">=</span> <span class="cn">FALSE</span>,</span>
+<span>  sort_by <span class="op">=</span> <span class="st">"name"</span>,</span>
+<span>  sort_order <span class="op">=</span> <span class="st">"asc"</span>,</span>
 <span>  page <span class="op">=</span> <span class="fl">1</span>,</span>
-<span>  page_size <span class="op">=</span> <span class="fl">50</span></span>
+<span>  page_size <span class="op">=</span> <span class="fl">20</span></span>
 <span><span class="op">)</span></span></code></pre></div><p></p></div>
 </div>
 
@@ -210,16 +220,32 @@
 <dd><p>The vocabulary ID.</p></dd>
 
 
-<dt><code>domain_id</code></dt>
-<dd><p>Filter by domain.</p></dd>
+<dt><code>search</code></dt>
+<dd><p>Search term to filter concepts by name or code.</p></dd>
 
 
-<dt><code>concept_class_id</code></dt>
-<dd><p>Filter by concept class.</p></dd>
+<dt><code>standard_concept</code></dt>
+<dd><p>Filter by standard concept status ('S', 'C', 'all'). Default "all".</p></dd>
 
 
-<dt><code>standard_only</code></dt>
-<dd><p>Only standard concepts. Default <code>FALSE</code>.</p></dd>
+<dt><code>include_invalid</code></dt>
+<dd><p>Include invalid or deprecated concepts. Default <code>FALSE</code>.</p></dd>
+
+
+<dt><code>include_relationships</code></dt>
+<dd><p>Include concept relationships. Default <code>FALSE</code>.</p></dd>
+
+
+<dt><code>include_synonyms</code></dt>
+<dd><p>Include concept synonyms. Default <code>FALSE</code>.</p></dd>
+
+
+<dt><code>sort_by</code></dt>
+<dd><p>Sort field ('name', 'concept_id', 'concept_code'). Default "name".</p></dd>
+
+
+<dt><code>sort_order</code></dt>
+<dd><p>Sort order ('asc' or 'desc'). Default "asc".</p></dd>
 
 
 <dt><code>page</code></dt>
@@ -227,7 +253,7 @@
 
 
 <dt><code>page_size</code></dt>
-<dd><p>Results per page. Default 50.</p></dd>
+<dd><p>Results per page (max 1000). Default 20.</p></dd>
 
 
 </dl><p></p></div>
@@ -236,7 +262,7 @@
 </div><p></p><hr><a id="method-VocabulariesResource-print"></a><div class="section">
 <h3 id="method-print-">Method <code><a href="https://rdrr.io/r/base/print.html" class="external-link">print()</a></code><a class="anchor" aria-label="anchor" href="#method-print-"></a></h3>
 <p>Print resource information.</p><div class="section">
-<h4 id="usage-6">Usage<a class="anchor" aria-label="anchor" href="#usage-6"></a></h4>
+<h4 id="usage-8">Usage<a class="anchor" aria-label="anchor" href="#usage-8"></a></h4>
 <p></p><div class="r"><div class="sourceCode"><pre><code><span><span class="va">VocabulariesResource</span><span class="op">$</span><span class="fu">print</span><span class="op">(</span><span class="op">)</span></span></code></pre></div><p></p></div>
 </div>
 
@@ -244,7 +270,7 @@
 </div><p></p><hr><a id="method-VocabulariesResource-clone"></a><div class="section">
 <h3 id="method-clone-">Method <code>clone()</code><a class="anchor" aria-label="anchor" href="#method-clone-"></a></h3>
 <p>The objects of this class are cloneable with this method.</p><div class="section">
-<h4 id="usage-7">Usage<a class="anchor" aria-label="anchor" href="#usage-7"></a></h4>
+<h4 id="usage-9">Usage<a class="anchor" aria-label="anchor" href="#usage-9"></a></h4>
 <p></p><div class="r"><div class="sourceCode"><pre><code><span><span class="va">VocabulariesResource</span><span class="op">$</span><span class="fu">clone</span><span class="op">(</span>deep <span class="op">=</span> <span class="cn">FALSE</span><span class="op">)</span></span></code></pre></div><p></p></div>
 </div>
 

@@ -182,14 +182,14 @@ Advanced concept search with facets.
 
     SearchResource$advanced(
       query,
-      vocabularies = NULL,
-      domains = NULL,
-      concept_classes = NULL,
+      vocabulary_ids = NULL,
+      domain_ids = NULL,
+      concept_class_ids = NULL,
       standard_concepts_only = FALSE,
       include_invalid = FALSE,
       relationship_filters = NULL,
-      limit = 20,
-      offset = 0
+      page = 1,
+      page_size = 20
     )
 
 #### Arguments
@@ -198,17 +198,17 @@ Advanced concept search with facets.
 
   Search query string.
 
-- `vocabularies`:
+- `vocabulary_ids`:
 
-  Filter by vocabularies.
+  Filter by vocabulary IDs.
 
-- `domains`:
+- `domain_ids`:
 
-  Filter by domains.
+  Filter by domain IDs.
 
-- `concept_classes`:
+- `concept_class_ids`:
 
-  Filter by concept classes.
+  Filter by concept class IDs.
 
 - `standard_concepts_only`:
 
@@ -222,13 +222,13 @@ Advanced concept search with facets.
 
   Relationship-based filters.
 
-- `limit`:
+- `page`:
 
-  Maximum results. Default 20.
+  Page number (1-based). Default 1.
 
-- `offset`:
+- `page_size`:
 
-  Result offset. Default 0.
+  Results per page. Default 20.
 
 ------------------------------------------------------------------------
 

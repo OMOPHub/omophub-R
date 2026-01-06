@@ -7,7 +7,7 @@
 
     <a class="navbar-brand me-2" href="../index.html">omophub</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">1.1.0</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">1.3.0</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -43,7 +43,9 @@
 
     <div class="section level2">
     <h2 id="value">Value<a class="anchor" aria-label="anchor" href="#value"></a></h2>
-    <p>Ancestors with hierarchy summary.</p>
+    <p>For flat format: ancestors, descendants arrays with level/total counts.
+For graph format: nodes and edges arrays for visualization.</p>
+<p>Ancestors with hierarchy summary.</p>
 <p>Descendants with hierarchy summary.</p>
     </div>
     <div class="section level2">
@@ -53,6 +55,7 @@
 <h3 id="public-methods">Public methods<a class="anchor" aria-label="anchor" href="#public-methods"></a></h3>
 
 <ul><li><p><a href="#method-HierarchyResource-new"><code>HierarchyResource$new()</code></a></p></li>
+<li><p><a href="#method-HierarchyResource-get"><code>HierarchyResource$get()</code></a></p></li>
 <li><p><a href="#method-HierarchyResource-ancestors"><code>HierarchyResource$ancestors()</code></a></p></li>
 <li><p><a href="#method-HierarchyResource-descendants"><code>HierarchyResource$descendants()</code></a></p></li>
 <li><p><a href="#method-HierarchyResource-print"><code>HierarchyResource$print()</code></a></p></li>
@@ -73,21 +76,19 @@
 </dl><p></p></div>
 </div>
 
-</div><p></p><hr><a id="method-HierarchyResource-ancestors"></a><div class="section">
-<h3 id="method-ancestors-">Method <code>ancestors()</code><a class="anchor" aria-label="anchor" href="#method-ancestors-"></a></h3>
-<p>Get concept ancestors.</p><div class="section">
+</div><p></p><hr><a id="method-HierarchyResource-get"></a><div class="section">
+<h3 id="method-get-">Method <code><a href="https://rdrr.io/r/base/get.html" class="external-link">get()</a></code><a class="anchor" aria-label="anchor" href="#method-get-"></a></h3>
+<p>Get complete concept hierarchy (ancestors and descendants).</p><div class="section">
 <h4 id="usage-1">Usage<a class="anchor" aria-label="anchor" href="#usage-1"></a></h4>
-<p></p><div class="r"><div class="sourceCode"><pre><code><span><span class="va">HierarchyResource</span><span class="op">$</span><span class="fu">ancestors</span><span class="op">(</span></span>
+<p></p><div class="r"><div class="sourceCode"><pre><code><span><span class="va">HierarchyResource</span><span class="op">$</span><span class="fu">get</span><span class="op">(</span></span>
 <span>  <span class="va">concept_id</span>,</span>
-<span>  vocabulary_id <span class="op">=</span> <span class="cn">NULL</span>,</span>
-<span>  max_levels <span class="op">=</span> <span class="cn">NULL</span>,</span>
+<span>  format <span class="op">=</span> <span class="st">"flat"</span>,</span>
+<span>  vocabulary_ids <span class="op">=</span> <span class="cn">NULL</span>,</span>
+<span>  domain_ids <span class="op">=</span> <span class="cn">NULL</span>,</span>
+<span>  max_levels <span class="op">=</span> <span class="fl">10</span>,</span>
+<span>  max_results <span class="op">=</span> <span class="cn">NULL</span>,</span>
 <span>  relationship_types <span class="op">=</span> <span class="cn">NULL</span>,</span>
-<span>  include_paths <span class="op">=</span> <span class="cn">FALSE</span>,</span>
-<span>  include_distance <span class="op">=</span> <span class="cn">TRUE</span>,</span>
-<span>  standard_only <span class="op">=</span> <span class="cn">FALSE</span>,</span>
-<span>  include_deprecated <span class="op">=</span> <span class="cn">FALSE</span>,</span>
-<span>  page <span class="op">=</span> <span class="fl">1</span>,</span>
-<span>  page_size <span class="op">=</span> <span class="fl">100</span></span>
+<span>  include_invalid <span class="op">=</span> <span class="cn">FALSE</span></span>
 <span><span class="op">)</span></span></code></pre></div><p></p></div>
 </div>
 
@@ -97,8 +98,62 @@
 <dd><p>The concept ID.</p></dd>
 
 
-<dt><code>vocabulary_id</code></dt>
-<dd><p>Filter to specific vocabulary.</p></dd>
+<dt><code>format</code></dt>
+<dd><p>Response format - "flat" (default) or "graph" for visualization.</p></dd>
+
+
+<dt><code>vocabulary_ids</code></dt>
+<dd><p>Filter to specific vocabularies (character vector).</p></dd>
+
+
+<dt><code>domain_ids</code></dt>
+<dd><p>Filter to specific domains (character vector).</p></dd>
+
+
+<dt><code>max_levels</code></dt>
+<dd><p>Maximum hierarchy levels to traverse in both directions (default 10).</p></dd>
+
+
+<dt><code>max_results</code></dt>
+<dd><p>Maximum results per direction for performance optimization.</p></dd>
+
+
+<dt><code>relationship_types</code></dt>
+<dd><p>Relationship types to follow (default: "Is a").</p></dd>
+
+
+<dt><code>include_invalid</code></dt>
+<dd><p>Include deprecated/invalid concepts. Default <code>FALSE</code>.</p></dd>
+
+
+</dl><p></p></div>
+</div>
+
+</div><p></p><hr><a id="method-HierarchyResource-ancestors"></a><div class="section">
+<h3 id="method-ancestors-">Method <code>ancestors()</code><a class="anchor" aria-label="anchor" href="#method-ancestors-"></a></h3>
+<p>Get concept ancestors.</p><div class="section">
+<h4 id="usage-2">Usage<a class="anchor" aria-label="anchor" href="#usage-2"></a></h4>
+<p></p><div class="r"><div class="sourceCode"><pre><code><span><span class="va">HierarchyResource</span><span class="op">$</span><span class="fu">ancestors</span><span class="op">(</span></span>
+<span>  <span class="va">concept_id</span>,</span>
+<span>  vocabulary_ids <span class="op">=</span> <span class="cn">NULL</span>,</span>
+<span>  max_levels <span class="op">=</span> <span class="cn">NULL</span>,</span>
+<span>  relationship_types <span class="op">=</span> <span class="cn">NULL</span>,</span>
+<span>  include_paths <span class="op">=</span> <span class="cn">FALSE</span>,</span>
+<span>  include_distance <span class="op">=</span> <span class="cn">TRUE</span>,</span>
+<span>  include_invalid <span class="op">=</span> <span class="cn">FALSE</span>,</span>
+<span>  page <span class="op">=</span> <span class="fl">1</span>,</span>
+<span>  page_size <span class="op">=</span> <span class="fl">100</span></span>
+<span><span class="op">)</span></span></code></pre></div><p></p></div>
+</div>
+
+<div class="section">
+<h4 id="arguments-2">Arguments<a class="anchor" aria-label="anchor" href="#arguments-2"></a></h4>
+<p></p><div class="arguments"><dl><dt><code>concept_id</code></dt>
+<dd><p>The concept ID.</p></dd>
+
+
+<dt><code>vocabulary_ids</code></dt>
+<dd><p>Filter to specific vocabularies (character vector).</p></dd>
 
 
 <dt><code>max_levels</code></dt>
@@ -117,12 +172,8 @@
 <dd><p>Include distance from source. Default <code>TRUE</code>.</p></dd>
 
 
-<dt><code>standard_only</code></dt>
-<dd><p>Only return standard concepts. Default <code>FALSE</code>.</p></dd>
-
-
-<dt><code>include_deprecated</code></dt>
-<dd><p>Include deprecated concepts. Default <code>FALSE</code>.</p></dd>
+<dt><code>include_invalid</code></dt>
+<dd><p>Include deprecated/invalid concepts. Default <code>FALSE</code>.</p></dd>
 
 
 <dt><code>page</code></dt>
@@ -139,35 +190,33 @@
 </div><p></p><hr><a id="method-HierarchyResource-descendants"></a><div class="section">
 <h3 id="method-descendants-">Method <code>descendants()</code><a class="anchor" aria-label="anchor" href="#method-descendants-"></a></h3>
 <p>Get concept descendants.</p><div class="section">
-<h4 id="usage-2">Usage<a class="anchor" aria-label="anchor" href="#usage-2"></a></h4>
+<h4 id="usage-3">Usage<a class="anchor" aria-label="anchor" href="#usage-3"></a></h4>
 <p></p><div class="r"><div class="sourceCode"><pre><code><span><span class="va">HierarchyResource</span><span class="op">$</span><span class="fu">descendants</span><span class="op">(</span></span>
 <span>  <span class="va">concept_id</span>,</span>
-<span>  vocabulary_id <span class="op">=</span> <span class="cn">NULL</span>,</span>
+<span>  vocabulary_ids <span class="op">=</span> <span class="cn">NULL</span>,</span>
 <span>  max_levels <span class="op">=</span> <span class="fl">10</span>,</span>
 <span>  relationship_types <span class="op">=</span> <span class="cn">NULL</span>,</span>
 <span>  include_distance <span class="op">=</span> <span class="cn">TRUE</span>,</span>
-<span>  standard_only <span class="op">=</span> <span class="cn">FALSE</span>,</span>
-<span>  include_deprecated <span class="op">=</span> <span class="cn">FALSE</span>,</span>
+<span>  include_paths <span class="op">=</span> <span class="cn">FALSE</span>,</span>
+<span>  include_invalid <span class="op">=</span> <span class="cn">FALSE</span>,</span>
 <span>  domain_ids <span class="op">=</span> <span class="cn">NULL</span>,</span>
-<span>  concept_class_ids <span class="op">=</span> <span class="cn">NULL</span>,</span>
-<span>  include_synonyms <span class="op">=</span> <span class="cn">FALSE</span>,</span>
 <span>  page <span class="op">=</span> <span class="fl">1</span>,</span>
 <span>  page_size <span class="op">=</span> <span class="fl">100</span></span>
 <span><span class="op">)</span></span></code></pre></div><p></p></div>
 </div>
 
 <div class="section">
-<h4 id="arguments-2">Arguments<a class="anchor" aria-label="anchor" href="#arguments-2"></a></h4>
+<h4 id="arguments-3">Arguments<a class="anchor" aria-label="anchor" href="#arguments-3"></a></h4>
 <p></p><div class="arguments"><dl><dt><code>concept_id</code></dt>
 <dd><p>The concept ID.</p></dd>
 
 
-<dt><code>vocabulary_id</code></dt>
-<dd><p>Filter to specific vocabulary.</p></dd>
+<dt><code>vocabulary_ids</code></dt>
+<dd><p>Filter to specific vocabularies (character vector).</p></dd>
 
 
 <dt><code>max_levels</code></dt>
-<dd><p>Maximum hierarchy levels (default 10, max 10).</p></dd>
+<dd><p>Maximum hierarchy levels (default 10, max 20).</p></dd>
 
 
 <dt><code>relationship_types</code></dt>
@@ -178,24 +227,16 @@
 <dd><p>Include distance from source. Default <code>TRUE</code>.</p></dd>
 
 
-<dt><code>standard_only</code></dt>
-<dd><p>Only return standard concepts. Default <code>FALSE</code>.</p></dd>
+<dt><code>include_paths</code></dt>
+<dd><p>Include path information. Default <code>FALSE</code>.</p></dd>
 
 
-<dt><code>include_deprecated</code></dt>
-<dd><p>Include deprecated concepts. Default <code>FALSE</code>.</p></dd>
+<dt><code>include_invalid</code></dt>
+<dd><p>Include deprecated/invalid concepts. Default <code>FALSE</code>.</p></dd>
 
 
 <dt><code>domain_ids</code></dt>
 <dd><p>Filter by domains.</p></dd>
-
-
-<dt><code>concept_class_ids</code></dt>
-<dd><p>Filter by concept classes.</p></dd>
-
-
-<dt><code>include_synonyms</code></dt>
-<dd><p>Include synonyms. Default <code>FALSE</code>.</p></dd>
 
 
 <dt><code>page</code></dt>
@@ -212,7 +253,7 @@
 </div><p></p><hr><a id="method-HierarchyResource-print"></a><div class="section">
 <h3 id="method-print-">Method <code><a href="https://rdrr.io/r/base/print.html" class="external-link">print()</a></code><a class="anchor" aria-label="anchor" href="#method-print-"></a></h3>
 <p>Print resource information.</p><div class="section">
-<h4 id="usage-3">Usage<a class="anchor" aria-label="anchor" href="#usage-3"></a></h4>
+<h4 id="usage-4">Usage<a class="anchor" aria-label="anchor" href="#usage-4"></a></h4>
 <p></p><div class="r"><div class="sourceCode"><pre><code><span><span class="va">HierarchyResource</span><span class="op">$</span><span class="fu">print</span><span class="op">(</span><span class="op">)</span></span></code></pre></div><p></p></div>
 </div>
 
@@ -220,12 +261,12 @@
 </div><p></p><hr><a id="method-HierarchyResource-clone"></a><div class="section">
 <h3 id="method-clone-">Method <code>clone()</code><a class="anchor" aria-label="anchor" href="#method-clone-"></a></h3>
 <p>The objects of this class are cloneable with this method.</p><div class="section">
-<h4 id="usage-4">Usage<a class="anchor" aria-label="anchor" href="#usage-4"></a></h4>
+<h4 id="usage-5">Usage<a class="anchor" aria-label="anchor" href="#usage-5"></a></h4>
 <p></p><div class="r"><div class="sourceCode"><pre><code><span><span class="va">HierarchyResource</span><span class="op">$</span><span class="fu">clone</span><span class="op">(</span>deep <span class="op">=</span> <span class="cn">FALSE</span><span class="op">)</span></span></code></pre></div><p></p></div>
 </div>
 
 <div class="section">
-<h4 id="arguments-3">Arguments<a class="anchor" aria-label="anchor" href="#arguments-3"></a></h4>
+<h4 id="arguments-4">Arguments<a class="anchor" aria-label="anchor" href="#arguments-4"></a></h4>
 <p></p><div class="arguments"><dl><dt><code>deep</code></dt>
 <dd><p>Whether to make a deep clone.</p></dd>
 

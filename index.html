@@ -22,7 +22,7 @@
 
     <a class="navbar-brand me-2" href="index.html">omophub</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">1.1.0</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">1.3.0</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -145,7 +145,7 @@
 <span><span class="va">snomed_concept</span> <span class="op">&lt;-</span> <span class="va">client</span><span class="op">$</span><span class="va">concepts</span><span class="op">$</span><span class="fu">get_by_code</span><span class="op">(</span><span class="st">"SNOMED"</span>, <span class="st">"44054006"</span><span class="op">)</span></span>
 <span></span>
 <span><span class="co"># Map to another vocabulary</span></span>
-<span><span class="va">mappings</span> <span class="op">&lt;-</span> <span class="va">client</span><span class="op">$</span><span class="va">mappings</span><span class="op">$</span><span class="fu">get</span><span class="op">(</span><span class="fl">201826</span>, target_vocabularies <span class="op">=</span> <span class="st">"ICD10CM"</span><span class="op">)</span></span>
+<span><span class="va">mappings</span> <span class="op">&lt;-</span> <span class="va">client</span><span class="op">$</span><span class="va">mappings</span><span class="op">$</span><span class="fu">get</span><span class="op">(</span><span class="fl">201826</span>, target_vocabulary <span class="op">=</span> <span class="st">"ICD10CM"</span><span class="op">)</span></span>
 <span></span>
 <span><span class="co"># Navigate hierarchy</span></span>
 <span><span class="va">ancestors</span> <span class="op">&lt;-</span> <span class="va">client</span><span class="op">$</span><span class="va">hierarchy</span><span class="op">$</span><span class="fu">ancestors</span><span class="op">(</span><span class="fl">201826</span>, max_levels <span class="op">=</span> <span class="fl">3</span><span class="op">)</span></span></code></pre></div>
@@ -164,8 +164,8 @@
 <span>  </span>
 <span>  <span class="kw">if</span> <span class="op">(</span><span class="va">concept</span><span class="op">$</span><span class="va">standard_concept</span> <span class="op">!=</span> <span class="st">"S"</span><span class="op">)</span> <span class="op">{</span></span>
 <span>    <span class="va">mappings</span> <span class="op">&lt;-</span> <span class="va">client</span><span class="op">$</span><span class="va">mappings</span><span class="op">$</span><span class="fu">get</span><span class="op">(</span></span>
-<span>      <span class="va">concept</span><span class="op">$</span><span class="va">concept_id</span>, </span>
-<span>      target_vocabularies <span class="op">=</span> <span class="st">"SNOMED"</span></span>
+<span>      <span class="va">concept</span><span class="op">$</span><span class="va">concept_id</span>,</span>
+<span>      target_vocabulary <span class="op">=</span> <span class="st">"SNOMED"</span></span>
 <span>    <span class="op">)</span></span>
 <span>    <span class="kw"><a href="https://rdrr.io/r/base/function.html" class="external-link">return</a></span><span class="op">(</span><span class="va">mappings</span><span class="op">$</span><span class="va">mappings</span><span class="op">[[</span><span class="fl">1</span><span class="op">]</span><span class="op">]</span><span class="op">$</span><span class="va">target_concept_id</span><span class="op">)</span></span>
 <span>  <span class="op">}</span></span>
@@ -201,8 +201,7 @@
 <code class="sourceCode R"><span><span class="co"># Get all descendants for phenotype definition</span></span>
 <span><span class="va">descendants</span> <span class="op">&lt;-</span> <span class="va">client</span><span class="op">$</span><span class="va">hierarchy</span><span class="op">$</span><span class="fu">descendants</span><span class="op">(</span></span>
 <span>  <span class="fl">201826</span>,  <span class="co"># Type 2 diabetes mellitus</span></span>
-<span>  max_levels <span class="op">=</span> <span class="fl">5</span>,</span>
-<span>  standard_only <span class="op">=</span> <span class="cn">TRUE</span></span>
+<span>  max_levels <span class="op">=</span> <span class="fl">5</span></span>
 <span><span class="op">)</span></span>
 <span></span>
 <span><span class="va">concept_set</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/lapply.html" class="external-link">sapply</a></span><span class="op">(</span><span class="va">descendants</span><span class="op">$</span><span class="va">concepts</span>, <span class="kw">function</span><span class="op">(</span><span class="va">x</span><span class="op">)</span> <span class="va">x</span><span class="op">$</span><span class="va">concept_id</span><span class="op">)</span></span>

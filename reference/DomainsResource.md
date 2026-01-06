@@ -4,7 +4,7 @@ R6 class providing access to domain operations.
 
 ## Value
 
-Domain list with summary.
+Domain list.
 
 Paginated concepts.
 
@@ -46,50 +46,13 @@ List all domains.
 
 #### Usage
 
-    DomainsResource$list(
-      vocabulary_ids = NULL,
-      include_concept_counts = TRUE,
-      include_statistics = FALSE,
-      include_examples = FALSE,
-      standard_only = FALSE,
-      active_only = TRUE,
-      sort_by = "domain_id",
-      sort_order = "asc"
-    )
+    DomainsResource$list(include_stats = FALSE)
 
 #### Arguments
 
-- `vocabulary_ids`:
+- `include_stats`:
 
-  Filter by vocabularies.
-
-- `include_concept_counts`:
-
-  Include concept counts. Default `TRUE`.
-
-- `include_statistics`:
-
-  Include detailed statistics. Default `FALSE`.
-
-- `include_examples`:
-
-  Include example concepts. Default `FALSE`.
-
-- `standard_only`:
-
-  Only standard concepts. Default `FALSE`.
-
-- `active_only`:
-
-  Only active domains. Default `TRUE`.
-
-- `sort_by`:
-
-  Sort field. Default "domain_id".
-
-- `sort_order`:
-
-  Sort order. Default "asc".
+  Include concept counts and vocabulary coverage. Default `FALSE`.
 
 ------------------------------------------------------------------------
 
@@ -102,8 +65,8 @@ Get concepts in a domain.
     DomainsResource$concepts(
       domain_id,
       vocabulary_ids = NULL,
-      concept_class_ids = NULL,
       standard_only = FALSE,
+      include_invalid = FALSE,
       page = 1,
       page_size = 50
     )
@@ -118,13 +81,13 @@ Get concepts in a domain.
 
   Filter by vocabularies.
 
-- `concept_class_ids`:
-
-  Filter by concept classes.
-
 - `standard_only`:
 
   Only standard concepts. Default `FALSE`.
+
+- `include_invalid`:
+
+  Include invalid/deprecated concepts. Default `FALSE`.
 
 - `page`:
 

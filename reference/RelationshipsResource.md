@@ -4,9 +4,9 @@ R6 class providing access to relationship operations.
 
 ## Value
 
-Relationships with summary.
+Relationships data with pagination metadata.
 
-Relationship types with metadata.
+Relationship types with pagination metadata.
 
 ## Methods
 
@@ -48,11 +48,15 @@ Get relationships for a concept.
 
     RelationshipsResource$get(
       concept_id,
-      relationship_type = NULL,
-      target_vocabulary = NULL,
+      relationship_ids = NULL,
+      vocabulary_ids = NULL,
+      domain_ids = NULL,
       include_invalid = FALSE,
+      standard_only = FALSE,
+      include_reverse = FALSE,
       page = 1,
-      page_size = 50
+      page_size = 100,
+      vocab_release = NULL
     )
 
 #### Arguments
@@ -61,75 +65,56 @@ Get relationships for a concept.
 
   The concept ID.
 
-- `relationship_type`:
+- `relationship_ids`:
 
-  Filter by relationship type.
-
-- `target_vocabulary`:
-
-  Filter by target vocabulary.
-
-- `include_invalid`:
-
-  Include invalid relationships. Default `FALSE`.
-
-- `page`:
-
-  Page number. Default 1.
-
-- `page_size`:
-
-  Results per page. Default 50.
-
-------------------------------------------------------------------------
-
-### Method `types()`
-
-Get available relationship types.
-
-#### Usage
-
-    RelationshipsResource$types(
-      vocabulary_ids = NULL,
-      include_reverse = FALSE,
-      include_usage_stats = FALSE,
-      include_examples = FALSE,
-      category = NULL,
-      is_defining = NULL,
-      standard_only = FALSE,
-      page = 1,
-      page_size = 100
-    )
-
-#### Arguments
+  Filter by relationship type IDs (character vector or comma-separated
+  string).
 
 - `vocabulary_ids`:
 
-  Filter by vocabularies.
+  Filter by target vocabulary IDs (character vector or comma-separated
+  string).
+
+- `domain_ids`:
+
+  Filter by target domain IDs (character vector or comma-separated
+  string).
+
+- `include_invalid`:
+
+  Include relationships to invalid concepts. Default `FALSE`.
+
+- `standard_only`:
+
+  Only include relationships to standard concepts. Default `FALSE`.
 
 - `include_reverse`:
 
   Include reverse relationships. Default `FALSE`.
 
-- `include_usage_stats`:
+- `page`:
 
-  Include usage statistics. Default `FALSE`.
+  Page number. Default 1.
 
-- `include_examples`:
+- `page_size`:
 
-  Include example concepts. Default `FALSE`.
+  Results per page (max 1000). Default 100.
 
-- `category`:
+- `vocab_release`:
 
-  Filter by category.
+  Specific vocabulary release version. Default `NULL`.
 
-- `is_defining`:
+------------------------------------------------------------------------
 
-  Filter by defining status.
+### Method `types()`
 
-- `standard_only`:
+Get available relationship types from the OMOP CDM.
 
-  Only standard relationships. Default `FALSE`.
+#### Usage
+
+    RelationshipsResource$types(page = 1, page_size = 100)
+
+#### Arguments
 
 - `page`:
 
@@ -137,7 +122,7 @@ Get available relationship types.
 
 - `page_size`:
 
-  Results per page. Default 100.
+  Results per page (max 500). Default 100.
 
 ------------------------------------------------------------------------
 

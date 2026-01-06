@@ -5,6 +5,9 @@ descendants).
 
 ## Value
 
+For flat format: ancestors, descendants arrays with level/total counts.
+For graph format: nodes and edges arrays for visualization.
+
 Ancestors with hierarchy summary.
 
 Descendants with hierarchy summary.
@@ -14,6 +17,8 @@ Descendants with hierarchy summary.
 ### Public methods
 
 - [`HierarchyResource$new()`](#method-HierarchyResource-new)
+
+- [`HierarchyResource$get()`](#method-HierarchyResource-get)
 
 - [`HierarchyResource$ancestors()`](#method-HierarchyResource-ancestors)
 
@@ -41,6 +46,59 @@ Create a new HierarchyResource.
 
 ------------------------------------------------------------------------
 
+### Method [`get()`](https://rdrr.io/r/base/get.html)
+
+Get complete concept hierarchy (ancestors and descendants).
+
+#### Usage
+
+    HierarchyResource$get(
+      concept_id,
+      format = "flat",
+      vocabulary_ids = NULL,
+      domain_ids = NULL,
+      max_levels = 10,
+      max_results = NULL,
+      relationship_types = NULL,
+      include_invalid = FALSE
+    )
+
+#### Arguments
+
+- `concept_id`:
+
+  The concept ID.
+
+- `format`:
+
+  Response format - "flat" (default) or "graph" for visualization.
+
+- `vocabulary_ids`:
+
+  Filter to specific vocabularies (character vector).
+
+- `domain_ids`:
+
+  Filter to specific domains (character vector).
+
+- `max_levels`:
+
+  Maximum hierarchy levels to traverse in both directions (default 10).
+
+- `max_results`:
+
+  Maximum results per direction for performance optimization.
+
+- `relationship_types`:
+
+  Relationship types to follow (default: "Is a").
+
+- `include_invalid`:
+
+  Include deprecated/invalid concepts. Default `FALSE`.
+
+------------------------------------------------------------------------
+
 ### Method `ancestors()`
 
 Get concept ancestors.
@@ -49,13 +107,12 @@ Get concept ancestors.
 
     HierarchyResource$ancestors(
       concept_id,
-      vocabulary_id = NULL,
+      vocabulary_ids = NULL,
       max_levels = NULL,
       relationship_types = NULL,
       include_paths = FALSE,
       include_distance = TRUE,
-      standard_only = FALSE,
-      include_deprecated = FALSE,
+      include_invalid = FALSE,
       page = 1,
       page_size = 100
     )
@@ -66,9 +123,9 @@ Get concept ancestors.
 
   The concept ID.
 
-- `vocabulary_id`:
+- `vocabulary_ids`:
 
-  Filter to specific vocabulary.
+  Filter to specific vocabularies (character vector).
 
 - `max_levels`:
 
@@ -86,13 +143,9 @@ Get concept ancestors.
 
   Include distance from source. Default `TRUE`.
 
-- `standard_only`:
+- `include_invalid`:
 
-  Only return standard concepts. Default `FALSE`.
-
-- `include_deprecated`:
-
-  Include deprecated concepts. Default `FALSE`.
+  Include deprecated/invalid concepts. Default `FALSE`.
 
 - `page`:
 
@@ -112,15 +165,13 @@ Get concept descendants.
 
     HierarchyResource$descendants(
       concept_id,
-      vocabulary_id = NULL,
+      vocabulary_ids = NULL,
       max_levels = 10,
       relationship_types = NULL,
       include_distance = TRUE,
-      standard_only = FALSE,
-      include_deprecated = FALSE,
+      include_paths = FALSE,
+      include_invalid = FALSE,
       domain_ids = NULL,
-      concept_class_ids = NULL,
-      include_synonyms = FALSE,
       page = 1,
       page_size = 100
     )
@@ -131,13 +182,13 @@ Get concept descendants.
 
   The concept ID.
 
-- `vocabulary_id`:
+- `vocabulary_ids`:
 
-  Filter to specific vocabulary.
+  Filter to specific vocabularies (character vector).
 
 - `max_levels`:
 
-  Maximum hierarchy levels (default 10, max 10).
+  Maximum hierarchy levels (default 10, max 20).
 
 - `relationship_types`:
 
@@ -147,25 +198,17 @@ Get concept descendants.
 
   Include distance from source. Default `TRUE`.
 
-- `standard_only`:
+- `include_paths`:
 
-  Only return standard concepts. Default `FALSE`.
+  Include path information. Default `FALSE`.
 
-- `include_deprecated`:
+- `include_invalid`:
 
-  Include deprecated concepts. Default `FALSE`.
+  Include deprecated/invalid concepts. Default `FALSE`.
 
 - `domain_ids`:
 
   Filter by domains.
-
-- `concept_class_ids`:
-
-  Filter by concept classes.
-
-- `include_synonyms`:
-
-  Include synonyms. Default `FALSE`.
 
 - `page`:
 

@@ -4,7 +4,7 @@ R6 class providing access to mapping operations.
 
 ## Value
 
-Mappings with summary.
+Mappings for the concept.
 
 Mapping results with summary.
 
@@ -48,19 +48,9 @@ Get mappings for a concept.
 
     MappingsResource$get(
       concept_id,
-      target_vocabularies = NULL,
-      mapping_types = NULL,
-      direction = "both",
-      include_indirect = FALSE,
-      standard_only = FALSE,
-      include_mapping_quality = FALSE,
-      include_synonyms = FALSE,
-      include_context = FALSE,
-      active_only = TRUE,
-      sort_by = NULL,
-      sort_order = NULL,
-      page = 1,
-      page_size = 50
+      target_vocabulary = NULL,
+      include_invalid = FALSE,
+      vocab_release = NULL
     )
 
 #### Arguments
@@ -69,57 +59,17 @@ Get mappings for a concept.
 
   The concept ID.
 
-- `target_vocabularies`:
+- `target_vocabulary`:
 
-  Filter by target vocabularies.
+  Filter to a specific target vocabulary (e.g., "ICD10CM").
 
-- `mapping_types`:
+- `include_invalid`:
 
-  Filter by mapping types.
+  Include invalid/deprecated mappings. Default `FALSE`.
 
-- `direction`:
+- `vocab_release`:
 
-  Mapping direction ("outgoing", "incoming", "both"). Default "both".
-
-- `include_indirect`:
-
-  Include indirect mappings. Default `FALSE`.
-
-- `standard_only`:
-
-  Only standard concept mappings. Default `FALSE`.
-
-- `include_mapping_quality`:
-
-  Include quality metrics. Default `FALSE`.
-
-- `include_synonyms`:
-
-  Include synonyms. Default `FALSE`.
-
-- `include_context`:
-
-  Include mapping context. Default `FALSE`.
-
-- `active_only`:
-
-  Only active mappings. Default `TRUE`.
-
-- `sort_by`:
-
-  Sort field.
-
-- `sort_order`:
-
-  Sort order.
-
-- `page`:
-
-  Page number. Default 1.
-
-- `page_size`:
-
-  Results per page. Default 50.
+  Specific vocabulary release version (e.g., "2025.1"). Default `NULL`.
 
 ------------------------------------------------------------------------
 
@@ -133,7 +83,8 @@ Map concepts to a target vocabulary.
       source_concepts,
       target_vocabulary,
       mapping_type = NULL,
-      include_invalid = FALSE
+      include_invalid = FALSE,
+      vocab_release = NULL
     )
 
 #### Arguments
@@ -153,6 +104,10 @@ Map concepts to a target vocabulary.
 - `include_invalid`:
 
   Include invalid mappings. Default `FALSE`.
+
+- `vocab_release`:
+
+  Specific vocabulary release version (e.g., "2025.1"). Default `NULL`.
 
 ------------------------------------------------------------------------
 

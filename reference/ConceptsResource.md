@@ -6,15 +6,18 @@ R6 class providing access to concept operations.
 
 A list containing the concept data.
 
-A list containing the concept data with mappings.
+A list containing the concept data with optional relationships and
+synonyms.
 
 A list with `concepts` and any `failures`.
 
-A list of suggestions.
+A list with suggestions and pagination metadata.
 
-Related concepts with scores and analysis.
+Related concepts with relationship scores.
 
-Relationships with summary.
+Relationships data.
+
+Recommendations grouped by source concept ID with pagination metadata.
 
 ## Methods
 
@@ -33,6 +36,8 @@ Relationships with summary.
 - [`ConceptsResource$related()`](#method-ConceptsResource-related)
 
 - [`ConceptsResource$relationships()`](#method-ConceptsResource-relationships)
+
+- [`ConceptsResource$recommended()`](#method-ConceptsResource-recommended)
 
 - [`ConceptsResource$print()`](#method-ConceptsResource-print)
 
@@ -65,7 +70,9 @@ Get a concept by ID.
     ConceptsResource$get(
       concept_id,
       include_relationships = FALSE,
-      include_synonyms = FALSE
+      include_synonyms = FALSE,
+      include_hierarchy = FALSE,
+      vocab_release = NULL
     )
 
 #### Arguments
@@ -76,11 +83,19 @@ Get a concept by ID.
 
 - `include_relationships`:
 
-  Include related concepts. Default `FALSE`.
+  Include related concepts (parents/children). Default `FALSE`.
 
 - `include_synonyms`:
 
   Include concept synonyms. Default `FALSE`.
+
+- `include_hierarchy`:
+
+  Include hierarchy information. Default `FALSE`.
+
+- `vocab_release`:
+
+  Specific vocabulary release (e.g., "2025.2"). Default `NULL`.
 
 ------------------------------------------------------------------------
 
@@ -90,7 +105,14 @@ Get a concept by vocabulary and code.
 
 #### Usage
 
-    ConceptsResource$get_by_code(vocabulary_id, concept_code)
+    ConceptsResource$get_by_code(
+      vocabulary_id,
+      concept_code,
+      include_relationships = FALSE,
+      include_synonyms = FALSE,
+      include_hierarchy = FALSE,
+      vocab_release = NULL
+    )
 
 #### Arguments
 
@@ -101,6 +123,22 @@ Get a concept by vocabulary and code.
 - `concept_code`:
 
   The concept code within the vocabulary.
+
+- `include_relationships`:
+
+  Include related concepts (parents/children). Default `FALSE`.
+
+- `include_synonyms`:
+
+  Include concept synonyms. Default `FALSE`.
+
+- `include_hierarchy`:
+
+  Include hierarchy information. Default `FALSE`.
+
+- `vocab_release`:
+
+  Specific vocabulary release (e.g., "2025.2"). Default `NULL`.
 
 ------------------------------------------------------------------------
 
@@ -116,14 +154,14 @@ Get multiple concepts by IDs.
       include_synonyms = FALSE,
       include_mappings = FALSE,
       vocabulary_filter = NULL,
-      standard_only = FALSE
+      standard_only = TRUE
     )
 
 #### Arguments
 
 - `concept_ids`:
 
-  Vector of concept IDs (max 1000).
+  Vector of concept IDs (max 100).
 
 - `include_relationships`:
 
@@ -143,7 +181,7 @@ Get multiple concepts by IDs.
 
 - `standard_only`:
 
-  Only return standard concepts. Default `FALSE`.
+  Only return standard concepts. Default `TRUE`.
 
 ------------------------------------------------------------------------
 
@@ -153,25 +191,40 @@ Get concept suggestions (autocomplete).
 
 #### Usage
 
-    ConceptsResource$suggest(query, vocabulary = NULL, domain = NULL, limit = 10)
+    ConceptsResource$suggest(
+      query,
+      page = 1,
+      page_size = 10,
+      vocabulary_ids = NULL,
+      domain_ids = NULL,
+      vocab_release = NULL
+    )
 
 #### Arguments
 
 - `query`:
 
-  Search query (min 2 characters).
+  Search query (min 2 characters, max 100 characters).
 
-- `vocabulary`:
+- `page`:
 
-  Filter to specific vocabulary.
+  Page number (default 1).
 
-- `domain`:
+- `page_size`:
 
-  Filter to specific domain.
+  Number of suggestions per page (default 10, max 100).
 
-- `limit`:
+- `vocabulary_ids`:
 
-  Maximum suggestions (default 10, max 50).
+  Filter to specific vocabularies (character vector).
+
+- `domain_ids`:
+
+  Filter to specific domains (character vector).
+
+- `vocab_release`:
+
+  Specific vocabulary release (e.g., "2025.2").
 
 ------------------------------------------------------------------------
 
@@ -183,13 +236,10 @@ Get related concepts.
 
     ConceptsResource$related(
       concept_id,
-      relatedness_types = NULL,
-      vocabulary_ids = NULL,
-      domain_ids = NULL,
-      min_relatedness_score = NULL,
-      max_results = 50,
-      include_scores = TRUE,
-      standard_concepts_only = FALSE
+      relationship_types = NULL,
+      min_score = NULL,
+      page_size = 20,
+      vocab_release = NULL
     )
 
 #### Arguments
@@ -198,33 +248,21 @@ Get related concepts.
 
   The source concept ID.
 
-- `relatedness_types`:
+- `relationship_types`:
 
-  Types of relatedness (hierarchical, semantic, etc.).
+  Filter by relationship types (e.g., c("Is a", "Maps to")).
 
-- `vocabulary_ids`:
+- `min_score`:
 
-  Filter to specific vocabularies.
+  Minimum relationship score (0.0-1.0).
 
-- `domain_ids`:
+- `page_size`:
 
-  Filter to specific domains.
+  Maximum number of results (default 20, max 100).
 
-- `min_relatedness_score`:
+- `vocab_release`:
 
-  Minimum relatedness score.
-
-- `max_results`:
-
-  Maximum results (default 50, max 200).
-
-- `include_scores`:
-
-  Include score breakdown. Default `TRUE`.
-
-- `standard_concepts_only`:
-
-  Only return standard concepts. Default `FALSE`.
+  Specific vocabulary release (e.g., "2025.1").
 
 ------------------------------------------------------------------------
 
@@ -236,11 +274,13 @@ Get concept relationships.
 
     ConceptsResource$relationships(
       concept_id,
-      relationship_type = NULL,
-      target_vocabulary = NULL,
+      relationship_ids = NULL,
+      vocabulary_ids = NULL,
+      domain_ids = NULL,
       include_invalid = FALSE,
-      page = 1,
-      page_size = 20
+      standard_only = FALSE,
+      include_reverse = FALSE,
+      vocab_release = NULL
     )
 
 #### Arguments
@@ -249,17 +289,81 @@ Get concept relationships.
 
   The concept ID.
 
-- `relationship_type`:
+- `relationship_ids`:
 
-  Filter by relationship type.
+  Filter by relationship type IDs (character vector or comma-separated
+  string).
 
-- `target_vocabulary`:
+- `vocabulary_ids`:
 
-  Filter by target vocabulary.
+  Filter by target vocabulary IDs (character vector or comma-separated
+  string).
+
+- `domain_ids`:
+
+  Filter by target domain IDs (character vector or comma-separated
+  string).
 
 - `include_invalid`:
 
-  Include invalid relationships. Default `FALSE`.
+  Include relationships to invalid concepts. Default `FALSE`.
+
+- `standard_only`:
+
+  Only include relationships to standard concepts. Default `FALSE`.
+
+- `include_reverse`:
+
+  Include reverse relationships. Default `FALSE`.
+
+- `vocab_release`:
+
+  Specific vocabulary release version. Default `NULL`.
+
+------------------------------------------------------------------------
+
+### Method `recommended()`
+
+Get recommended concepts using OHDSI Phoebe algorithm.
+
+#### Usage
+
+    ConceptsResource$recommended(
+      concept_ids,
+      relationship_types = NULL,
+      vocabulary_ids = NULL,
+      domain_ids = NULL,
+      standard_only = TRUE,
+      include_invalid = FALSE,
+      page = 1,
+      page_size = 100
+    )
+
+#### Arguments
+
+- `concept_ids`:
+
+  Vector of source concept IDs (1-100).
+
+- `relationship_types`:
+
+  Filter by relationship types (max 20).
+
+- `vocabulary_ids`:
+
+  Filter to specific vocabularies (max 50).
+
+- `domain_ids`:
+
+  Filter to specific domains (max 50).
+
+- `standard_only`:
+
+  Only return standard concepts. Default `TRUE`.
+
+- `include_invalid`:
+
+  Include invalid/deprecated concepts. Default `FALSE`.
 
 - `page`:
 
@@ -267,7 +371,7 @@ Get concept relationships.
 
 - `page_size`:
 
-  Items per page. Default 20.
+  Results per page (default 100, max 1000).
 
 ------------------------------------------------------------------------
 

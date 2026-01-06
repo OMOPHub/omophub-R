@@ -106,7 +106,7 @@ results <- client$search$basic(
 Get suggestions for autocomplete:
 
 ``` r
-suggestions <- client$search$autocomplete("diab", max_suggestions = 5)
+suggestions <- client$concepts$suggest("diab", page_size = 5)
 for (s in suggestions$suggestions) {
   print(s$suggestion)
 }
@@ -185,7 +185,7 @@ Map to specific vocabularies:
 ``` r
 result <- client$mappings$get(
   201826,
-  target_vocabularies = c("ICD10CM", "ICD9CM")
+  target_vocabulary = "ICD10CM"
 )
 ```
 

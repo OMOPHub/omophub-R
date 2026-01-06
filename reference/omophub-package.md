@@ -1,9 +1,9 @@
-# omophub: R Client for the OMOPHub Medical Vocabulary API
+# omophub: R Client for the 'OMOPHub' Medical Vocabulary API
 
-Provides an R interface to the OMOPHub API for accessing OHDSI ATHENA
-standardized medical vocabularies. Supports concept search, vocabulary
-exploration, hierarchy navigation, relationship queries, and concept
-mappings with automatic pagination and rate limiting.
+Provides an R interface to the 'OMOPHub' API for accessing 'OHDSI
+ATHENA' standardized medical vocabularies. Supports concept search,
+vocabulary exploration, hierarchy navigation, relationship queries, and
+concept mappings with automatic pagination and rate limiting.
 
 Provides an R interface to the OMOPHub API for accessing OHDSI ATHENA
 standardized medical vocabularies. Supports concept search, vocabulary
@@ -61,8 +61,16 @@ Useful links:
 
 - <https://docs.omophub.com>
 
+- <https://omophub.github.io/omophub-R/>
+
+- <https://omophub.com>
+
 - Report bugs at <https://github.com/omopHub/omophub-R/issues>
 
 ## Author
 
-**Maintainer**: OMOPHub Team <support@omophub.com> \[copyright holder\]
+**Maintainer**: Alex Chen <alex@omophub.com> \[copyright holder\]
+
+Other contributors:
+
+- Observational Health Data Science and Informatics \[copyright holder\]

@@ -6,11 +6,18 @@ R6 class providing access to vocabulary operations.
 
 Paginated vocabulary list.
 
-Vocabulary details.
+Vocabulary details including vocabulary_id, vocabulary_name,
+vocabulary_reference, vocabulary_version, vocabulary_concept_id.
 
 Vocabulary statistics.
 
-Domain statistics for vocabularies.
+Domain statistics including concept counts and class breakdown.
+
+List of all available domains with domain_id, domain_name, and
+description.
+
+List of all available concept classes with concept_class_id,
+concept_class_name, and concept_class_concept_id.
 
 Paginated concepts.
 
@@ -26,7 +33,11 @@ Paginated concepts.
 
 - [`VocabulariesResource$stats()`](#method-VocabulariesResource-stats)
 
+- [`VocabulariesResource$domain_stats()`](#method-VocabulariesResource-domain_stats)
+
 - [`VocabulariesResource$domains()`](#method-VocabulariesResource-domains)
+
+- [`VocabulariesResource$concept_classes()`](#method-VocabulariesResource-concept_classes)
 
 - [`VocabulariesResource$concepts()`](#method-VocabulariesResource-concepts)
 
@@ -101,25 +112,13 @@ Get vocabulary details.
 
 #### Usage
 
-    VocabulariesResource$get(
-      vocabulary_id,
-      include_stats = FALSE,
-      include_domains = FALSE
-    )
+    VocabulariesResource$get(vocabulary_id)
 
 #### Arguments
 
 - `vocabulary_id`:
 
   The vocabulary ID.
-
-- `include_stats`:
-
-  Include statistics. Default `FALSE`.
-
-- `include_domains`:
-
-  Include domain breakdown. Default `FALSE`.
 
 ------------------------------------------------------------------------
 
@@ -139,27 +138,43 @@ Get vocabulary statistics.
 
 ------------------------------------------------------------------------
 
-### Method `domains()`
+### Method `domain_stats()`
 
-Get vocabulary domains.
+Get statistics for a specific domain within a vocabulary.
 
 #### Usage
 
-    VocabulariesResource$domains(vocabulary_ids = NULL, page = 1, page_size = 50)
+    VocabulariesResource$domain_stats(vocabulary_id, domain_id)
 
 #### Arguments
 
-- `vocabulary_ids`:
+- `vocabulary_id`:
 
-  Filter by vocabulary IDs (optional).
+  The vocabulary ID (e.g., "SNOMED", "ICD10CM").
 
-- `page`:
+- `domain_id`:
 
-  Page number. Default 1.
+  The domain ID (e.g., "Condition", "Drug", "Procedure").
 
-- `page_size`:
+------------------------------------------------------------------------
 
-  Results per page. Default 50.
+### Method `domains()`
+
+Get all standard OHDSI domains.
+
+#### Usage
+
+    VocabulariesResource$domains()
+
+------------------------------------------------------------------------
+
+### Method `concept_classes()`
+
+Get all concept classes.
+
+#### Usage
+
+    VocabulariesResource$concept_classes()
 
 ------------------------------------------------------------------------
 
@@ -171,11 +186,15 @@ Get concepts in a vocabulary.
 
     VocabulariesResource$concepts(
       vocabulary_id,
-      domain_id = NULL,
-      concept_class_id = NULL,
-      standard_only = FALSE,
+      search = NULL,
+      standard_concept = "all",
+      include_invalid = FALSE,
+      include_relationships = FALSE,
+      include_synonyms = FALSE,
+      sort_by = "name",
+      sort_order = "asc",
       page = 1,
-      page_size = 50
+      page_size = 20
     )
 
 #### Arguments
@@ -184,17 +203,33 @@ Get concepts in a vocabulary.
 
   The vocabulary ID.
 
-- `domain_id`:
+- `search`:
 
-  Filter by domain.
+  Search term to filter concepts by name or code.
 
-- `concept_class_id`:
+- `standard_concept`:
 
-  Filter by concept class.
+  Filter by standard concept status ('S', 'C', 'all'). Default "all".
 
-- `standard_only`:
+- `include_invalid`:
 
-  Only standard concepts. Default `FALSE`.
+  Include invalid or deprecated concepts. Default `FALSE`.
+
+- `include_relationships`:
+
+  Include concept relationships. Default `FALSE`.
+
+- `include_synonyms`:
+
+  Include concept synonyms. Default `FALSE`.
+
+- `sort_by`:
+
+  Sort field ('name', 'concept_id', 'concept_code'). Default "name".
+
+- `sort_order`:
+
+  Sort order ('asc' or 'desc'). Default "asc".
 
 - `page`:
 
@@ -202,7 +237,7 @@ Get concepts in a vocabulary.
 
 - `page_size`:
 
-  Results per page. Default 50.
+  Results per page (max 1000). Default 20.
 
 ------------------------------------------------------------------------
 
