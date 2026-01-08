@@ -282,7 +282,6 @@ devtools::check()
 ## Support
 
 - [GitHub Issues](https://github.com/omopHub/omophub-R/issues)
-- [GitHub Discussions](https://github.com/omopHub/discussions)
 - Email: <support@omophub.com>
 - Website: [omophub.com](https://omophub.com)
 
