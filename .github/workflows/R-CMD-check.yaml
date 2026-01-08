@@ -45,7 +45,16 @@ jobs:
 
       - name: Check URLs
         run: |
-          urlchecker::url_check()
+          result <- tryCatch({
+            urlchecker::url_check()
+            TRUE
+          }, error = function(e) {
+            message("URL check failed: ", conditionMessage(e))
+            FALSE
+          })
+          if (!result) {
+            quit(status = 1)
+          }
         shell: Rscript {0}
 
       - uses: r-lib/actions/check-r-package@v2
@@ -53,3 +62,5 @@ jobs:
           upload-snapshots: true
           build_args: 'c("--no-manual", "--compact-vignettes=gs+qpdf")'
           args: 'c("--as-cran", "--no-manual")'
+          error-on: '"warning"'
+          check-dir: '"check"'
