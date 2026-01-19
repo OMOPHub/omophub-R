@@ -2,6 +2,8 @@
 
 ## omophub 1.3.0
 
+CRAN release: 2026-01-08
+
 ### New Features
 
 - **Hierarchy [`get()`](https://rdrr.io/r/base/get.html) method**: New
