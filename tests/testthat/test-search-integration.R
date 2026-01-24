@@ -45,6 +45,53 @@ test_that("search with domain filter works", {
   }
 })
 
+test_that("search with standard_concept filter works", {
+  skip_if_no_integration_key()
+  client <- integration_client()
+
+  results <- client$search$basic(
+    "diabetes",
+    standard_concept = "S",
+    page_size = 20
+  )
+
+  concepts <- extract_data(results, "concepts")
+  expect_gt(length(concepts), 0)
+
+  # All results should be standard concepts
+  for (concept in concepts) {
+    expect_equal(concept$standard_concept, "S")
+  }
+})
+
+test_that("search with multiple filters and pagination works", {
+  skip_if_no_integration_key()
+  client <- integration_client()
+
+  # This combination triggers the COUNT query with all parameters
+  results <- client$search$basic(
+    "diabetes",
+    vocabulary_ids = "SNOMED",
+    domain_ids = "Condition",
+    standard_concept = "S",
+    page_size = 10
+  )
+
+  concepts <- extract_data(results, "concepts")
+  expect_gt(length(concepts), 0)
+
+  # Verify all filters applied correctly
+  for (concept in concepts) {
+    expect_equal(concept$vocabulary_id, "SNOMED")
+    expect_equal(concept$domain_id, "Condition")
+    expect_equal(concept$standard_concept, "S")
+  }
+
+  # Verify pagination metadata exists (proves COUNT query worked)
+  expect_true(!is.null(results$meta))
+  expect_true(!is.null(results$meta$total_items))
+})
+
 test_that("autocomplete works", {
   skip_if_no_integration_key()
   client <- integration_client()
