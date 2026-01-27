@@ -8,6 +8,8 @@ name: test-coverage
 
 jobs:
   test-coverage:
+    # Only run on push to main/develop, not on PRs (saves ~5-7 min per PR)
+    if: github.event_name == 'push'
     runs-on: ubuntu-latest
     env:
       GITHUB_PAT: ${{ secrets.GITHUB_TOKEN }}
