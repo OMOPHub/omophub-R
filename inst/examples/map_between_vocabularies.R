@@ -109,8 +109,8 @@ concept_ids <- c(
 )
 
 batch_result <- client$mappings$map(
-  source_concepts = concept_ids,
-  target_vocabulary = "ICD10CM"
+  target_vocabulary = "ICD10CM",
+  source_concepts = concept_ids
 )
 
 cat("Batch mapping results:\n")

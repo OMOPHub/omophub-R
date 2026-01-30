@@ -74,8 +74,9 @@ Get mappings for a concept.
 Map concepts to a target vocabulary.
 \subsection{Usage}{
 \if{html}{\out{<div class="r">}}\preformatted{MappingsResource$map(
-  source_concepts,
   target_vocabulary,
+  source_concepts = NULL,
+  source_codes = NULL,
   mapping_type = NULL,
   include_invalid = FALSE,
   vocab_release = NULL
@@ -85,11 +86,14 @@ Map concepts to a target vocabulary.
 \subsection{Arguments}{
 \if{html}{\out{<div class="arguments">}}
 \describe{
-\item{\code{source_concepts}}{Vector of OMOP concept IDs to map.}
+\item{\code{target_vocabulary}}{Target vocabulary ID (e.g., "ICD10CM", "SNOMED", "RxNorm").}
 
-\item{\code{target_vocabulary}}{Target vocabulary ID (e.g., "ICD10CM", "SNOMED").}
+\item{\code{source_concepts}}{Vector of OMOP concept IDs to map. Use this OR source_codes, not both.}
 
-\item{\code{mapping_type}}{Mapping type (direct, equivalent, broader, narrower).}
+\item{\code{source_codes}}{List of vocabulary/code pairs to map. Each element should be a list
+with \code{vocabulary_id} and \code{concept_code}. Use this OR source_concepts, not both.}
+
+\item{\code{mapping_type}}{Mapping type filter (direct, equivalent, broader, narrower).}
 
 \item{\code{include_invalid}}{Include invalid mappings. Default \code{FALSE}.}
 
