@@ -80,8 +80,9 @@ Map concepts to a target vocabulary.
 #### Usage
 
     MappingsResource$map(
-      source_concepts,
       target_vocabulary,
+      source_concepts = NULL,
+      source_codes = NULL,
       mapping_type = NULL,
       include_invalid = FALSE,
       vocab_release = NULL
@@ -89,17 +90,23 @@ Map concepts to a target vocabulary.
 
 #### Arguments
 
-- `source_concepts`:
-
-  Vector of OMOP concept IDs to map.
-
 - `target_vocabulary`:
 
-  Target vocabulary ID (e.g., "ICD10CM", "SNOMED").
+  Target vocabulary ID (e.g., "ICD10CM", "SNOMED", "RxNorm").
+
+- `source_concepts`:
+
+  Vector of OMOP concept IDs to map. Use this OR source_codes, not both.
+
+- `source_codes`:
+
+  List of vocabulary/code pairs to map. Each element should be a list
+  with `vocabulary_id` and `concept_code`. Use this OR source_concepts,
+  not both.
 
 - `mapping_type`:
 
-  Mapping type (direct, equivalent, broader, narrower).
+  Mapping type filter (direct, equivalent, broader, narrower).
 
 - `include_invalid`:
 
