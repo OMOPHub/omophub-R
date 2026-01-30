@@ -53,25 +53,53 @@ MappingsResource <- R6::R6Class(
     #' @description
     #' Map concepts to a target vocabulary.
     #'
-    #' @param source_concepts Vector of OMOP concept IDs to map.
-    #' @param target_vocabulary Target vocabulary ID (e.g., "ICD10CM", "SNOMED").
-    #' @param mapping_type Mapping type (direct, equivalent, broader, narrower).
+    #' @param target_vocabulary Target vocabulary ID (e.g., "ICD10CM", "SNOMED", "RxNorm").
+    #' @param source_concepts Vector of OMOP concept IDs to map. Use this OR source_codes, not both.
+    #' @param source_codes List of vocabulary/code pairs to map. Each element should be a list
+    #'   with `vocabulary_id` and `concept_code`. Use this OR source_concepts, not both.
+    #' @param mapping_type Mapping type filter (direct, equivalent, broader, narrower).
     #' @param include_invalid Include invalid mappings. Default `FALSE`.
     #' @param vocab_release Specific vocabulary release version (e.g., "2025.1"). Default `NULL`.
     #'
     #' @returns Mapping results with summary.
-    map = function(source_concepts,
-                   target_vocabulary,
+    map = function(target_vocabulary,
+                   source_concepts = NULL,
+                   source_codes = NULL,
                    mapping_type = NULL,
                    include_invalid = FALSE,
                    vocab_release = NULL) {
-      checkmate::assert_integerish(source_concepts, min.len = 1)
       checkmate::assert_string(target_vocabulary, min.chars = 1)
 
-      body <- list(
-        source_concepts = as.integer(source_concepts),
-        target_vocabulary = target_vocabulary
-      )
+      # Validate: exactly one of source_concepts or source_codes required
+      has_concepts <- !is.null(source_concepts) && length(source_concepts) > 0
+      has_codes <- !is.null(source_codes) && length(source_codes) > 0
+
+      if (!has_concepts && !has_codes) {
+        abort_validation("Either source_concepts or source_codes is required")
+      }
+      if (has_concepts && has_codes) {
+        abort_validation("Cannot use both source_concepts and source_codes")
+      }
+
+      body <- list(target_vocabulary = target_vocabulary)
+
+      if (has_concepts) {
+        checkmate::assert_integerish(source_concepts, min.len = 1)
+        body$source_concepts <- as.integer(source_concepts)
+      }
+
+      if (has_codes) {
+        checkmate::assert_list(source_codes, min.len = 1)
+        # Validate each code entry has required fields
+        for (i in seq_along(source_codes)) {
+          if (!all(c("vocabulary_id", "concept_code") %in% names(source_codes[[i]]))) {
+            abort_validation(
+              sprintf("source_codes[%d] must have 'vocabulary_id' and 'concept_code'", i)
+            )
+          }
+        }
+        body$source_codes <- source_codes
+      }
 
       if (!is.null(mapping_type)) {
         body$mapping_type <- mapping_type
