@@ -161,6 +161,8 @@ SearchResource <- R6::R6Class(
                         page = 1,
                         page_size = 20) {
       checkmate::assert_string(query, min.chars = 1)
+      checkmate::assert_integerish(page, lower = 1, len = 1, any.missing = FALSE)
+      checkmate::assert_integerish(page_size, lower = 1, upper = 1000, len = 1, any.missing = FALSE)
 
       body <- list(query = query)
 
@@ -206,6 +208,7 @@ SearchResource <- R6::R6Class(
                             domains = NULL,
                             max_suggestions = 10) {
       checkmate::assert_string(query, min.chars = 1)
+      checkmate::assert_integerish(max_suggestions, lower = 1, len = 1, any.missing = FALSE)
 
       params <- list(
         query = query,
@@ -368,6 +371,9 @@ SearchResource <- R6::R6Class(
       checkmate::assert_choice(algorithm, c("semantic", "lexical", "hybrid"))
       checkmate::assert_number(similarity_threshold, lower = 0, upper = 1)
       checkmate::assert_integerish(page_size, lower = 1, upper = 1000)
+      if (!is.null(concept_id)) {
+        checkmate::assert_integerish(concept_id, len = 1, any.missing = FALSE)
+      }
 
       body <- list(
         algorithm = algorithm,
