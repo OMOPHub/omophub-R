@@ -271,6 +271,7 @@ Fetch all semantic search results with automatic pagination.
   vocabulary_ids = NULL,
   domain_ids = NULL,
   standard_concept = NULL,
+  concept_class_id = NULL,
   threshold = NULL,
   page_size = 100,
   max_pages = Inf,
@@ -288,6 +289,8 @@ Fetch all semantic search results with automatic pagination.
 \item{\code{domain_ids}}{Filter by domain IDs.}
 
 \item{\code{standard_concept}}{Filter by standard concept ('S' or 'C').}
+
+\item{\code{concept_class_id}}{Filter by concept class ID.}
 
 \item{\code{threshold}}{Minimum similarity threshold (0.0-1.0).}
 

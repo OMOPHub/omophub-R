@@ -280,6 +280,7 @@ SearchResource <- R6::R6Class(
     #' @param vocabulary_ids Filter by vocabulary IDs.
     #' @param domain_ids Filter by domain IDs.
     #' @param standard_concept Filter by standard concept ('S' or 'C').
+    #' @param concept_class_id Filter by concept class ID.
     #' @param threshold Minimum similarity threshold (0.0-1.0).
     #' @param page_size Results per page. Default 100.
     #' @param max_pages Maximum pages to fetch. Default Inf.
@@ -290,6 +291,7 @@ SearchResource <- R6::R6Class(
                             vocabulary_ids = NULL,
                             domain_ids = NULL,
                             standard_concept = NULL,
+                            concept_class_id = NULL,
                             threshold = NULL,
                             page_size = 100,
                             max_pages = Inf,
@@ -300,6 +302,7 @@ SearchResource <- R6::R6Class(
           vocabulary_ids = vocabulary_ids,
           domain_ids = domain_ids,
           standard_concept = standard_concept,
+          concept_class_id = concept_class_id,
           threshold = threshold,
           page = page,
           page_size = size

@@ -20,7 +20,7 @@ build_request <- function(base_url, api_key, timeout = 30, max_retries = 3,
       "Content-Type" = "application/json",
       "Accept" = "application/json"
     ) |>
-    httr2::req_user_agent("OMOPHub-SDK-R/1.0.0") |>
+    httr2::req_user_agent(paste0("OMOPHub-SDK-R/", utils::packageVersion("omophub"))) |>
     httr2::req_timeout(timeout) |>
     httr2::req_throttle(
       rate = .omophub_env$rate_limit_capacity / .omophub_env$rate_limit_fill_time
