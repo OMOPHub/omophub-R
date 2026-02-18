@@ -233,7 +233,7 @@ SearchResource <- R6::R6Class(
     #' @param domain_ids Filter by domain IDs.
     #' @param standard_concept Filter by standard concept ('S' or 'C').
     #' @param concept_class_id Filter by concept class ID.
-    #' @param threshold Minimum similarity threshold (0.0-1.0, default 0.3).
+    #' @param threshold Minimum similarity threshold (0.0-1.0, default 0.5).
     #' @param page Page number (1-based). Default 1.
     #' @param page_size Results per page (max 100). Default 20.
     #'

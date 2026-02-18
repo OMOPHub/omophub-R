@@ -251,7 +251,7 @@ Semantic concept search using neural embeddings.
 
 \item{\code{concept_class_id}}{Filter by concept class ID.}
 
-\item{\code{threshold}}{Minimum similarity threshold (0.0-1.0, default 0.3).}
+\item{\code{threshold}}{Minimum similarity threshold (0.0-1.0, default 0.5).}
 
 \item{\code{page}}{Page number (1-based). Default 1.}
 
