@@ -12,6 +12,17 @@ Search results with facets and metadata.
 
 Autocomplete suggestions.
 
+List with results and pagination metadata.
+
+A tibble of all matching concepts with similarity scores.
+
+List with similar_concepts and search_metadata.
+
+## Note
+
+When algorithm='semantic', only single vocabulary/domain filter
+supported.
+
 ## Methods
 
 ### Public methods
@@ -25,6 +36,12 @@ Autocomplete suggestions.
 - [`SearchResource$advanced()`](#method-SearchResource-advanced)
 
 - [`SearchResource$autocomplete()`](#method-SearchResource-autocomplete)
+
+- [`SearchResource$semantic()`](#method-SearchResource-semantic)
+
+- [`SearchResource$semantic_all()`](#method-SearchResource-semantic_all)
+
+- [`SearchResource$similar()`](#method-SearchResource-similar)
 
 - [`SearchResource$print()`](#method-SearchResource-print)
 
@@ -262,6 +279,192 @@ Get autocomplete suggestions.
 - `max_suggestions`:
 
   Maximum suggestions. Default 10.
+
+------------------------------------------------------------------------
+
+### Method `semantic()`
+
+Semantic concept search using neural embeddings.
+
+#### Usage
+
+    SearchResource$semantic(
+      query,
+      vocabulary_ids = NULL,
+      domain_ids = NULL,
+      standard_concept = NULL,
+      concept_class_id = NULL,
+      threshold = NULL,
+      page = 1,
+      page_size = 20
+    )
+
+#### Arguments
+
+- `query`:
+
+  Natural language search query (required).
+
+- `vocabulary_ids`:
+
+  Filter by vocabulary IDs.
+
+- `domain_ids`:
+
+  Filter by domain IDs.
+
+- `standard_concept`:
+
+  Filter by standard concept ('S' or 'C').
+
+- `concept_class_id`:
+
+  Filter by concept class ID.
+
+- `threshold`:
+
+  Minimum similarity threshold (0.0-1.0, default 0.5).
+
+- `page`:
+
+  Page number (1-based). Default 1.
+
+- `page_size`:
+
+  Results per page (max 100). Default 20.
+
+------------------------------------------------------------------------
+
+### Method `semantic_all()`
+
+Fetch all semantic search results with automatic pagination.
+
+#### Usage
+
+    SearchResource$semantic_all(
+      query,
+      vocabulary_ids = NULL,
+      domain_ids = NULL,
+      standard_concept = NULL,
+      concept_class_id = NULL,
+      threshold = NULL,
+      page_size = 100,
+      max_pages = Inf,
+      progress = TRUE
+    )
+
+#### Arguments
+
+- `query`:
+
+  Natural language search query (required).
+
+- `vocabulary_ids`:
+
+  Filter by vocabulary IDs.
+
+- `domain_ids`:
+
+  Filter by domain IDs.
+
+- `standard_concept`:
+
+  Filter by standard concept ('S' or 'C').
+
+- `concept_class_id`:
+
+  Filter by concept class ID.
+
+- `threshold`:
+
+  Minimum similarity threshold (0.0-1.0).
+
+- `page_size`:
+
+  Results per page. Default 100.
+
+- `max_pages`:
+
+  Maximum pages to fetch. Default Inf.
+
+- `progress`:
+
+  Show progress bar. Default `TRUE`.
+
+------------------------------------------------------------------------
+
+### Method `similar()`
+
+Find concepts similar to a reference concept or query.
+
+Must provide exactly one of: concept_id, concept_name, or query.
+
+#### Usage
+
+    SearchResource$similar(
+      concept_id = NULL,
+      concept_name = NULL,
+      query = NULL,
+      algorithm = "hybrid",
+      similarity_threshold = 0.7,
+      page_size = 20,
+      vocabulary_ids = NULL,
+      domain_ids = NULL,
+      standard_concept = NULL,
+      include_invalid = NULL,
+      include_scores = NULL,
+      include_explanations = NULL
+    )
+
+#### Arguments
+
+- `concept_id`:
+
+  Concept ID to find similar concepts for.
+
+- `concept_name`:
+
+  Concept name to find similar concepts for.
+
+- `query`:
+
+  Natural language query for semantic similarity.
+
+- `algorithm`:
+
+  One of 'semantic', 'lexical', or 'hybrid' (default).
+
+- `similarity_threshold`:
+
+  Minimum similarity (0.0-1.0). Default 0.7.
+
+- `page_size`:
+
+  Max results (max 1000). Default 20.
+
+- `vocabulary_ids`:
+
+  Filter by vocabulary IDs.
+
+- `domain_ids`:
+
+  Filter by domain IDs.
+
+- `standard_concept`:
+
+  Filter by standard concept flag ('S', 'C', or 'N').
+
+- `include_invalid`:
+
+  Include invalid/deprecated concepts.
+
+- `include_scores`:
+
+  Include detailed similarity scores.
+
+- `include_explanations`:
+
+  Include similarity explanations.
 
 ------------------------------------------------------------------------
 

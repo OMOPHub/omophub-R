@@ -91,6 +91,29 @@ mappings <- client$mappings$get(201826, target_vocabulary = "ICD10CM")
 ancestors <- client$hierarchy$ancestors(201826, max_levels = 3)
 ```
 
+## Semantic Search
+
+Use natural language queries to find concepts using neural embeddings:
+
+``` r
+# Natural language search - understands clinical intent
+results <- client$search$semantic("high blood sugar levels")
+for (r in results$data$results) {
+  cat(sprintf("%s (similarity: %.2f)\n", r$concept_name, r$similarity_score))
+}
+
+# Filter by vocabulary and set minimum similarity threshold
+results <- client$search$semantic(
+  "heart attack",
+  vocabulary_ids = "SNOMED",
+  domain_ids = "Condition",
+  threshold = 0.5
+)
+
+# Fetch all results with auto-pagination
+all_results <- client$search$semantic_all("chronic kidney disease", page_size = 50)
+```
+
 ## Use Cases
 
 ### ETL & Data Pipelines
@@ -178,7 +201,7 @@ concepts_df %>%
 | Resource       | Description                         | Key Methods                                                                                            |
 |----------------|-------------------------------------|--------------------------------------------------------------------------------------------------------|
 | `concepts`     | Concept lookup and batch operations | [`get()`](https://rdrr.io/r/base/get.html), `get_by_code()`, `batch()`, `suggest()`                    |
-| `search`       | Full-text and semantic search       | `basic()`, `advanced()`, `basic_all()`                                                                 |
+| `search`       | Full-text and semantic search       | `basic()`, `advanced()`, `semantic()`, `semantic_all()`, `basic_all()`                                 |
 | `hierarchy`    | Navigate concept relationships      | `ancestors()`, `descendants()`                                                                         |
 | `mappings`     | Cross-vocabulary mappings           | [`get()`](https://rdrr.io/r/base/get.html), [`map()`](https://purrr.tidyverse.org/reference/map.html)  |
 | `vocabularies` | Vocabulary metadata                 | [`list()`](https://rdrr.io/r/base/list.html), [`get()`](https://rdrr.io/r/base/get.html), `stats()`    |

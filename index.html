@@ -151,13 +151,35 @@
 <span><span class="va">ancestors</span> <span class="op">&lt;-</span> <span class="va">client</span><span class="op">$</span><span class="va">hierarchy</span><span class="op">$</span><span class="fu">ancestors</span><span class="op">(</span><span class="fl">201826</span>, max_levels <span class="op">=</span> <span class="fl">3</span><span class="op">)</span></span></code></pre></div>
 </div>
 <div class="section level2">
+<h2 id="semantic-search">Semantic Search<a class="anchor" aria-label="anchor" href="#semantic-search"></a>
+</h2>
+<p>Use natural language queries to find concepts using neural embeddings:</p>
+<div class="sourceCode" id="cb4"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="co"># Natural language search - understands clinical intent</span></span>
+<span><span class="va">results</span> <span class="op">&lt;-</span> <span class="va">client</span><span class="op">$</span><span class="va">search</span><span class="op">$</span><span class="fu">semantic</span><span class="op">(</span><span class="st">"high blood sugar levels"</span><span class="op">)</span></span>
+<span><span class="kw">for</span> <span class="op">(</span><span class="va">r</span> <span class="kw">in</span> <span class="va">results</span><span class="op">$</span><span class="va">data</span><span class="op">$</span><span class="va">results</span><span class="op">)</span> <span class="op">{</span></span>
+<span>  <span class="fu"><a href="https://rdrr.io/r/base/cat.html" class="external-link">cat</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/sprintf.html" class="external-link">sprintf</a></span><span class="op">(</span><span class="st">"%s (similarity: %.2f)\n"</span>, <span class="va">r</span><span class="op">$</span><span class="va">concept_name</span>, <span class="va">r</span><span class="op">$</span><span class="va">similarity_score</span><span class="op">)</span><span class="op">)</span></span>
+<span><span class="op">}</span></span>
+<span></span>
+<span><span class="co"># Filter by vocabulary and set minimum similarity threshold</span></span>
+<span><span class="va">results</span> <span class="op">&lt;-</span> <span class="va">client</span><span class="op">$</span><span class="va">search</span><span class="op">$</span><span class="fu">semantic</span><span class="op">(</span></span>
+<span>  <span class="st">"heart attack"</span>,</span>
+<span>  vocabulary_ids <span class="op">=</span> <span class="st">"SNOMED"</span>,</span>
+<span>  domain_ids <span class="op">=</span> <span class="st">"Condition"</span>,</span>
+<span>  threshold <span class="op">=</span> <span class="fl">0.5</span></span>
+<span><span class="op">)</span></span>
+<span></span>
+<span><span class="co"># Fetch all results with auto-pagination</span></span>
+<span><span class="va">all_results</span> <span class="op">&lt;-</span> <span class="va">client</span><span class="op">$</span><span class="va">search</span><span class="op">$</span><span class="fu">semantic_all</span><span class="op">(</span><span class="st">"chronic kidney disease"</span>, page_size <span class="op">=</span> <span class="fl">50</span><span class="op">)</span></span></code></pre></div>
+</div>
+<div class="section level2">
 <h2 id="use-cases">Use Cases<a class="anchor" aria-label="anchor" href="#use-cases"></a>
 </h2>
 <div class="section level3">
 <h3 id="etl--data-pipelines">ETL &amp; Data Pipelines<a class="anchor" aria-label="anchor" href="#etl--data-pipelines"></a>
 </h3>
 <p>Validate and map clinical codes during OMOP CDM transformations:</p>
-<div class="sourceCode" id="cb4"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb5"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="co"># Validate source codes and find standard equivalents</span></span>
 <span><span class="va">validate_and_map</span> <span class="op">&lt;-</span> <span class="kw">function</span><span class="op">(</span><span class="va">source_vocab</span>, <span class="va">source_code</span><span class="op">)</span> <span class="op">{</span></span>
 <span>  <span class="va">concept</span> <span class="op">&lt;-</span> <span class="va">client</span><span class="op">$</span><span class="va">concepts</span><span class="op">$</span><span class="fu">get_by_code</span><span class="op">(</span><span class="va">source_vocab</span>, <span class="va">source_code</span><span class="op">)</span></span>
@@ -180,7 +202,7 @@
 <h3 id="data-quality-checks">Data Quality Checks<a class="anchor" aria-label="anchor" href="#data-quality-checks"></a>
 </h3>
 <p>Verify codes exist and are valid:</p>
-<div class="sourceCode" id="cb5"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb6"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="co"># Check if condition codes are valid</span></span>
 <span><span class="va">condition_codes</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"E11.9"</span>, <span class="st">"I10"</span>, <span class="st">"J44.9"</span><span class="op">)</span></span>
 <span></span>
@@ -197,7 +219,7 @@
 <h3 id="phenotype-development">Phenotype Development<a class="anchor" aria-label="anchor" href="#phenotype-development"></a>
 </h3>
 <p>Explore hierarchies to build comprehensive concept sets:</p>
-<div class="sourceCode" id="cb6"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb7"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="co"># Get all descendants for phenotype definition</span></span>
 <span><span class="va">descendants</span> <span class="op">&lt;-</span> <span class="va">client</span><span class="op">$</span><span class="va">hierarchy</span><span class="op">$</span><span class="fu">descendants</span><span class="op">(</span></span>
 <span>  <span class="fl">201826</span>,  <span class="co"># Type 2 diabetes mellitus</span></span>
@@ -210,7 +232,7 @@
 <div class="section level3">
 <h3 id="integration-with-tidyverse">Integration with tidyverse<a class="anchor" aria-label="anchor" href="#integration-with-tidyverse"></a>
 </h3>
-<div class="sourceCode" id="cb7"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb8"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="https://dplyr.tidyverse.org" class="external-link">dplyr</a></span><span class="op">)</span></span>
 <span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="https://purrr.tidyverse.org/" class="external-link">purrr</a></span><span class="op">)</span></span>
 <span></span>
@@ -257,7 +279,7 @@
 <td><code>search</code></td>
 <td>Full-text and semantic search</td>
 <td>
-<code>basic()</code>, <code>advanced()</code>, <code>basic_all()</code>
+<code>basic()</code>, <code>advanced()</code>, <code>semantic()</code>, <code>semantic_all()</code>, <code>basic_all()</code>
 </td>
 </tr>
 <tr class="odd">
@@ -294,7 +316,7 @@
 <div class="section level2">
 <h2 id="pagination">Pagination<a class="anchor" aria-label="anchor" href="#pagination"></a>
 </h2>
-<div class="sourceCode" id="cb8"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb9"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="co"># Automatic pagination - fetch all results</span></span>
 <span><span class="va">all_results</span> <span class="op">&lt;-</span> <span class="va">client</span><span class="op">$</span><span class="va">search</span><span class="op">$</span><span class="fu">basic_all</span><span class="op">(</span><span class="st">"diabetes"</span>, page_size <span class="op">=</span> <span class="fl">100</span><span class="op">)</span></span>
 <span></span>
@@ -305,7 +327,7 @@
 <div class="section level2">
 <h2 id="configuration">Configuration<a class="anchor" aria-label="anchor" href="#configuration"></a>
 </h2>
-<div class="sourceCode" id="cb9"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb10"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="co"># Specify vocabulary version</span></span>
 <span><span class="va">client</span> <span class="op">&lt;-</span> <span class="va"><a href="reference/OMOPHubClient.html">OMOPHubClient</a></span><span class="op">$</span><span class="fu">new</span><span class="op">(</span>vocab_version <span class="op">=</span> <span class="st">"2025.2"</span><span class="op">)</span></span>
 <span></span>
@@ -319,7 +341,7 @@
 <div class="section level2">
 <h2 id="error-handling">Error Handling<a class="anchor" aria-label="anchor" href="#error-handling"></a>
 </h2>
-<div class="sourceCode" id="cb10"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb11"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="kw"><a href="https://rdrr.io/r/base/conditions.html" class="external-link">tryCatch</a></span><span class="op">(</span><span class="op">{</span></span>
 <span>  <span class="va">result</span> <span class="op">&lt;-</span> <span class="va">client</span><span class="op">$</span><span class="va">concepts</span><span class="op">$</span><span class="fu">get</span><span class="op">(</span><span class="fl">999999999</span><span class="op">)</span></span>
 <span><span class="op">}</span>, omophub_not_found_error <span class="op">=</span> <span class="kw">function</span><span class="op">(</span><span class="va">e</span><span class="op">)</span> <span class="op">{</span></span>
@@ -408,7 +430,7 @@
 </tbody>
 </table>
 <p>Run an example:</p>
-<div class="sourceCode" id="cb11"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb12"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">example_path</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/system.file.html" class="external-link">system.file</a></span><span class="op">(</span><span class="st">"examples"</span>, <span class="st">"basic_usage.R"</span>, package <span class="op">=</span> <span class="st">"omophub"</span><span class="op">)</span></span>
 <span><span class="kw"><a href="https://rdrr.io/r/base/source.html" class="external-link">source</a></span><span class="op">(</span><span class="va">example_path</span><span class="op">)</span></span></code></pre></div>
 </div>
@@ -426,7 +448,7 @@
 <h2 id="contributing">Contributing<a class="anchor" aria-label="anchor" href="#contributing"></a>
 </h2>
 <p>We welcome contributions!</p>
-<div class="sourceCode" id="cb12"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb13"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="co"># Clone and install for development</span></span>
 <span><span class="co"># install.packages("devtools")</span></span>
 <span><span class="fu">devtools</span><span class="fu">::</span><span class="fu"><a href="https://remotes.r-lib.org/reference/install_github.html" class="external-link">install_github</a></span><span class="op">(</span><span class="st">"omopHub/omophub-R"</span><span class="op">)</span></span>
