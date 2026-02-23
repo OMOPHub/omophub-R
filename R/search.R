@@ -161,6 +161,8 @@ SearchResource <- R6::R6Class(
                         page = 1,
                         page_size = 20) {
       checkmate::assert_string(query, min.chars = 1)
+      checkmate::assert_integerish(page, lower = 1, len = 1, any.missing = FALSE)
+      checkmate::assert_integerish(page_size, lower = 1, upper = 1000, len = 1, any.missing = FALSE)
 
       body <- list(query = query)
 
@@ -206,6 +208,7 @@ SearchResource <- R6::R6Class(
                             domains = NULL,
                             max_suggestions = 10) {
       checkmate::assert_string(query, min.chars = 1)
+      checkmate::assert_integerish(max_suggestions, lower = 1, len = 1, any.missing = FALSE)
 
       params <- list(
         query = query,
@@ -223,10 +226,200 @@ SearchResource <- R6::R6Class(
     },
 
     #' @description
+    #' Semantic concept search using neural embeddings.
+    #'
+    #' @param query Natural language search query (required).
+    #' @param vocabulary_ids Filter by vocabulary IDs.
+    #' @param domain_ids Filter by domain IDs.
+    #' @param standard_concept Filter by standard concept ('S' or 'C').
+    #' @param concept_class_id Filter by concept class ID.
+    #' @param threshold Minimum similarity threshold (0.0-1.0, default 0.5).
+    #' @param page Page number (1-based). Default 1.
+    #' @param page_size Results per page (max 100). Default 20.
+    #'
+    #' @returns List with results and pagination metadata.
+    semantic = function(query,
+                        vocabulary_ids = NULL,
+                        domain_ids = NULL,
+                        standard_concept = NULL,
+                        concept_class_id = NULL,
+                        threshold = NULL,
+                        page = 1,
+                        page_size = 20) {
+      checkmate::assert_string(query, min.chars = 1)
+      pag <- validate_pagination(page, page_size, max_page_size = 100)
+
+      params <- list(
+        query = query,
+        page = pag$page,
+        page_size = pag$page_size
+      )
+
+      if (!is.null(vocabulary_ids)) {
+        params$vocabulary_ids <- join_params(vocabulary_ids)
+      }
+      if (!is.null(domain_ids)) {
+        params$domain_ids <- join_params(domain_ids)
+      }
+      if (!is.null(standard_concept)) {
+        checkmate::assert_choice(standard_concept, c("S", "C"))
+        params$standard_concept <- standard_concept
+      }
+      if (!is.null(concept_class_id)) {
+        params$concept_class_id <- concept_class_id
+      }
+      if (!is.null(threshold)) {
+        checkmate::assert_number(threshold, lower = 0, upper = 1)
+        params$threshold <- threshold
+      }
+
+      perform_get(private$.base_req, "concepts/semantic-search", query = params)
+    },
+
+    #' @description
+    #' Fetch all semantic search results with automatic pagination.
+    #'
+    #' @param query Natural language search query (required).
+    #' @param vocabulary_ids Filter by vocabulary IDs.
+    #' @param domain_ids Filter by domain IDs.
+    #' @param standard_concept Filter by standard concept ('S' or 'C').
+    #' @param concept_class_id Filter by concept class ID.
+    #' @param threshold Minimum similarity threshold (0.0-1.0).
+    #' @param page_size Results per page. Default 100.
+    #' @param max_pages Maximum pages to fetch. Default Inf.
+    #' @param progress Show progress bar. Default `TRUE`.
+    #'
+    #' @returns A tibble of all matching concepts with similarity scores.
+    semantic_all = function(query,
+                            vocabulary_ids = NULL,
+                            domain_ids = NULL,
+                            standard_concept = NULL,
+                            concept_class_id = NULL,
+                            threshold = NULL,
+                            page_size = 100,
+                            max_pages = Inf,
+                            progress = TRUE) {
+      fetch_fn <- function(page, size) {
+        result <- self$semantic(
+          query = query,
+          vocabulary_ids = vocabulary_ids,
+          domain_ids = domain_ids,
+          standard_concept = standard_concept,
+          concept_class_id = concept_class_id,
+          threshold = threshold,
+          page = page,
+          page_size = size
+        )
+        # Handle different response structures
+        if (is.list(result) && "data" %in% names(result) && "meta" %in% names(result)) {
+          data <- result$data
+          if (is.list(data) && "results" %in% names(data)) {
+            data <- data$results
+          }
+          list(data = data, meta = result$meta)
+        } else if (is.list(result) && "results" %in% names(result)) {
+          list(data = result$results, meta = result$meta %||% list())
+        } else {
+          list(data = result %||% list(), meta = list())
+        }
+      }
+
+      paginate_all(fetch_fn, page_size = page_size, max_pages = max_pages, progress = progress)
+    },
+
+    #' @description
+    #' Find concepts similar to a reference concept or query.
+    #'
+    #' Must provide exactly one of: concept_id, concept_name, or query.
+    #'
+    #' @param concept_id Concept ID to find similar concepts for.
+    #' @param concept_name Concept name to find similar concepts for.
+    #' @param query Natural language query for semantic similarity.
+    #' @param algorithm One of 'semantic', 'lexical', or 'hybrid' (default).
+    #' @param similarity_threshold Minimum similarity (0.0-1.0). Default 0.7.
+    #' @param page_size Max results (max 1000). Default 20.
+    #' @param vocabulary_ids Filter by vocabulary IDs.
+    #' @param domain_ids Filter by domain IDs.
+    #' @param standard_concept Filter by standard concept flag ('S', 'C', or 'N').
+    #' @param include_invalid Include invalid/deprecated concepts.
+    #' @param include_scores Include detailed similarity scores.
+    #' @param include_explanations Include similarity explanations.
+    #'
+    #' @returns List with similar_concepts and search_metadata.
+    #'
+    #' @note When algorithm='semantic', only single vocabulary/domain filter supported.
+    similar = function(concept_id = NULL,
+                       concept_name = NULL,
+                       query = NULL,
+                       algorithm = "hybrid",
+                       similarity_threshold = 0.7,
+                       page_size = 20,
+                       vocabulary_ids = NULL,
+                       domain_ids = NULL,
+                       standard_concept = NULL,
+                       include_invalid = NULL,
+                       include_scores = NULL,
+                       include_explanations = NULL) {
+      # Validate exactly one of concept_id, concept_name, or query provided
+      provided <- sum(!is.null(concept_id), !is.null(concept_name), !is.null(query))
+      if (provided != 1) {
+        cli::cli_abort(
+          "Exactly one of {.arg concept_id}, {.arg concept_name}, or {.arg query} must be provided"
+        )
+      }
+
+      checkmate::assert_choice(algorithm, c("semantic", "lexical", "hybrid"))
+      checkmate::assert_number(similarity_threshold, lower = 0, upper = 1)
+      checkmate::assert_integerish(page_size, lower = 1, upper = 1000)
+      if (!is.null(concept_id)) {
+        checkmate::assert_integerish(concept_id, len = 1, any.missing = FALSE)
+      }
+
+      body <- list(
+        algorithm = algorithm,
+        similarity_threshold = similarity_threshold
+      )
+
+      if (!is.null(concept_id)) {
+        body$concept_id <- as.integer(concept_id)
+      }
+      if (!is.null(concept_name)) {
+        body$concept_name <- concept_name
+      }
+      if (!is.null(query)) {
+        body$query <- query
+      }
+      if (page_size != 20) {
+        body$page_size <- as.integer(page_size)
+      }
+      if (!is.null(vocabulary_ids)) {
+        body$vocabulary_ids <- as.list(vocabulary_ids)
+      }
+      if (!is.null(domain_ids)) {
+        body$domain_ids <- as.list(domain_ids)
+      }
+      if (!is.null(standard_concept)) {
+        checkmate::assert_choice(standard_concept, c("S", "C", "N"))
+        body$standard_concept <- standard_concept
+      }
+      if (!is.null(include_invalid)) {
+        body$include_invalid <- include_invalid
+      }
+      if (!is.null(include_scores)) {
+        body$include_scores <- include_scores
+      }
+      if (!is.null(include_explanations)) {
+        body$include_explanations <- include_explanations
+      }
+
+      perform_post(private$.base_req, "search/similar", body = body)
+    },
+
+    #' @description
     #' Print resource information.
     print = function() {
       cat("<OMOPHub SearchResource>\n")
-      cat("  Methods: basic, basic_all, advanced, autocomplete\n")
+      cat("  Methods: basic, basic_all, advanced, autocomplete, semantic, semantic_all, similar\n")
       invisible(self)
     }
   ),

@@ -11,9 +11,18 @@ A tibble of all matching concepts.
 Search results with facets and metadata.
 
 Autocomplete suggestions.
+
+List with results and pagination metadata.
+
+A tibble of all matching concepts with similarity scores.
+
+List with similar_concepts and search_metadata.
 }
 \description{
 R6 class providing access to search operations.
+}
+\note{
+When algorithm='semantic', only single vocabulary/domain filter supported.
 }
 \keyword{internal}
 \section{Methods}{
@@ -24,6 +33,9 @@ R6 class providing access to search operations.
 \item \href{#method-SearchResource-basic_all}{\code{SearchResource$basic_all()}}
 \item \href{#method-SearchResource-advanced}{\code{SearchResource$advanced()}}
 \item \href{#method-SearchResource-autocomplete}{\code{SearchResource$autocomplete()}}
+\item \href{#method-SearchResource-semantic}{\code{SearchResource$semantic()}}
+\item \href{#method-SearchResource-semantic_all}{\code{SearchResource$semantic_all()}}
+\item \href{#method-SearchResource-similar}{\code{SearchResource$similar()}}
 \item \href{#method-SearchResource-print}{\code{SearchResource$print()}}
 \item \href{#method-SearchResource-clone}{\code{SearchResource$clone()}}
 }
@@ -204,6 +216,143 @@ Get autocomplete suggestions.
 \item{\code{domains}}{Filter by domains.}
 
 \item{\code{max_suggestions}}{Maximum suggestions. Default 10.}
+}
+\if{html}{\out{</div>}}
+}
+}
+\if{html}{\out{<hr>}}
+\if{html}{\out{<a id="method-SearchResource-semantic"></a>}}
+\if{latex}{\out{\hypertarget{method-SearchResource-semantic}{}}}
+\subsection{Method \code{semantic()}}{
+Semantic concept search using neural embeddings.
+\subsection{Usage}{
+\if{html}{\out{<div class="r">}}\preformatted{SearchResource$semantic(
+  query,
+  vocabulary_ids = NULL,
+  domain_ids = NULL,
+  standard_concept = NULL,
+  concept_class_id = NULL,
+  threshold = NULL,
+  page = 1,
+  page_size = 20
+)}\if{html}{\out{</div>}}
+}
+
+\subsection{Arguments}{
+\if{html}{\out{<div class="arguments">}}
+\describe{
+\item{\code{query}}{Natural language search query (required).}
+
+\item{\code{vocabulary_ids}}{Filter by vocabulary IDs.}
+
+\item{\code{domain_ids}}{Filter by domain IDs.}
+
+\item{\code{standard_concept}}{Filter by standard concept ('S' or 'C').}
+
+\item{\code{concept_class_id}}{Filter by concept class ID.}
+
+\item{\code{threshold}}{Minimum similarity threshold (0.0-1.0, default 0.5).}
+
+\item{\code{page}}{Page number (1-based). Default 1.}
+
+\item{\code{page_size}}{Results per page (max 100). Default 20.}
+}
+\if{html}{\out{</div>}}
+}
+}
+\if{html}{\out{<hr>}}
+\if{html}{\out{<a id="method-SearchResource-semantic_all"></a>}}
+\if{latex}{\out{\hypertarget{method-SearchResource-semantic_all}{}}}
+\subsection{Method \code{semantic_all()}}{
+Fetch all semantic search results with automatic pagination.
+\subsection{Usage}{
+\if{html}{\out{<div class="r">}}\preformatted{SearchResource$semantic_all(
+  query,
+  vocabulary_ids = NULL,
+  domain_ids = NULL,
+  standard_concept = NULL,
+  concept_class_id = NULL,
+  threshold = NULL,
+  page_size = 100,
+  max_pages = Inf,
+  progress = TRUE
+)}\if{html}{\out{</div>}}
+}
+
+\subsection{Arguments}{
+\if{html}{\out{<div class="arguments">}}
+\describe{
+\item{\code{query}}{Natural language search query (required).}
+
+\item{\code{vocabulary_ids}}{Filter by vocabulary IDs.}
+
+\item{\code{domain_ids}}{Filter by domain IDs.}
+
+\item{\code{standard_concept}}{Filter by standard concept ('S' or 'C').}
+
+\item{\code{concept_class_id}}{Filter by concept class ID.}
+
+\item{\code{threshold}}{Minimum similarity threshold (0.0-1.0).}
+
+\item{\code{page_size}}{Results per page. Default 100.}
+
+\item{\code{max_pages}}{Maximum pages to fetch. Default Inf.}
+
+\item{\code{progress}}{Show progress bar. Default \code{TRUE}.}
+}
+\if{html}{\out{</div>}}
+}
+}
+\if{html}{\out{<hr>}}
+\if{html}{\out{<a id="method-SearchResource-similar"></a>}}
+\if{latex}{\out{\hypertarget{method-SearchResource-similar}{}}}
+\subsection{Method \code{similar()}}{
+Find concepts similar to a reference concept or query.
+
+Must provide exactly one of: concept_id, concept_name, or query.
+\subsection{Usage}{
+\if{html}{\out{<div class="r">}}\preformatted{SearchResource$similar(
+  concept_id = NULL,
+  concept_name = NULL,
+  query = NULL,
+  algorithm = "hybrid",
+  similarity_threshold = 0.7,
+  page_size = 20,
+  vocabulary_ids = NULL,
+  domain_ids = NULL,
+  standard_concept = NULL,
+  include_invalid = NULL,
+  include_scores = NULL,
+  include_explanations = NULL
+)}\if{html}{\out{</div>}}
+}
+
+\subsection{Arguments}{
+\if{html}{\out{<div class="arguments">}}
+\describe{
+\item{\code{concept_id}}{Concept ID to find similar concepts for.}
+
+\item{\code{concept_name}}{Concept name to find similar concepts for.}
+
+\item{\code{query}}{Natural language query for semantic similarity.}
+
+\item{\code{algorithm}}{One of 'semantic', 'lexical', or 'hybrid' (default).}
+
+\item{\code{similarity_threshold}}{Minimum similarity (0.0-1.0). Default 0.7.}
+
+\item{\code{page_size}}{Max results (max 1000). Default 20.}
+
+\item{\code{vocabulary_ids}}{Filter by vocabulary IDs.}
+
+\item{\code{domain_ids}}{Filter by domain IDs.}
+
+\item{\code{standard_concept}}{Filter by standard concept flag ('S', 'C', or 'N').}
+
+\item{\code{include_invalid}}{Include invalid/deprecated concepts.}
+
+\item{\code{include_scores}}{Include detailed similarity scores.}
+
+\item{\code{include_explanations}}{Include similarity explanations.}
 }
 \if{html}{\out{</div>}}
 }

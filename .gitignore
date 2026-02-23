@@ -6,6 +6,7 @@
 .Ruserdata
 *.Rcheck/
 *.tar.gz
+dump.rdb
 
 # Build artifacts
 docs/
