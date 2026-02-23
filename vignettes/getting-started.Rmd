@@ -117,6 +117,77 @@ results <- client$search$basic(
 )
 ```
 
+## Semantic Search
+
+Search using natural language queries powered by neural embeddings:
+
+```{r semantic-search}
+# Natural language search - understands clinical intent
+results <- client$search$semantic("high blood sugar levels")
+for (r in results$data$results) {
+  cat(sprintf("%s (similarity: %.2f)\n", r$concept_name, r$similarity_score))
+}
+```
+
+Filter semantic search results:
+
+```{r semantic-filtered}
+results <- client$search$semantic(
+  "heart attack",
+  vocabulary_ids = "SNOMED",
+  domain_ids = "Condition",
+  threshold = 0.5
+)
+```
+
+Fetch all semantic search results with automatic pagination:
+
+```{r semantic-all}
+all_results <- client$search$semantic_all(
+  "chronic kidney disease",
+  page_size = 50,
+  max_pages = 5,
+  progress = TRUE
+)
+print(nrow(all_results))
+```
+
+## Similarity Search
+
+Find concepts similar to a reference concept:
+
+```{r similar-by-id}
+# Find concepts similar to Type 2 diabetes mellitus
+similar <- client$search$similar(concept_id = 201826)
+for (s in similar$similar_concepts) {
+  cat(sprintf("%s (score: %.2f)\n", s$concept_name, s$similarity_score))
+}
+```
+
+Search by natural language query with different algorithms:
+
+```{r similar-by-query}
+# Semantic similarity (neural embeddings)
+similar <- client$search$similar(
+  query = "high blood pressure",
+  algorithm = "semantic"
+)
+
+# Lexical similarity (string matching)
+similar <- client$search$similar(
+  query = "high blood pressure",
+  algorithm = "lexical"
+)
+
+# Hybrid (combined - default)
+similar <- client$search$similar(
+  query = "high blood pressure",
+  algorithm = "hybrid",
+  include_scores = TRUE,
+  include_explanations = TRUE
+)
+```
+
 ## Autocomplete
 
 Get suggestions for autocomplete:

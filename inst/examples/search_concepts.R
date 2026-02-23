@@ -175,6 +175,108 @@ for (c in concepts) {
 cat("\n")
 
 # ============================================================================
+# Semantic Search
+# ============================================================================
+
+cat("7. Semantic search (natural language)\n")
+cat("-------------------------------------\n")
+
+# Search using natural language - understands clinical intent
+results <- client$search$semantic("high blood sugar levels", page_size = 5)
+
+cat("Semantic results for 'high blood sugar levels':\n")
+for (r in results$data$results) {
+  cat(sprintf("  [%d] %s (similarity: %.2f)\n",
+              r$concept_id, r$concept_name, r$similarity_score))
+}
+cat("\n")
+
+# ============================================================================
+# Semantic Search with Filters
+# ============================================================================
+
+cat("8. Semantic search with filters\n")
+cat("-------------------------------\n")
+
+results <- client$search$semantic(
+  "heart attack",
+  vocabulary_ids = "SNOMED",
+  domain_ids = "Condition",
+  threshold = 0.5,
+  page_size = 5
+)
+
+cat("Filtered semantic results for 'heart attack':\n")
+for (r in results$data$results) {
+  cat(sprintf("  [%d] %s (similarity: %.2f)\n",
+              r$concept_id, r$concept_name, r$similarity_score))
+}
+cat("\n")
+
+# ============================================================================
+# Auto-Paginated Semantic Search
+# ============================================================================
+
+cat("9. Auto-paginated semantic search\n")
+cat("----------------------------------\n")
+
+all_results <- client$search$semantic_all(
+  "chronic kidney disease",
+  page_size = 10,
+  max_pages = 3,
+  progress = FALSE
+)
+
+cat(sprintf("Fetched %d concepts for 'chronic kidney disease':\n", nrow(all_results)))
+if (nrow(all_results) > 0) {
+  for (i in seq_len(min(5, nrow(all_results)))) {
+    cat(sprintf("  [%d] %s\n",
+                all_results$concept_id[i],
+                all_results$concept_name[i]))
+  }
+  if (nrow(all_results) > 5) {
+    cat(sprintf("  ... and %d more\n", nrow(all_results) - 5))
+  }
+}
+cat("\n")
+
+# ============================================================================
+# Similarity Search
+# ============================================================================
+
+cat("10. Similarity search\n")
+cat("---------------------\n")
+
+# Find concepts similar to Type 2 diabetes mellitus
+similar <- client$search$similar(
+  concept_id = 201826,
+  algorithm = "hybrid",
+  similarity_threshold = 0.6,
+  page_size = 5
+)
+
+cat("Concepts similar to 'Type 2 diabetes mellitus':\n")
+for (s in similar$similar_concepts) {
+  cat(sprintf("  [%d] %s (score: %.2f)\n",
+              s$concept_id, s$concept_name, s$similarity_score))
+}
+cat("\n")
+
+# Similarity by natural language query
+similar <- client$search$similar(
+  query = "high blood pressure",
+  algorithm = "semantic",
+  page_size = 5
+)
+
+cat("Concepts similar to 'high blood pressure' (semantic):\n")
+for (s in similar$similar_concepts) {
+  cat(sprintf("  [%d] %s (score: %.2f)\n",
+              s$concept_id, s$concept_name, s$similarity_score))
+}
+cat("\n")
+
+# ============================================================================
 # Done
 # ============================================================================
 

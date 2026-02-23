@@ -1,3 +1,19 @@
+# omophub 1.4.0
+
+## New Features
+
+* **Semantic search** (`semantic()`, `semantic_all()`): Natural language concept
+  search using neural embeddings. Search for clinical intent like "high blood
+  sugar levels" to find diabetes-related concepts. Supports filtering by
+  vocabulary, domain, standard concept, concept class, and minimum similarity
+  threshold. `semantic_all()` provides automatic pagination with progress bar.
+
+* **Similarity search** (`similar()`): Find concepts similar to a reference
+  concept ID, concept name, or natural language query. Three algorithm options:
+  `'semantic'` (neural embeddings), `'lexical'` (string matching), and
+  `'hybrid'` (combined). Configurable similarity threshold with optional
+  detailed scores and explanations.
+
 # omophub 1.3.0
 
 ## New Features

@@ -103,6 +103,12 @@ results <- client$search$semantic(
 
 # Fetch all results with auto-pagination
 all_results <- client$search$semantic_all("chronic kidney disease", page_size = 50)
+
+# Find concepts similar to a reference concept
+similar <- client$search$similar(concept_id = 201826, algorithm = "hybrid")
+for (s in similar$similar_concepts) {
+  cat(sprintf("%s (score: %.2f)\n", s$concept_name, s$similarity_score))
+}
 ```
 
 ## Use Cases
@@ -192,7 +198,7 @@ concepts_df %>%
 | Resource | Description | Key Methods |
 |----------|-------------|-------------|
 | `concepts` | Concept lookup and batch operations | `get()`, `get_by_code()`, `batch()`, `suggest()` |
-| `search` | Full-text and semantic search | `basic()`, `advanced()`, `semantic()`, `semantic_all()`, `basic_all()` |
+| `search` | Full-text and semantic search | `basic()`, `advanced()`, `semantic()`, `semantic_all()`, `similar()`, `basic_all()` |
 | `hierarchy` | Navigate concept relationships | `ancestors()`, `descendants()` |
 | `mappings` | Cross-vocabulary mappings | `get()`, `map()` |
 | `vocabularies` | Vocabulary metadata | `list()`, `get()`, `stats()` |
