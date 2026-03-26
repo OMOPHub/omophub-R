@@ -111,6 +111,29 @@ for (s in similar$similar_concepts) {
 }
 ```
 
+### Bulk Search
+
+Search for multiple terms in a single API call:
+
+```r
+# Bulk lexical search (up to 50 queries)
+results <- client$search$bulk_basic(list(
+  list(search_id = "q1", query = "diabetes mellitus"),
+  list(search_id = "q2", query = "hypertension"),
+  list(search_id = "q3", query = "aspirin")
+), defaults = list(vocabulary_ids = list("SNOMED"), page_size = 5))
+
+for (item in results$results) {
+  cat(sprintf("%s: %d results\n", item$search_id, length(item$results)))
+}
+
+# Bulk semantic search (up to 25 queries)
+results <- client$search$bulk_semantic(list(
+  list(search_id = "s1", query = "heart failure treatment options"),
+  list(search_id = "s2", query = "type 2 diabetes medication")
+), defaults = list(threshold = 0.5, page_size = 10))
+```
+
 ## Use Cases
 
 ### ETL & Data Pipelines
@@ -198,7 +221,7 @@ concepts_df %>%
 | Resource | Description | Key Methods |
 |----------|-------------|-------------|
 | `concepts` | Concept lookup and batch operations | `get()`, `get_by_code()`, `batch()`, `suggest()` |
-| `search` | Full-text and semantic search | `basic()`, `advanced()`, `semantic()`, `semantic_all()`, `similar()`, `basic_all()` |
+| `search` | Full-text and semantic search | `basic()`, `advanced()`, `semantic()`, `similar()`, `bulk_basic()`, `bulk_semantic()` |
 | `hierarchy` | Navigate concept relationships | `ancestors()`, `descendants()` |
 | `mappings` | Cross-vocabulary mappings | `get()`, `map()` |
 | `vocabularies` | Vocabulary metadata | `list()`, `get()`, `stats()` |

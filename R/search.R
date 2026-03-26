@@ -328,6 +328,66 @@ SearchResource <- R6::R6Class(
     },
 
     #' @description
+    #' Execute multiple lexical searches in a single request (max 50).
+    #'
+    #' @param searches List of search inputs. Each element is a named list with:
+    #'   - `search_id` (required): Unique ID to match results.
+    #'   - `query` (required): Search query string.
+    #'   - `vocabulary_ids`, `domain_ids`, `concept_class_ids`: Optional filters.
+    #'   - `standard_concept`, `include_invalid`, `page_size`: Optional params.
+    #' @param defaults Named list of default filters applied to all searches.
+    #'   Individual search-level values override defaults.
+    #'
+    #' @returns List with `results` (per-search), `total_searches`,
+    #'   `completed_searches`, `failed_searches`.
+    bulk_basic = function(searches, defaults = NULL) {
+      checkmate::assert_list(searches, min.len = 1, max.len = 50)
+      for (s in searches) {
+        checkmate::assert_list(s)
+        checkmate::assert_string(s$search_id, min.chars = 1)
+        checkmate::assert_string(s$query, min.chars = 1)
+      }
+
+      body <- list(searches = searches)
+      if (!is.null(defaults)) {
+        checkmate::assert_list(defaults)
+        body$defaults <- defaults
+      }
+
+      perform_post(private$.base_req, "search/bulk", body = body)
+    },
+
+    #' @description
+    #' Execute multiple semantic searches in a single request (max 25).
+    #'
+    #' @param searches List of search inputs. Each element is a named list with:
+    #'   - `search_id` (required): Unique ID to match results.
+    #'   - `query` (required): Natural language query (1-500 chars).
+    #'   - `threshold`: Per-search similarity threshold (0-1).
+    #'   - `page_size`: Per-search result limit (1-50).
+    #'   - `vocabulary_ids`, `domain_ids`, `standard_concept`: Optional filters.
+    #' @param defaults Named list of default filters applied to all searches.
+    #'
+    #' @returns List with `results` (per-search), `total_searches`,
+    #'   `completed_count`, `failed_count`, `total_duration`.
+    bulk_semantic = function(searches, defaults = NULL) {
+      checkmate::assert_list(searches, min.len = 1, max.len = 25)
+      for (s in searches) {
+        checkmate::assert_list(s)
+        checkmate::assert_string(s$search_id, min.chars = 1)
+        checkmate::assert_string(s$query, min.chars = 1, max.chars = 500)
+      }
+
+      body <- list(searches = searches)
+      if (!is.null(defaults)) {
+        checkmate::assert_list(defaults)
+        body$defaults <- defaults
+      }
+
+      perform_post(private$.base_req, "search/semantic-bulk", body = body)
+    },
+
+    #' @description
     #' Find concepts similar to a reference concept or query.
     #'
     #' Must provide exactly one of: concept_id, concept_name, or query.
@@ -419,7 +479,7 @@ SearchResource <- R6::R6Class(
     #' Print resource information.
     print = function() {
       cat("<OMOPHub SearchResource>\n")
-      cat("  Methods: basic, basic_all, advanced, autocomplete, semantic, semantic_all, similar\n")
+      cat("  Methods: basic, basic_all, advanced, autocomplete, semantic, semantic_all, bulk_basic, bulk_semantic, similar\n")
       invisible(self)
     }
   ),

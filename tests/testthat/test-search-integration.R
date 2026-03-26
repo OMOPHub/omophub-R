@@ -315,3 +315,76 @@ test_that("similar with vocabulary filter works", {
     }
   }
 })
+
+# ==============================================================================
+# Bulk lexical search integration tests
+# ==============================================================================
+
+test_that("bulk_basic search works with multiple queries", {
+  skip_if_no_integration_key()
+  client <- integration_client()
+
+  result <- client$search$bulk_basic(list(
+    list(search_id = "q1", query = "diabetes mellitus"),
+    list(search_id = "q2", query = "hypertension"),
+    list(search_id = "q3", query = "aspirin")
+  ), defaults = list(page_size = 5))
+
+  results <- extract_data(result, "results")
+  expect_length(results, 3)
+
+  for (item in results) {
+    expect_true(item$search_id %in% c("q1", "q2", "q3"))
+    expect_equal(item$status, "completed")
+    expect_gt(length(item$results), 0)
+  }
+})
+
+test_that("bulk_basic search works with vocabulary filter", {
+  skip_if_no_integration_key()
+  client <- integration_client()
+
+  result <- client$search$bulk_basic(
+    list(list(search_id = "snomed1", query = "diabetes")),
+    defaults = list(vocabulary_ids = list("SNOMED"), page_size = 3)
+  )
+
+  results <- extract_data(result, "results")
+  expect_length(results, 1)
+  expect_equal(results[[1]]$status, "completed")
+})
+
+# ==============================================================================
+# Bulk semantic search integration tests
+# ==============================================================================
+
+test_that("bulk_semantic search works with multiple queries", {
+  skip_if_no_integration_key()
+  client <- integration_client()
+
+  result <- client$search$bulk_semantic(list(
+    list(search_id = "s1", query = "heart failure treatment options"),
+    list(search_id = "s2", query = "type 2 diabetes medication")
+  ), defaults = list(threshold = 0.5, page_size = 5))
+
+  results <- extract_data(result, "results")
+  expect_length(results, 2)
+
+  for (item in results) {
+    expect_true(item$search_id %in% c("s1", "s2"))
+    expect_equal(item$status, "completed")
+  }
+})
+
+test_that("bulk_semantic search works with single query", {
+  skip_if_no_integration_key()
+  client <- integration_client()
+
+  result <- client$search$bulk_semantic(
+    list(list(search_id = "one", query = "elevated blood pressure", threshold = 0.5))
+  )
+
+  results <- extract_data(result, "results")
+  expect_length(results, 1)
+  expect_equal(results[[1]]$search_id, "one")
+})

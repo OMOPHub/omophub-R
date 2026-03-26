@@ -915,3 +915,122 @@ test_that("SearchResource print method includes new methods", {
   expect_output(print(resource), "similar")
 })
 
+# ==============================================================================
+# bulk_basic() method
+# ==============================================================================
+
+test_that("search$bulk_basic validates searches", {
+  base_req <- httr2::request("https://api.omophub.com/v1")
+  resource <- SearchResource$new(base_req)
+
+  expect_error(resource$bulk_basic(list()))  # Empty list
+  expect_error(resource$bulk_basic(list(list(search_id = "", query = "test"))))  # Empty search_id
+  expect_error(resource$bulk_basic(list(list(search_id = "q1", query = ""))))  # Empty query
+})
+
+test_that("search$bulk_basic calls correct endpoint", {
+  base_req <- httr2::request("https://api.omophub.com/v1")
+  resource <- SearchResource$new(base_req)
+
+  called_with <- NULL
+  local_mocked_bindings(
+    perform_post = function(req, path, body = NULL) {
+      called_with <<- list(path = path, body = body)
+      list(results = list(), total_searches = 0, completed_searches = 0, failed_searches = 0)
+    }
+  )
+
+  resource$bulk_basic(list(
+    list(search_id = "q1", query = "diabetes"),
+    list(search_id = "q2", query = "hypertension")
+  ))
+
+  expect_equal(called_with$path, "search/bulk")
+  expect_length(called_with$body$searches, 2)
+  expect_equal(called_with$body$searches[[1]]$search_id, "q1")
+  expect_equal(called_with$body$searches[[2]]$query, "hypertension")
+})
+
+test_that("search$bulk_basic passes defaults", {
+  base_req <- httr2::request("https://api.omophub.com/v1")
+  resource <- SearchResource$new(base_req)
+
+  called_with <- NULL
+  local_mocked_bindings(
+    perform_post = function(req, path, body = NULL) {
+      called_with <<- list(path = path, body = body)
+      list(results = list(), total_searches = 1, completed_searches = 1, failed_searches = 0)
+    }
+  )
+
+  resource$bulk_basic(
+    list(list(search_id = "q1", query = "diabetes")),
+    defaults = list(vocabulary_ids = list("SNOMED"), page_size = 5)
+  )
+
+  expect_equal(called_with$body$defaults$vocabulary_ids, list("SNOMED"))
+  expect_equal(called_with$body$defaults$page_size, 5)
+})
+
+# ==============================================================================
+# bulk_semantic() method
+# ==============================================================================
+
+test_that("search$bulk_semantic validates searches", {
+  base_req <- httr2::request("https://api.omophub.com/v1")
+  resource <- SearchResource$new(base_req)
+
+  expect_error(resource$bulk_semantic(list()))  # Empty list
+  expect_error(resource$bulk_semantic(list(list(search_id = "", query = "test"))))  # Empty search_id
+  expect_error(resource$bulk_semantic(list(list(search_id = "s1", query = ""))))  # Empty query
+})
+
+test_that("search$bulk_semantic calls correct endpoint", {
+  base_req <- httr2::request("https://api.omophub.com/v1")
+  resource <- SearchResource$new(base_req)
+
+  called_with <- NULL
+  local_mocked_bindings(
+    perform_post = function(req, path, body = NULL) {
+      called_with <<- list(path = path, body = body)
+      list(results = list(), total_searches = 0, completed_count = 0, failed_count = 0)
+    }
+  )
+
+  resource$bulk_semantic(list(
+    list(search_id = "s1", query = "heart failure treatment")
+  ))
+
+  expect_equal(called_with$path, "search/semantic-bulk")
+  expect_length(called_with$body$searches, 1)
+  expect_equal(called_with$body$searches[[1]]$search_id, "s1")
+})
+
+test_that("search$bulk_semantic passes defaults", {
+  base_req <- httr2::request("https://api.omophub.com/v1")
+  resource <- SearchResource$new(base_req)
+
+  called_with <- NULL
+  local_mocked_bindings(
+    perform_post = function(req, path, body = NULL) {
+      called_with <<- list(path = path, body = body)
+      list(results = list(), total_searches = 1, completed_count = 1, failed_count = 0)
+    }
+  )
+
+  resource$bulk_semantic(
+    list(list(search_id = "s1", query = "diabetes medications")),
+    defaults = list(threshold = 0.8, page_size = 10)
+  )
+
+  expect_equal(called_with$body$defaults$threshold, 0.8)
+  expect_equal(called_with$body$defaults$page_size, 10)
+})
+
+test_that("SearchResource print includes bulk methods", {
+  base_req <- httr2::request("https://api.omophub.com/v1")
+  resource <- SearchResource$new(base_req)
+
+  expect_output(print(resource), "bulk_basic")
+  expect_output(print(resource), "bulk_semantic")
+})
