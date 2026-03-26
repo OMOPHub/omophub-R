@@ -2,6 +2,8 @@
 
 ## omophub 1.4.0
 
+CRAN release: 2026-02-23
+
 ### New Features
 
 - **Semantic search** (`semantic()`, `semantic_all()`): Natural language
