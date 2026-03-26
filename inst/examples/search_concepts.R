@@ -277,6 +277,79 @@ for (s in similar$similar_concepts) {
 cat("\n")
 
 # ============================================================================
+# Bulk Lexical Search
+# ============================================================================
+
+cat("11. Bulk lexical search (multiple queries in one call)\n")
+cat("------------------------------------------------------\n")
+
+# Search for multiple terms at once (up to 50)
+results <- client$search$bulk_basic(list(
+  list(search_id = "q1", query = "diabetes mellitus"),
+  list(search_id = "q2", query = "hypertension"),
+  list(search_id = "q3", query = "aspirin")
+), defaults = list(vocabulary_ids = list("SNOMED"), page_size = 3))
+
+cat("Bulk search results:\n")
+for (item in results$results) {
+  cat(sprintf("  %s: %d results (%s)\n",
+              item$search_id, length(item$results), item$status))
+}
+cat("\n")
+
+# ============================================================================
+# Bulk Semantic Search
+# ============================================================================
+
+cat("12. Bulk semantic search (multiple NLP queries)\n")
+cat("------------------------------------------------\n")
+
+# Search for multiple natural-language queries at once (up to 25)
+results <- client$search$bulk_semantic(list(
+  list(search_id = "s1", query = "heart failure treatment options"),
+  list(search_id = "s2", query = "type 2 diabetes medication"),
+  list(search_id = "s3", query = "elevated blood pressure")
+), defaults = list(threshold = 0.5, page_size = 5))
+
+cat("Bulk semantic results:\n")
+for (item in results$results) {
+  n_results <- item$result_count %||% length(item$results)
+  cat(sprintf("  %s: %d results (%s)\n",
+              item$search_id, n_results, item$status))
+
+  # Show top result for each query
+  if (length(item$results) > 0) {
+    top <- item$results[[1]]
+    cat(sprintf("    Top: %s (score: %.2f)\n",
+                top$concept_name, top$similarity_score))
+  }
+}
+cat("\n")
+
+# ============================================================================
+# Bulk Search with Per-Query Overrides
+# ============================================================================
+
+cat("13. Bulk search with per-query filters\n")
+cat("--------------------------------------\n")
+
+# Defaults apply to all, but individual searches can override
+results <- client$search$bulk_basic(list(
+  list(search_id = "conditions", query = "diabetes", domain_ids = list("Condition")),
+  list(search_id = "drugs", query = "metformin", domain_ids = list("Drug"))
+), defaults = list(vocabulary_ids = list("SNOMED", "RxNorm"), page_size = 3))
+
+for (item in results$results) {
+  cat(sprintf("  %s:\n", item$search_id))
+  for (c in item$results) {
+    cat(sprintf("    [%d] %s (%s/%s)\n",
+                c$concept_id, c$concept_name,
+                c$vocabulary_id, c$domain_id))
+  }
+}
+cat("\n")
+
+# ============================================================================
 # Done
 # ============================================================================
 

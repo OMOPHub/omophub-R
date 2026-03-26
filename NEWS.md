@@ -1,3 +1,17 @@
+# omophub 1.5.0
+
+## New Features
+
+* **Bulk lexical search** (`bulk_basic()`): Execute up to 50 keyword searches
+  in a single API call. Supports shared default filters for vocabulary, domain,
+  and other parameters. Each search is identified by a unique `search_id` for
+  result matching. Maps to `POST /v1/search/bulk`.
+
+* **Bulk semantic search** (`bulk_semantic()`): Execute up to 25 natural-language
+  searches using neural embeddings in a single call. Supports per-search
+  similarity thresholds and shared defaults. Query length validated at 1-500
+  characters. Maps to `POST /v1/search/semantic-bulk`.
+
 # omophub 1.4.0
 
 ## New Features

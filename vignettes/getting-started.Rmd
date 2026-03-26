@@ -188,6 +188,53 @@ similar <- client$search$similar(
 )
 ```
 
+## Bulk Search
+
+Search for multiple queries in a single API call — much faster than individual requests when you have many terms to look up.
+
+### Bulk Lexical Search
+
+Execute up to 50 keyword searches at once:
+
+```{r bulk-basic}
+results <- client$search$bulk_basic(list(
+  list(search_id = "q1", query = "diabetes mellitus"),
+  list(search_id = "q2", query = "hypertension"),
+  list(search_id = "q3", query = "aspirin")
+), defaults = list(vocabulary_ids = list("SNOMED"), page_size = 5))
+
+# Each result is matched by search_id
+for (item in results$results) {
+  cat(sprintf("%s: %d results\n", item$search_id, length(item$results)))
+}
+```
+
+### Bulk Semantic Search
+
+Execute up to 25 natural-language searches using neural embeddings:
+
+```{r bulk-semantic}
+results <- client$search$bulk_semantic(list(
+  list(search_id = "s1", query = "heart failure treatment options"),
+  list(search_id = "s2", query = "type 2 diabetes medication")
+), defaults = list(threshold = 0.5, page_size = 10))
+
+for (item in results$results) {
+  cat(sprintf("%s: %d results\n", item$search_id,
+              item$result_count %||% length(item$results)))
+}
+```
+
+Defaults apply to all searches; per-search values override them:
+
+```{r bulk-overrides}
+# Different domains per query, shared vocabulary filter
+results <- client$search$bulk_basic(list(
+  list(search_id = "cond", query = "diabetes", domain_ids = list("Condition")),
+  list(search_id = "drug", query = "metformin", domain_ids = list("Drug"))
+), defaults = list(vocabulary_ids = list("SNOMED", "RxNorm"), page_size = 5))
+```
+
 ## Autocomplete
 
 Get suggestions for autocomplete:
