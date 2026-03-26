@@ -1,0 +1,25 @@
+R/search.R
+  fbf8eddf7d63a736 331-389,482
+README.md
+  fbf8eddf7d63a736 114-136,224
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.1.19",
+  "base_commit_sha": "7fda72c7fdad06174b3d30625a9d9cf04f46f2f0",
+  "prompts": {
+    "fbf8eddf7d63a736": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "b7194bf1-48e2-427b-93c7-45db94416fa3",
+        "model": "claude-opus-4-6"
+      },
+      "human_author": "alex-omophub <sdk@omophub.com>",
+      "messages": [],
+      "total_additions": 86,
+      "total_deletions": 3,
+      "accepted_lines": 85,
+      "overriden_lines": 0
+    }
+  }
+}
