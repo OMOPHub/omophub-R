@@ -2,6 +2,8 @@
 
 ## omophub 1.5.0
 
+CRAN release: 2026-03-26
+
 ### New Features
 
 - **Bulk lexical search** (`bulk_basic()`): Execute up to 50 keyword
