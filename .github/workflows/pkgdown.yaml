@@ -10,6 +10,7 @@ name: pkgdown
 jobs:
   pkgdown:
     runs-on: ubuntu-latest
+    timeout-minutes: 15
     concurrency:
       group: pkgdown-${{ github.event_name != 'pull_request' || github.run_id }}
     env:
@@ -31,6 +32,7 @@ jobs:
         with:
           extra-packages: any::pkgdown, local::.
           needs: website
+          cache-version: 2
 
       - name: Build site
         run: pkgdown::build_site_github_pages(new_process = FALSE, install = FALSE)
