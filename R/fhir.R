@@ -92,6 +92,13 @@ FhirResource <- R6::R6Class(
                              recommendations_limit = 5L,
                              include_quality = FALSE) {
       stopifnot(is.list(codings), length(codings) >= 1, length(codings) <= 100)
+      if (!all(vapply(codings, is.list, logical(1)))) {
+        cli::cli_abort(c(
+          "{.arg codings} must be a list of coding lists.",
+          "i" = "Each element should be a list with {.field system}, {.field code}, etc.",
+          "i" = "Example: {.code list(list(system = \"http://snomed.info/sct\", code = \"44054006\"))}"
+        ))
+      }
 
       body <- list(codings = codings)
       if (!is.null(resource_type)) body$resource_type <- resource_type
@@ -127,6 +134,13 @@ FhirResource <- R6::R6Class(
                                         recommendations_limit = 5L,
                                         include_quality = FALSE) {
       stopifnot(is.list(coding), length(coding) >= 1, length(coding) <= 20)
+      if (!all(vapply(coding, is.list, logical(1)))) {
+        cli::cli_abort(c(
+          "{.arg coding} must be a list of coding lists.",
+          "i" = "Each element should be a list with {.field system} and {.field code}.",
+          "i" = "Example: {.code list(list(system = \"http://snomed.info/sct\", code = \"44054006\"))}"
+        ))
+      }
 
       body <- list(coding = coding)
       if (!is.null(text)) body$text <- text

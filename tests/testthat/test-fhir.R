@@ -203,6 +203,28 @@ test_that("fhir$resolve_batch validates codings length", {
   expect_error(resource$resolve_batch(list()))
 })
 
+test_that("fhir$resolve_batch rejects a single coding (not list-of-lists)", {
+  base_req <- httr2::request("https://api.omophub.com/v1")
+  resource <- FhirResource$new(base_req)
+
+  # A single coding object (not wrapped in an outer list) should fail
+  expect_error(
+    resource$resolve_batch(list(system = "http://snomed.info/sct", code = "44054006")),
+    "list of coding lists"
+  )
+})
+
+test_that("fhir$resolve_codeable_concept rejects a single coding (not list-of-lists)", {
+  base_req <- httr2::request("https://api.omophub.com/v1")
+  resource <- FhirResource$new(base_req)
+
+  # A single coding object (not wrapped in an outer list) should fail
+  expect_error(
+    resource$resolve_codeable_concept(list(system = "http://snomed.info/sct", code = "44054006")),
+    "list of coding lists"
+  )
+})
+
 # ==============================================================================
 # resolve_codeable_concept()
 # ==============================================================================
