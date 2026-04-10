@@ -10,15 +10,15 @@
 ## Citation
 
 Source:
-[`DESCRIPTION`](https://github.com/omopHub/omophub-R/blob/v1.5.0/DESCRIPTION)
+[`DESCRIPTION`](https://github.com/omopHub/omophub-R/blob/main/DESCRIPTION)
 
 Chen A (2026). *omophub: R Client for the 'OMOPHub' Medical Vocabulary
-API*. R package version 1.5.0, <https://github.com/omopHub/omophub-R>.
+API*. R package version 1.6.0, <https://github.com/omopHub/omophub-R>.
 
     @Manual{,
       title = {omophub: R Client for the 'OMOPHub' Medical Vocabulary API},
       author = {Alex Chen},
       year = {2026},
-      note = {R package version 1.5.0},
+      note = {R package version 1.6.0},
       url = {https://github.com/omopHub/omophub-R},
     }

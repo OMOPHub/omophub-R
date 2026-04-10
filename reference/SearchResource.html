@@ -7,7 +7,7 @@
 
     <a class="navbar-brand me-2" href="../index.html">omophub</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">1.5.0</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">1.6.0</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -32,7 +32,7 @@
   <main id="main" class="col-md-9"><div class="page-header">
 
       <h1>Search Resource</h1>
-      <small class="dont-index">Source: <a href="https://github.com/omopHub/omophub-R/blob/v1.5.0/R/search.R" class="external-link"><code>R/search.R</code></a></small>
+      <small class="dont-index">Source: <a href="https://github.com/omopHub/omophub-R/blob/main/R/search.R" class="external-link"><code>R/search.R</code></a></small>
       <div class="d-none name"><code>SearchResource.Rd</code></div>
     </div>
 
@@ -49,6 +49,10 @@
 <p>Autocomplete suggestions.</p>
 <p>List with results and pagination metadata.</p>
 <p>A tibble of all matching concepts with similarity scores.</p>
+<p>List with <code>results</code> (per-search), <code>total_searches</code>,
+<code>completed_searches</code>, <code>failed_searches</code>.</p>
+<p>List with <code>results</code> (per-search), <code>total_searches</code>,
+<code>completed_count</code>, <code>failed_count</code>, <code>total_duration</code>.</p>
 <p>List with similar_concepts and search_metadata.</p>
     </div>
     <div class="section level2">
@@ -68,6 +72,8 @@
 <li><p><a href="#method-SearchResource-autocomplete"><code>SearchResource$autocomplete()</code></a></p></li>
 <li><p><a href="#method-SearchResource-semantic"><code>SearchResource$semantic()</code></a></p></li>
 <li><p><a href="#method-SearchResource-semantic_all"><code>SearchResource$semantic_all()</code></a></p></li>
+<li><p><a href="#method-SearchResource-bulk_basic"><code>SearchResource$bulk_basic()</code></a></p></li>
+<li><p><a href="#method-SearchResource-bulk_semantic"><code>SearchResource$bulk_semantic()</code></a></p></li>
 <li><p><a href="#method-SearchResource-similar"><code>SearchResource$similar()</code></a></p></li>
 <li><p><a href="#method-SearchResource-print"><code>SearchResource$print()</code></a></p></li>
 <li><p><a href="#method-SearchResource-clone"><code>SearchResource$clone()</code></a></p></li>
@@ -415,11 +421,61 @@
 </dl><p></p></div>
 </div>
 
+</div><p></p><hr><a id="method-SearchResource-bulk_basic"></a><div class="section">
+<h3 id="method-bulk-basic-">Method <code>bulk_basic()</code><a class="anchor" aria-label="anchor" href="#method-bulk-basic-"></a></h3>
+<p>Execute multiple lexical searches in a single request (max 50).</p><div class="section">
+<h4 id="usage-7">Usage<a class="anchor" aria-label="anchor" href="#usage-7"></a></h4>
+<p></p><div class="r"><div class="sourceCode"><pre><code><span><span class="va">SearchResource</span><span class="op">$</span><span class="fu">bulk_basic</span><span class="op">(</span><span class="va">searches</span>, defaults <span class="op">=</span> <span class="cn">NULL</span><span class="op">)</span></span></code></pre></div><p></p></div>
+</div>
+
+<div class="section">
+<h4 id="arguments-7">Arguments<a class="anchor" aria-label="anchor" href="#arguments-7"></a></h4>
+<p></p><div class="arguments"><dl><dt><code>searches</code></dt>
+<dd><p>List of search inputs. Each element is a named list with:</p><ul><li><p><code>search_id</code> (required): Unique ID to match results.</p></li>
+<li><p><code>query</code> (required): Search query string.</p></li>
+<li><p><code>vocabulary_ids</code>, <code>domain_ids</code>, <code>concept_class_ids</code>: Optional filters.</p></li>
+<li><p><code>standard_concept</code>, <code>include_invalid</code>, <code>page_size</code>: Optional params.</p></li>
+</ul></dd>
+
+
+<dt><code>defaults</code></dt>
+<dd><p>Named list of default filters applied to all searches.
+Individual search-level values override defaults.</p></dd>
+
+
+</dl><p></p></div>
+</div>
+
+</div><p></p><hr><a id="method-SearchResource-bulk_semantic"></a><div class="section">
+<h3 id="method-bulk-semantic-">Method <code>bulk_semantic()</code><a class="anchor" aria-label="anchor" href="#method-bulk-semantic-"></a></h3>
+<p>Execute multiple semantic searches in a single request (max 25).</p><div class="section">
+<h4 id="usage-8">Usage<a class="anchor" aria-label="anchor" href="#usage-8"></a></h4>
+<p></p><div class="r"><div class="sourceCode"><pre><code><span><span class="va">SearchResource</span><span class="op">$</span><span class="fu">bulk_semantic</span><span class="op">(</span><span class="va">searches</span>, defaults <span class="op">=</span> <span class="cn">NULL</span><span class="op">)</span></span></code></pre></div><p></p></div>
+</div>
+
+<div class="section">
+<h4 id="arguments-8">Arguments<a class="anchor" aria-label="anchor" href="#arguments-8"></a></h4>
+<p></p><div class="arguments"><dl><dt><code>searches</code></dt>
+<dd><p>List of search inputs. Each element is a named list with:</p><ul><li><p><code>search_id</code> (required): Unique ID to match results.</p></li>
+<li><p><code>query</code> (required): Natural language query (1-500 chars).</p></li>
+<li><p><code>threshold</code>: Per-search similarity threshold (0-1).</p></li>
+<li><p><code>page_size</code>: Per-search result limit (1-50).</p></li>
+<li><p><code>vocabulary_ids</code>, <code>domain_ids</code>, <code>standard_concept</code>: Optional filters.</p></li>
+</ul></dd>
+
+
+<dt><code>defaults</code></dt>
+<dd><p>Named list of default filters applied to all searches.</p></dd>
+
+
+</dl><p></p></div>
+</div>
+
 </div><p></p><hr><a id="method-SearchResource-similar"></a><div class="section">
 <h3 id="method-similar-">Method <code>similar()</code><a class="anchor" aria-label="anchor" href="#method-similar-"></a></h3>
 <p>Find concepts similar to a reference concept or query.</p>
 <p>Must provide exactly one of: concept_id, concept_name, or query.</p><div class="section">
-<h4 id="usage-7">Usage<a class="anchor" aria-label="anchor" href="#usage-7"></a></h4>
+<h4 id="usage-9">Usage<a class="anchor" aria-label="anchor" href="#usage-9"></a></h4>
 <p></p><div class="r"><div class="sourceCode"><pre><code><span><span class="va">SearchResource</span><span class="op">$</span><span class="fu">similar</span><span class="op">(</span></span>
 <span>  concept_id <span class="op">=</span> <span class="cn">NULL</span>,</span>
 <span>  concept_name <span class="op">=</span> <span class="cn">NULL</span>,</span>
@@ -437,7 +493,7 @@
 </div>
 
 <div class="section">
-<h4 id="arguments-7">Arguments<a class="anchor" aria-label="anchor" href="#arguments-7"></a></h4>
+<h4 id="arguments-9">Arguments<a class="anchor" aria-label="anchor" href="#arguments-9"></a></h4>
 <p></p><div class="arguments"><dl><dt><code>concept_id</code></dt>
 <dd><p>Concept ID to find similar concepts for.</p></dd>
 
@@ -492,7 +548,7 @@
 </div><p></p><hr><a id="method-SearchResource-print"></a><div class="section">
 <h3 id="method-print-">Method <code><a href="https://rdrr.io/r/base/print.html" class="external-link">print()</a></code><a class="anchor" aria-label="anchor" href="#method-print-"></a></h3>
 <p>Print resource information.</p><div class="section">
-<h4 id="usage-8">Usage<a class="anchor" aria-label="anchor" href="#usage-8"></a></h4>
+<h4 id="usage-10">Usage<a class="anchor" aria-label="anchor" href="#usage-10"></a></h4>
 <p></p><div class="r"><div class="sourceCode"><pre><code><span><span class="va">SearchResource</span><span class="op">$</span><span class="fu">print</span><span class="op">(</span><span class="op">)</span></span></code></pre></div><p></p></div>
 </div>
 
@@ -500,12 +556,12 @@
 </div><p></p><hr><a id="method-SearchResource-clone"></a><div class="section">
 <h3 id="method-clone-">Method <code>clone()</code><a class="anchor" aria-label="anchor" href="#method-clone-"></a></h3>
 <p>The objects of this class are cloneable with this method.</p><div class="section">
-<h4 id="usage-9">Usage<a class="anchor" aria-label="anchor" href="#usage-9"></a></h4>
+<h4 id="usage-11">Usage<a class="anchor" aria-label="anchor" href="#usage-11"></a></h4>
 <p></p><div class="r"><div class="sourceCode"><pre><code><span><span class="va">SearchResource</span><span class="op">$</span><span class="fu">clone</span><span class="op">(</span>deep <span class="op">=</span> <span class="cn">FALSE</span><span class="op">)</span></span></code></pre></div><p></p></div>
 </div>
 
 <div class="section">
-<h4 id="arguments-8">Arguments<a class="anchor" aria-label="anchor" href="#arguments-8"></a></h4>
+<h4 id="arguments-10">Arguments<a class="anchor" aria-label="anchor" href="#arguments-10"></a></h4>
 <p></p><div class="arguments"><dl><dt><code>deep</code></dt>
 <dd><p>Whether to make a deep clone.</p></dd>
 

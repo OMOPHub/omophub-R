@@ -9,6 +9,7 @@
 <url><loc>https://omophub.github.io/omophub-R/news/index.html</loc></url>
 <url><loc>https://omophub.github.io/omophub-R/reference/ConceptsResource.html</loc></url>
 <url><loc>https://omophub.github.io/omophub-R/reference/DomainsResource.html</loc></url>
+<url><loc>https://omophub.github.io/omophub-R/reference/FhirResource.html</loc></url>
 <url><loc>https://omophub.github.io/omophub-R/reference/HierarchyResource.html</loc></url>
 <url><loc>https://omophub.github.io/omophub-R/reference/MappingsResource.html</loc></url>
 <url><loc>https://omophub.github.io/omophub-R/reference/OMOPHubClient.html</loc></url>
@@ -21,6 +22,7 @@
 <url><loc>https://omophub.github.io/omophub-R/reference/abort_validation.html</loc></url>
 <url><loc>https://omophub.github.io/omophub-R/reference/bool_to_str.html</loc></url>
 <url><loc>https://omophub.github.io/omophub-R/reference/build_request.html</loc></url>
+<url><loc>https://omophub.github.io/omophub-R/reference/compact_list.html</loc></url>
 <url><loc>https://omophub.github.io/omophub-R/reference/dot-onAttach.html</loc></url>
 <url><loc>https://omophub.github.io/omophub-R/reference/dot-onLoad.html</loc></url>
 <url><loc>https://omophub.github.io/omophub-R/reference/extract_error_message.html</loc></url>

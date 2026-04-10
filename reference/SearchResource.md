@@ -16,6 +16,12 @@ List with results and pagination metadata.
 
 A tibble of all matching concepts with similarity scores.
 
+List with `results` (per-search), `total_searches`,
+`completed_searches`, `failed_searches`.
+
+List with `results` (per-search), `total_searches`, `completed_count`,
+`failed_count`, `total_duration`.
+
 List with similar_concepts and search_metadata.
 
 ## Note
@@ -40,6 +46,10 @@ supported.
 - [`SearchResource$semantic()`](#method-SearchResource-semantic)
 
 - [`SearchResource$semantic_all()`](#method-SearchResource-semantic_all)
+
+- [`SearchResource$bulk_basic()`](#method-SearchResource-bulk_basic)
+
+- [`SearchResource$bulk_semantic()`](#method-SearchResource-bulk_semantic)
 
 - [`SearchResource$similar()`](#method-SearchResource-similar)
 
@@ -390,6 +400,67 @@ Fetch all semantic search results with automatic pagination.
 - `progress`:
 
   Show progress bar. Default `TRUE`.
+
+------------------------------------------------------------------------
+
+### Method `bulk_basic()`
+
+Execute multiple lexical searches in a single request (max 50).
+
+#### Usage
+
+    SearchResource$bulk_basic(searches, defaults = NULL)
+
+#### Arguments
+
+- `searches`:
+
+  List of search inputs. Each element is a named list with:
+
+  - `search_id` (required): Unique ID to match results.
+
+  - `query` (required): Search query string.
+
+  - `vocabulary_ids`, `domain_ids`, `concept_class_ids`: Optional
+    filters.
+
+  - `standard_concept`, `include_invalid`, `page_size`: Optional params.
+
+- `defaults`:
+
+  Named list of default filters applied to all searches. Individual
+  search-level values override defaults.
+
+------------------------------------------------------------------------
+
+### Method `bulk_semantic()`
+
+Execute multiple semantic searches in a single request (max 25).
+
+#### Usage
+
+    SearchResource$bulk_semantic(searches, defaults = NULL)
+
+#### Arguments
+
+- `searches`:
+
+  List of search inputs. Each element is a named list with:
+
+  - `search_id` (required): Unique ID to match results.
+
+  - `query` (required): Natural language query (1-500 chars).
+
+  - `threshold`: Per-search similarity threshold (0-1).
+
+  - `page_size`: Per-search result limit (1-50).
+
+  - `vocabulary_ids`, `domain_ids`, `standard_concept`: Optional
+    filters.
+
+- `defaults`:
+
+  Named list of default filters applied to all searches.
 
 ------------------------------------------------------------------------
 

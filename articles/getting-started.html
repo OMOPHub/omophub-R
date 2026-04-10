@@ -20,7 +20,7 @@
 
     <a class="navbar-brand me-2" href="../index.html">omophub</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">1.5.0</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">1.6.0</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -58,7 +58,7 @@
       <h1>Getting Started with omophub</h1>
             
       
-      <small class="dont-index">Source: <a href="https://github.com/omopHub/omophub-R/blob/v1.5.0/vignettes/getting-started.Rmd" class="external-link"><code>vignettes/getting-started.Rmd</code></a></small>
+      <small class="dont-index">Source: <a href="https://github.com/omopHub/omophub-R/blob/main/vignettes/getting-started.Rmd" class="external-link"><code>vignettes/getting-started.Rmd</code></a></small>
       <div class="d-none name"><code>getting-started.Rmd</code></div>
     </div>
 
@@ -77,7 +77,7 @@ demonstrates basic usage patterns.</p>
 <p>Install from GitHub:</p>
 <div class="sourceCode" id="cb1"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="co"># install.packages("devtools")</span></span>
-<span><span class="fu">devtools</span><span class="fu">::</span><span class="fu"><a href="https://devtools.r-lib.org/reference/install-deprecated.html" class="external-link">install_github</a></span><span class="op">(</span><span class="st">"omophub/omophub-R"</span><span class="op">)</span></span></code></pre></div>
+<span><span class="fu">devtools</span><span class="fu">::</span><span class="fu">install_github</span><span class="op">(</span><span class="st">"omophub/omophub-R"</span><span class="op">)</span></span></code></pre></div>
 </div>
 <div class="section level2">
 <h2 id="authentication">Authentication<a class="anchor" aria-label="anchor" href="#authentication"></a>
@@ -353,6 +353,62 @@ embeddings:</p>
 <span>    <span class="fu"><a href="https://rdrr.io/r/base/message.html" class="external-link">message</a></span><span class="op">(</span><span class="st">"API error: "</span>, <span class="va">e</span><span class="op">$</span><span class="va">message</span><span class="op">)</span></span>
 <span>  <span class="op">}</span></span>
 <span><span class="op">)</span></span></code></pre></div>
+</div>
+<div class="section level2">
+<h2 id="fhir-to-omop-resolution">FHIR-to-OMOP Resolution<a class="anchor" aria-label="anchor" href="#fhir-to-omop-resolution"></a>
+</h2>
+<p>The FHIR resolver translates FHIR coded values to OMOP standard
+concepts in a single call — handling URI mapping, code lookup,
+<code>Maps to</code> traversal, and CDM target table assignment
+automatically.</p>
+<div class="section level3">
+<h3 id="single-coding">Single Coding<a class="anchor" aria-label="anchor" href="#single-coding"></a>
+</h3>
+<div class="sourceCode" id="cb26"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="va">result</span> <span class="op">&lt;-</span> <span class="va">client</span><span class="op">$</span><span class="va">fhir</span><span class="op">$</span><span class="fu">resolve</span><span class="op">(</span></span>
+<span>  system <span class="op">=</span> <span class="st">"http://snomed.info/sct"</span>,</span>
+<span>  code <span class="op">=</span> <span class="st">"44054006"</span>,</span>
+<span>  resource_type <span class="op">=</span> <span class="st">"Condition"</span></span>
+<span><span class="op">)</span></span>
+<span><span class="fu"><a href="https://rdrr.io/r/base/cat.html" class="external-link">cat</a></span><span class="op">(</span><span class="va">result</span><span class="op">$</span><span class="va">resolution</span><span class="op">$</span><span class="va">standard_concept</span><span class="op">$</span><span class="va">concept_name</span><span class="op">)</span></span>
+<span><span class="fu"><a href="https://rdrr.io/r/base/cat.html" class="external-link">cat</a></span><span class="op">(</span><span class="va">result</span><span class="op">$</span><span class="va">resolution</span><span class="op">$</span><span class="va">target_table</span><span class="op">)</span>   <span class="co"># "condition_occurrence"</span></span>
+<span><span class="fu"><a href="https://rdrr.io/r/base/cat.html" class="external-link">cat</a></span><span class="op">(</span><span class="va">result</span><span class="op">$</span><span class="va">resolution</span><span class="op">$</span><span class="va">mapping_type</span><span class="op">)</span>   <span class="co"># "direct"</span></span></code></pre></div>
+</div>
+<div class="section level3">
+<h3 id="non-standard-code-automatic-maps-to-traversal">Non-Standard Code (Automatic Maps-to Traversal)<a class="anchor" aria-label="anchor" href="#non-standard-code-automatic-maps-to-traversal"></a>
+</h3>
+<div class="sourceCode" id="cb27"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="va">result</span> <span class="op">&lt;-</span> <span class="va">client</span><span class="op">$</span><span class="va">fhir</span><span class="op">$</span><span class="fu">resolve</span><span class="op">(</span></span>
+<span>  system <span class="op">=</span> <span class="st">"http://hl7.org/fhir/sid/icd-10-cm"</span>,</span>
+<span>  code <span class="op">=</span> <span class="st">"E11.9"</span></span>
+<span><span class="op">)</span></span>
+<span><span class="fu"><a href="https://rdrr.io/r/base/cat.html" class="external-link">cat</a></span><span class="op">(</span><span class="va">result</span><span class="op">$</span><span class="va">resolution</span><span class="op">$</span><span class="va">mapping_type</span><span class="op">)</span>                    <span class="co"># "mapped"</span></span>
+<span><span class="fu"><a href="https://rdrr.io/r/base/cat.html" class="external-link">cat</a></span><span class="op">(</span><span class="va">result</span><span class="op">$</span><span class="va">resolution</span><span class="op">$</span><span class="va">standard_concept</span><span class="op">$</span><span class="va">vocabulary_id</span><span class="op">)</span>  <span class="co"># "SNOMED"</span></span></code></pre></div>
+</div>
+<div class="section level3">
+<h3 id="batch-resolution">Batch Resolution<a class="anchor" aria-label="anchor" href="#batch-resolution"></a>
+</h3>
+<div class="sourceCode" id="cb28"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="va">batch</span> <span class="op">&lt;-</span> <span class="va">client</span><span class="op">$</span><span class="va">fhir</span><span class="op">$</span><span class="fu">resolve_batch</span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/list.html" class="external-link">list</a></span><span class="op">(</span></span>
+<span>  <span class="fu"><a href="https://rdrr.io/r/base/list.html" class="external-link">list</a></span><span class="op">(</span>system <span class="op">=</span> <span class="st">"http://snomed.info/sct"</span>, code <span class="op">=</span> <span class="st">"44054006"</span><span class="op">)</span>,</span>
+<span>  <span class="fu"><a href="https://rdrr.io/r/base/list.html" class="external-link">list</a></span><span class="op">(</span>system <span class="op">=</span> <span class="st">"http://loinc.org"</span>, code <span class="op">=</span> <span class="st">"2339-0"</span><span class="op">)</span></span>
+<span><span class="op">)</span><span class="op">)</span></span>
+<span><span class="fu"><a href="https://rdrr.io/r/base/cat.html" class="external-link">cat</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/sprintf.html" class="external-link">sprintf</a></span><span class="op">(</span><span class="st">"Resolved: %d/%d\n"</span>, <span class="va">batch</span><span class="op">$</span><span class="va">summary</span><span class="op">$</span><span class="va">resolved</span>, <span class="va">batch</span><span class="op">$</span><span class="va">summary</span><span class="op">$</span><span class="va">total</span><span class="op">)</span><span class="op">)</span></span></code></pre></div>
+</div>
+<div class="section level3">
+<h3 id="codeableconcept-with-vocabulary-preference">CodeableConcept with Vocabulary Preference<a class="anchor" aria-label="anchor" href="#codeableconcept-with-vocabulary-preference"></a>
+</h3>
+<div class="sourceCode" id="cb29"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="va">result</span> <span class="op">&lt;-</span> <span class="va">client</span><span class="op">$</span><span class="va">fhir</span><span class="op">$</span><span class="fu">resolve_codeable_concept</span><span class="op">(</span></span>
+<span>  coding <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/list.html" class="external-link">list</a></span><span class="op">(</span></span>
+<span>    <span class="fu"><a href="https://rdrr.io/r/base/list.html" class="external-link">list</a></span><span class="op">(</span>system <span class="op">=</span> <span class="st">"http://snomed.info/sct"</span>, code <span class="op">=</span> <span class="st">"44054006"</span><span class="op">)</span>,</span>
+<span>    <span class="fu"><a href="https://rdrr.io/r/base/list.html" class="external-link">list</a></span><span class="op">(</span>system <span class="op">=</span> <span class="st">"http://hl7.org/fhir/sid/icd-10-cm"</span>, code <span class="op">=</span> <span class="st">"E11.9"</span><span class="op">)</span></span>
+<span>  <span class="op">)</span>,</span>
+<span>  resource_type <span class="op">=</span> <span class="st">"Condition"</span></span>
+<span><span class="op">)</span></span>
+<span><span class="co"># SNOMED wins over ICD-10-CM per OHDSI preference</span></span>
+<span><span class="fu"><a href="https://rdrr.io/r/base/cat.html" class="external-link">cat</a></span><span class="op">(</span><span class="va">result</span><span class="op">$</span><span class="va">best_match</span><span class="op">$</span><span class="va">resolution</span><span class="op">$</span><span class="va">source_concept</span><span class="op">$</span><span class="va">vocabulary_id</span><span class="op">)</span>  <span class="co"># "SNOMED"</span></span></code></pre></div>
+</div>
 </div>
 <div class="section level2">
 <h2 id="further-resources">Further Resources<a class="anchor" aria-label="anchor" href="#further-resources"></a>

@@ -55,6 +55,10 @@ The client provides access to these resources:
 
   Access to mapping operations.
 
+- `fhir`:
+
+  Access to FHIR-to-OMOP Concept Resolver operations.
+
 ## Methods
 
 ### Public methods
