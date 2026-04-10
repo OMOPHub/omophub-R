@@ -12,6 +12,7 @@ jobs:
     # Only run on push to main/develop, not on PRs (saves ~7-8 min per PR)
     if: github.event_name == 'push' || github.event_name == 'workflow_dispatch'
     runs-on: ubuntu-latest
+    timeout-minutes: 10
     env:
       GITHUB_PAT: ${{ secrets.GITHUB_TOKEN }}
       OMOPHUB_API_KEY: ${{ secrets.OMOPHUB_API_KEY }}
@@ -25,10 +26,16 @@ jobs:
           r-version: 'release'
           use-public-rspm: true
 
+      # Install only the runtime + test dependencies the integration tests
+      # actually need. The default `needs: check` pulls in all Suggests
+      # (rmarkdown, knitr, etc.) which require heavy system libraries
+      # (pandoc, libxml2-dev, cmake, libharfbuzz-dev, ...) and take 10+
+      # minutes to install. Integration tests only need httr2 + testthat.
       - uses: r-lib/actions/setup-r-dependencies@v2
         with:
           extra-packages: any::testthat, any::devtools
-          needs: check
+          dependencies: '"hard"'
+          cache-version: 2
 
       - name: Run integration tests
         run: |

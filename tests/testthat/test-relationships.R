@@ -116,3 +116,55 @@ test_that("relationships$types includes pagination options", {
   expect_equal(called_with$query$page, 2L)
   expect_equal(called_with$query$page_size, 50L)
 })
+
+# ==============================================================================
+# get() — multi-element vectors and remaining flags
+# ==============================================================================
+
+test_that("relationships$get passes multi-element vectors as CSV", {
+  base_req <- httr2::request("https://api.omophub.com/v1")
+  resource <- RelationshipsResource$new(base_req)
+
+  called_with <- NULL
+  local_mocked_bindings(
+    perform_get = function(req, path, query = NULL) {
+      called_with <<- list(query = query)
+      list()
+    }
+  )
+
+  resource$get(
+    201826,
+    relationship_ids = c("Is a", "Maps to"),
+    vocabulary_ids = c("SNOMED", "ICD10CM"),
+    domain_ids = c("Condition", "Drug")
+  )
+
+  expect_equal(called_with$query$relationship_ids, "Is a,Maps to")
+  expect_equal(called_with$query$vocabulary_ids, "SNOMED,ICD10CM")
+  expect_equal(called_with$query$domain_ids, "Condition,Drug")
+})
+
+test_that("relationships$get passes standard_only, include_reverse, and vocab_release", {
+  base_req <- httr2::request("https://api.omophub.com/v1")
+  resource <- RelationshipsResource$new(base_req)
+
+  called_with <- NULL
+  local_mocked_bindings(
+    perform_get = function(req, path, query = NULL) {
+      called_with <<- list(query = query)
+      list()
+    }
+  )
+
+  resource$get(
+    201826,
+    standard_only = TRUE,
+    include_reverse = TRUE,
+    vocab_release = "2025.2"
+  )
+
+  expect_equal(called_with$query$standard_only, "true")
+  expect_equal(called_with$query$include_reverse, "true")
+  expect_equal(called_with$query$vocab_release, "2025.2")
+})

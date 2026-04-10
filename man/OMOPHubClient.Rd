@@ -56,6 +56,8 @@ client <- OMOPHubClient$new(vocab_version = "2025.1")
 \item{\code{relationships}}{Access to relationship operations.}
 
 \item{\code{mappings}}{Access to mapping operations.}
+
+\item{\code{fhir}}{Access to FHIR-to-OMOP Concept Resolver operations.}
 }
 \if{html}{\out{</div>}}
 }

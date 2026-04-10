@@ -6,7 +6,7 @@
 \alias{omophub}
 \title{omophub: R Client for the 'OMOPHub' Medical Vocabulary API}
 \description{
-Provides an R interface to the 'OMOPHub' API for accessing 'OHDSI ATHENA' standardized medical vocabularies. Supports concept search, vocabulary exploration, hierarchy navigation, relationship queries, and concept mappings with automatic pagination and rate limiting.
+Provides an R interface to the 'OMOPHub' API for accessing 'OHDSI ATHENA' standardized medical vocabularies. Supports concept search, semantic search using neural embeddings, concept similarity, vocabulary exploration, hierarchy navigation, relationship queries, concept mappings, and FHIR-to-OMOP concept resolution with automatic pagination.
 
 Provides an R interface to the OMOPHub API for accessing OHDSI ATHENA
 standardized medical vocabularies. Supports concept search, vocabulary

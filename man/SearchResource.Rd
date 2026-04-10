@@ -16,6 +16,12 @@ List with results and pagination metadata.
 
 A tibble of all matching concepts with similarity scores.
 
+List with \code{results} (per-search), \code{total_searches},
+\code{completed_searches}, \code{failed_searches}.
+
+List with \code{results} (per-search), \code{total_searches},
+\code{completed_count}, \code{failed_count}, \code{total_duration}.
+
 List with similar_concepts and search_metadata.
 }
 \description{
@@ -35,6 +41,8 @@ When algorithm='semantic', only single vocabulary/domain filter supported.
 \item \href{#method-SearchResource-autocomplete}{\code{SearchResource$autocomplete()}}
 \item \href{#method-SearchResource-semantic}{\code{SearchResource$semantic()}}
 \item \href{#method-SearchResource-semantic_all}{\code{SearchResource$semantic_all()}}
+\item \href{#method-SearchResource-bulk_basic}{\code{SearchResource$bulk_basic()}}
+\item \href{#method-SearchResource-bulk_semantic}{\code{SearchResource$bulk_semantic()}}
 \item \href{#method-SearchResource-similar}{\code{SearchResource$similar()}}
 \item \href{#method-SearchResource-print}{\code{SearchResource$print()}}
 \item \href{#method-SearchResource-clone}{\code{SearchResource$clone()}}
@@ -299,6 +307,58 @@ Fetch all semantic search results with automatic pagination.
 \item{\code{max_pages}}{Maximum pages to fetch. Default Inf.}
 
 \item{\code{progress}}{Show progress bar. Default \code{TRUE}.}
+}
+\if{html}{\out{</div>}}
+}
+}
+\if{html}{\out{<hr>}}
+\if{html}{\out{<a id="method-SearchResource-bulk_basic"></a>}}
+\if{latex}{\out{\hypertarget{method-SearchResource-bulk_basic}{}}}
+\subsection{Method \code{bulk_basic()}}{
+Execute multiple lexical searches in a single request (max 50).
+\subsection{Usage}{
+\if{html}{\out{<div class="r">}}\preformatted{SearchResource$bulk_basic(searches, defaults = NULL)}\if{html}{\out{</div>}}
+}
+
+\subsection{Arguments}{
+\if{html}{\out{<div class="arguments">}}
+\describe{
+\item{\code{searches}}{List of search inputs. Each element is a named list with:
+\itemize{
+\item \code{search_id} (required): Unique ID to match results.
+\item \code{query} (required): Search query string.
+\item \code{vocabulary_ids}, \code{domain_ids}, \code{concept_class_ids}: Optional filters.
+\item \code{standard_concept}, \code{include_invalid}, \code{page_size}: Optional params.
+}}
+
+\item{\code{defaults}}{Named list of default filters applied to all searches.
+Individual search-level values override defaults.}
+}
+\if{html}{\out{</div>}}
+}
+}
+\if{html}{\out{<hr>}}
+\if{html}{\out{<a id="method-SearchResource-bulk_semantic"></a>}}
+\if{latex}{\out{\hypertarget{method-SearchResource-bulk_semantic}{}}}
+\subsection{Method \code{bulk_semantic()}}{
+Execute multiple semantic searches in a single request (max 25).
+\subsection{Usage}{
+\if{html}{\out{<div class="r">}}\preformatted{SearchResource$bulk_semantic(searches, defaults = NULL)}\if{html}{\out{</div>}}
+}
+
+\subsection{Arguments}{
+\if{html}{\out{<div class="arguments">}}
+\describe{
+\item{\code{searches}}{List of search inputs. Each element is a named list with:
+\itemize{
+\item \code{search_id} (required): Unique ID to match results.
+\item \code{query} (required): Natural language query (1-500 chars).
+\item \code{threshold}: Per-search similarity threshold (0-1).
+\item \code{page_size}: Per-search result limit (1-50).
+\item \code{vocabulary_ids}, \code{domain_ids}, \code{standard_concept}: Optional filters.
+}}
+
+\item{\code{defaults}}{Named list of default filters applied to all searches.}
 }
 \if{html}{\out{</div>}}
 }

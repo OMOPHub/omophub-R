@@ -1,3 +1,28 @@
+# omophub 1.6.0
+
+## New Features
+
+* **FHIR-to-OMOP Concept Resolver** (`client$fhir`): Translate FHIR coded
+  values into OMOP standard concepts, CDM target tables, and optional Phoebe
+  recommendations in a single API call.
+
+  - `resolve()`: Resolve a single FHIR `Coding` (system URI + code) or
+    text-only input via semantic search fallback. Returns the standard
+    concept, target CDM table, domain alignment check, and optional mapping
+    quality signal.
+
+  - `resolve_batch()`: Batch-resolve up to 100 FHIR codings per request with
+    inline per-item error reporting.
+
+  - `resolve_codeable_concept()`: Resolve a FHIR `CodeableConcept` with
+    multiple codings. Automatically picks the best match per OHDSI vocabulary
+    preference (SNOMED > RxNorm > LOINC > CVX > ICD-10). Falls back to the
+    `text` field via semantic search when no coding resolves.
+
+## Tests
+
+* Improved test coverage
+
 # omophub 1.5.0
 
 ## New Features

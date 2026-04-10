@@ -11,6 +11,7 @@ jobs:
   # Tests R release and devel on ubuntu-latest for quick feedback
   R-CMD-check-core:
     runs-on: ubuntu-latest
+    timeout-minutes: 20
     name: ubuntu-latest (R ${{ matrix.r }})
 
     strategy:
@@ -39,6 +40,7 @@ jobs:
         with:
           extra-packages: any::rcmdcheck, any::urlchecker
           needs: check
+          cache-version: 2
 
       - name: Check URLs
         if: matrix.r == 'release'
@@ -68,6 +70,7 @@ jobs:
   R-CMD-check-extended:
     if: github.event_name == 'push'
     runs-on: ${{ matrix.config.os }}
+    timeout-minutes: 25
     name: ${{ matrix.config.os }} (${{ matrix.config.r }})
     needs: [R-CMD-check-core]  # Run after core completes
 
@@ -100,6 +103,7 @@ jobs:
         with:
           extra-packages: any::rcmdcheck
           needs: check
+          cache-version: 2
 
       - uses: r-lib/actions/check-r-package@v2
         with:
