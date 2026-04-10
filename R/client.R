@@ -142,6 +142,14 @@ OMOPHubClient <- R6::R6Class(
         private$.mappings <- MappingsResource$new(private$.base_req)
       }
       private$.mappings
+    },
+
+    #' @field fhir Access to FHIR-to-OMOP Concept Resolver operations.
+    fhir = function() {
+      if (is.null(private$.fhir)) {
+        private$.fhir <- FhirResource$new(private$.base_req)
+      }
+      private$.fhir
     }
   ),
   private = list(
@@ -159,6 +167,7 @@ OMOPHubClient <- R6::R6Class(
     .domains = NULL,
     .hierarchy = NULL,
     .relationships = NULL,
-    .mappings = NULL
+    .mappings = NULL,
+    .fhir = NULL
   )
 )

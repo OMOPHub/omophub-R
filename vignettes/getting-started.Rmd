@@ -341,6 +341,60 @@ tryCatch(
 )
 ```
 
+## FHIR-to-OMOP Resolution
+
+The FHIR resolver translates FHIR coded values to OMOP standard concepts in a
+single call --- handling URI mapping, code lookup, `Maps to` traversal, and CDM
+target table assignment automatically.
+
+### Single Coding
+
+```{r fhir-resolve}
+result <- client$fhir$resolve(
+  system = "http://snomed.info/sct",
+  code = "44054006",
+  resource_type = "Condition"
+)
+cat(result$resolution$standard_concept$concept_name)
+cat(result$resolution$target_table)   # "condition_occurrence"
+cat(result$resolution$mapping_type)   # "direct"
+```
+
+### Non-Standard Code (Automatic Maps-to Traversal)
+
+```{r fhir-mapped}
+result <- client$fhir$resolve(
+  system = "http://hl7.org/fhir/sid/icd-10-cm",
+  code = "E11.9"
+)
+cat(result$resolution$mapping_type)                    # "mapped"
+cat(result$resolution$standard_concept$vocabulary_id)  # "SNOMED"
+```
+
+### Batch Resolution
+
+```{r fhir-batch}
+batch <- client$fhir$resolve_batch(list(
+  list(system = "http://snomed.info/sct", code = "44054006"),
+  list(system = "http://loinc.org", code = "2339-0")
+))
+cat(sprintf("Resolved: %d/%d\n", batch$summary$resolved, batch$summary$total))
+```
+
+### CodeableConcept with Vocabulary Preference
+
+```{r fhir-codeable}
+result <- client$fhir$resolve_codeable_concept(
+  coding = list(
+    list(system = "http://snomed.info/sct", code = "44054006"),
+    list(system = "http://hl7.org/fhir/sid/icd-10-cm", code = "E11.9")
+  ),
+  resource_type = "Condition"
+)
+# SNOMED wins over ICD-10-CM per OHDSI preference
+cat(result$best_match$resolution$source_concept$vocabulary_id)  # "SNOMED"
+```
+
 ## Further Resources
 
 - [OMOPHub API Documentation](https://docs.omophub.com)

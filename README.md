@@ -134,6 +134,48 @@ results <- client$search$bulk_semantic(list(
 ), defaults = list(threshold = 0.5, page_size = 10))
 ```
 
+## FHIR-to-OMOP Resolution
+
+Resolve FHIR coded values to OMOP standard concepts in one call:
+
+```r
+# Single FHIR Coding -> OMOP concept + CDM target table
+result <- client$fhir$resolve(
+  system = "http://snomed.info/sct",
+  code = "44054006",
+  resource_type = "Condition"
+)
+result$resolution$target_table
+# [1] "condition_occurrence"
+
+# ICD-10-CM -> traverses 'Maps to' automatically
+result <- client$fhir$resolve(
+  system = "http://hl7.org/fhir/sid/icd-10-cm",
+  code = "E11.9"
+)
+result$resolution$standard_concept$vocabulary_id
+# [1] "SNOMED"
+
+# Batch resolve up to 100 codings
+batch <- client$fhir$resolve_batch(list(
+  list(system = "http://snomed.info/sct", code = "44054006"),
+  list(system = "http://loinc.org", code = "2339-0"),
+  list(system = "http://www.nlm.nih.gov/research/umls/rxnorm", code = "197696")
+))
+cat(sprintf("Resolved %d/%d\n", batch$summary$resolved, batch$summary$total))
+
+# CodeableConcept with vocabulary preference (SNOMED wins over ICD-10)
+result <- client$fhir$resolve_codeable_concept(
+  coding = list(
+    list(system = "http://snomed.info/sct", code = "44054006"),
+    list(system = "http://hl7.org/fhir/sid/icd-10-cm", code = "E11.9")
+  ),
+  resource_type = "Condition"
+)
+result$best_match$resolution$source_concept$vocabulary_id
+# [1] "SNOMED"
+```
+
 ## Use Cases
 
 ### ETL & Data Pipelines
@@ -226,6 +268,7 @@ concepts_df %>%
 | `mappings` | Cross-vocabulary mappings | `get()`, `map()` |
 | `vocabularies` | Vocabulary metadata | `list()`, `get()`, `stats()` |
 | `domains` | Domain information | `list()`, `get()`, `concepts()` |
+| `fhir` | FHIR-to-OMOP resolution | `resolve()`, `resolve_batch()`, `resolve_codeable_concept()` |
 
 ## Pagination
 

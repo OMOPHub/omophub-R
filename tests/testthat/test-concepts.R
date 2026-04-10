@@ -71,6 +71,24 @@ test_that("concepts$get adds query params for options", {
   expect_equal(called_with$query$include_synonyms, "true")
 })
 
+test_that("concepts$get passes include_hierarchy and vocab_release", {
+  base_req <- httr2::request("https://api.omophub.com/v1")
+  resource <- ConceptsResource$new(base_req)
+
+  called_with <- NULL
+  local_mocked_bindings(
+    perform_get = function(req, path, query = NULL) {
+      called_with <<- list(query = query)
+      mock_concept()
+    }
+  )
+
+  resource$get(201826, include_hierarchy = TRUE, vocab_release = "2025.2")
+
+  expect_equal(called_with$query$include_hierarchy, "true")
+  expect_equal(called_with$query$vocab_release, "2025.2")
+})
+
 # ==============================================================================
 # get_by_code() method
 # ==============================================================================
@@ -99,6 +117,27 @@ test_that("concepts$get_by_code calls correct endpoint", {
   resource$get_by_code("SNOMED", "44054006")
 
   expect_equal(called_with$path, "concepts/by-code/SNOMED/44054006")
+})
+
+test_that("concepts$get_by_code passes include_hierarchy and vocab_release", {
+  base_req <- httr2::request("https://api.omophub.com/v1")
+  resource <- ConceptsResource$new(base_req)
+
+  called_with <- NULL
+  local_mocked_bindings(
+    perform_get = function(req, path, query = NULL) {
+      called_with <<- list(query = query)
+      mock_concept()
+    }
+  )
+
+  resource$get_by_code("SNOMED", "44054006",
+    include_hierarchy = TRUE,
+    vocab_release = "2025.2"
+  )
+
+  expect_equal(called_with$query$include_hierarchy, "true")
+  expect_equal(called_with$query$vocab_release, "2025.2")
 })
 
 # ==============================================================================
@@ -307,4 +346,126 @@ test_that("concepts$relationships includes optional filters", {
   expect_equal(called_with$query$relationship_ids, "Is a")
   expect_equal(called_with$query$vocabulary_ids, "SNOMED")
   expect_equal(called_with$query$include_invalid, "true")
+})
+
+test_that("concepts$suggest passes vocab_release", {
+  base_req <- httr2::request("https://api.omophub.com/v1")
+  resource <- ConceptsResource$new(base_req)
+
+  called_with <- NULL
+  local_mocked_bindings(
+    perform_get = function(req, path, query = NULL) {
+      called_with <<- list(query = query)
+      list()
+    }
+  )
+
+  resource$suggest("diabetes", vocab_release = "2025.2")
+
+  expect_equal(called_with$query$vocab_release, "2025.2")
+})
+
+test_that("concepts$related passes vocab_release", {
+  base_req <- httr2::request("https://api.omophub.com/v1")
+  resource <- ConceptsResource$new(base_req)
+
+  called_with <- NULL
+  local_mocked_bindings(
+    perform_get = function(req, path, query = NULL) {
+      called_with <<- list(query = query)
+      list()
+    }
+  )
+
+  resource$related(201826, vocab_release = "2025.2")
+
+  expect_equal(called_with$query$vocab_release, "2025.2")
+})
+
+test_that("concepts$relationships passes multi-element vectors and all flags", {
+  base_req <- httr2::request("https://api.omophub.com/v1")
+  resource <- ConceptsResource$new(base_req)
+
+  called_with <- NULL
+  local_mocked_bindings(
+    perform_get = function(req, path, query = NULL) {
+      called_with <<- list(query = query)
+      list()
+    }
+  )
+
+  resource$relationships(
+    201826,
+    relationship_ids = c("Is a", "Maps to"),
+    vocabulary_ids = c("SNOMED", "ICD10CM"),
+    domain_ids = c("Condition", "Drug"),
+    standard_only = TRUE,
+    include_reverse = TRUE,
+    vocab_release = "2025.2"
+  )
+
+  expect_equal(called_with$query$relationship_ids, "Is a,Maps to")
+  expect_equal(called_with$query$vocabulary_ids, "SNOMED,ICD10CM")
+  expect_equal(called_with$query$domain_ids, "Condition,Drug")
+  expect_equal(called_with$query$standard_only, "true")
+  expect_equal(called_with$query$include_reverse, "true")
+  expect_equal(called_with$query$vocab_release, "2025.2")
+})
+
+# ==============================================================================
+# recommended() method
+# ==============================================================================
+
+test_that("concepts$recommended calls correct endpoint with body", {
+  base_req <- httr2::request("https://api.omophub.com/v1")
+  resource <- ConceptsResource$new(base_req)
+
+  called_with <- NULL
+  local_mocked_bindings(
+    perform_post = function(req, path, body = NULL, query = NULL) {
+      called_with <<- list(path = path, body = body)
+      list()
+    }
+  )
+
+  resource$recommended(c(201826L, 4329847L))
+
+  expect_equal(called_with$path, "concepts/recommended")
+  expect_equal(called_with$body$concept_ids, c(201826L, 4329847L))
+  expect_true(called_with$body$standard_only)
+  expect_false(called_with$body$include_invalid)
+  expect_equal(called_with$body$page, 1L)
+  expect_equal(called_with$body$page_size, 100L)
+})
+
+test_that("concepts$recommended passes all optional filters", {
+  base_req <- httr2::request("https://api.omophub.com/v1")
+  resource <- ConceptsResource$new(base_req)
+
+  called_with <- NULL
+  local_mocked_bindings(
+    perform_post = function(req, path, body = NULL, query = NULL) {
+      called_with <<- list(body = body)
+      list()
+    }
+  )
+
+  resource$recommended(
+    c(201826L),
+    relationship_types = c("Has finding", "Associated finding"),
+    vocabulary_ids = c("SNOMED", "LOINC"),
+    domain_ids = c("Condition"),
+    standard_only = FALSE,
+    include_invalid = TRUE,
+    page = 2L,
+    page_size = 50L
+  )
+
+  expect_equal(called_with$body$relationship_types, c("Has finding", "Associated finding"))
+  expect_equal(called_with$body$vocabulary_ids, c("SNOMED", "LOINC"))
+  expect_equal(called_with$body$domain_ids, c("Condition"))
+  expect_false(called_with$body$standard_only)
+  expect_true(called_with$body$include_invalid)
+  expect_equal(called_with$body$page, 2L)
+  expect_equal(called_with$body$page_size, 50L)
 })
