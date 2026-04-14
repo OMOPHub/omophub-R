@@ -507,3 +507,68 @@ test_that("resolve_batch(as_tibble = TRUE) handles unusual scalar error shapes",
   expect_equal(nrow(tbl), 2L)
   expect_equal(tbl$status_detail, c("42", "TRUE"))
 })
+
+test_that("resolve_batch(as_tibble = TRUE) handles NULL and missing error", {
+  # Coverage for the `is.null(err)` early return: a failed item with no
+  # `error` field at all maps to NA_character_ in status_detail.
+  base_req <- httr2::request("https://api.omophub.com/v1")
+  resource <- FhirResource$new(base_req)
+
+  local_mocked_bindings(
+    perform_post = function(req, path, body = NULL, query = NULL) {
+      list(
+        results = list(
+          list(input = list(system = "http://snomed.info/sct", code = "a")),
+          list(error = NULL)
+        ),
+        summary = list(total = 2L, resolved = 0L, failed = 2L)
+      )
+    }
+  )
+
+  codings <- list(
+    list(system = "http://snomed.info/sct", code = "a"),
+    list(system = "http://snomed.info/sct", code = "b")
+  )
+
+  tbl <- resource$resolve_batch(codings, as_tibble = TRUE)
+  expect_equal(nrow(tbl), 2L)
+  expect_true(all(tbl$status == "failed"))
+  expect_true(all(is.na(tbl$status_detail)))
+})
+
+test_that("resolve_batch(as_tibble = TRUE) extracts message/code from list error", {
+  # Coverage for the structured-list error branch: picks the first
+  # usable of err$message, err$code, err$detail and returns it as
+  # status_detail rather than a flattened name=value concatenation.
+  base_req <- httr2::request("https://api.omophub.com/v1")
+  resource <- FhirResource$new(base_req)
+
+  local_mocked_bindings(
+    perform_post = function(req, path, body = NULL, query = NULL) {
+      list(
+        results = list(
+          list(error = list(
+            code = "concept_not_found",
+            message = "No matching OMOP concept"
+          )),
+          list(error = list(code = "vocabulary_restricted")),  # message missing
+          list(error = list(detail = "just a detail field"))   # only detail
+        ),
+        summary = list(total = 3L, resolved = 0L, failed = 3L)
+      )
+    }
+  )
+
+  codings <- list(
+    list(system = "http://snomed.info/sct", code = "a"),
+    list(system = "http://snomed.info/sct", code = "b"),
+    list(system = "http://snomed.info/sct", code = "c")
+  )
+
+  tbl <- resource$resolve_batch(codings, as_tibble = TRUE)
+  expect_equal(nrow(tbl), 3L)
+  expect_equal(tbl$status_detail[1], "No matching OMOP concept")  # message wins
+  expect_equal(tbl$status_detail[2], "vocabulary_restricted")     # code fallback
+  expect_equal(tbl$status_detail[3], "just a detail field")       # detail fallback
+})
