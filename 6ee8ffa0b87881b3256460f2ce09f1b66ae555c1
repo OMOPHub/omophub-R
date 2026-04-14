@@ -1,0 +1,29 @@
+tests/testthat/test-fhir.R
+  995c8e6367b1e02f 445-509
+inst/examples/error_handling.R
+  995c8e6367b1e02f 161-163,166-169,171-175,178-182,188,190-192,194
+inst/examples/navigate_hierarchy.R
+  995c8e6367b1e02f 137-140,142
+R/fhir.R
+  995c8e6367b1e02f 219-222
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.2.8",
+  "base_commit_sha": "6ee8ffa0b87881b3256460f2ce09f1b66ae555c1",
+  "prompts": {
+    "995c8e6367b1e02f": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "ea546814-6533-459a-8829-c1e8c71caab6",
+        "model": "claude-opus-4-6"
+      },
+      "human_author": "alex-omophub",
+      "messages": [],
+      "total_additions": 96,
+      "total_deletions": 16,
+      "accepted_lines": 473,
+      "overriden_lines": 0
+    }
+  }
+}
