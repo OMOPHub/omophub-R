@@ -23,6 +23,17 @@ reference:
       - set_api_key
       - has_api_key
 
+  - title: FHIR Resolution
+    desc: >
+      Translate FHIR coded values to OMOP standard concepts and CDM
+      target tables via the FHIR Concept Resolver, plus helpers for
+      interop with external FHIR client libraries.
+    contents:
+      - fhir_resolve
+      - fhir_resolve_batch
+      - fhir_resolve_codeable_concept
+      - omophub_fhir_url
+
   - title: Response Classes
     desc: S3 classes for API responses
     contents:
