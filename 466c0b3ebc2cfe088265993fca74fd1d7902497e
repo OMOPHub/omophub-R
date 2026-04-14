@@ -1,0 +1,39 @@
+R/fhir.R
+  995c8e6367b1e02f 204-221,242
+inst/examples/search_concepts.R
+  995c8e6367b1e02f 14-17,22
+inst/examples/fhir_resolver.R
+  995c8e6367b1e02f 1-327
+inst/examples/navigate_hierarchy.R
+  995c8e6367b1e02f 8,14-17,22,44-49,51,53,74,76,78,100,119-121,123,134-139,142-144,155-157,162,164-166,169-170,181-182,188,190-195,199-200,204
+inst/examples/fhir_interop.R
+  995c8e6367b1e02f 1-185
+inst/examples/map_between_vocabularies.R
+  995c8e6367b1e02f 14-17,22
+inst/examples/basic_usage.R
+  995c8e6367b1e02f 14-17,24-25
+inst/examples/error_handling.R
+  995c8e6367b1e02f 4,6-13,19-22,30,33,36-37,44-45,49,55,58-59,61-62,64-66,68-69,73-74,76,78,81,87,90-91,95,98-100,102-104,107,113,119-122,125-134,137,139,142,146,149,155,158-159,164-168,172-173,180,184,186,192,195-196,209,223,226-227,230,232-235,239,242-243,246-255
+vignettes/getting-started.Rmd
+  995c8e6367b1e02f 398-508
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.2.8",
+  "base_commit_sha": "466c0b3ebc2cfe088265993fca74fd1d7902497e",
+  "prompts": {
+    "995c8e6367b1e02f": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "ea546814-6533-459a-8829-c1e8c71caab6",
+        "model": "claude-opus-4-6"
+      },
+      "human_author": "alex-omophub",
+      "messages": [],
+      "total_additions": 818,
+      "total_deletions": 167,
+      "accepted_lines": 1194,
+      "overriden_lines": 0
+    }
+  }
+}
