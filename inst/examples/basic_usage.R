@@ -11,14 +11,18 @@
 
 library(omophub)
 
+# Null-coalescing operator (available in base R 4.4+; define locally for
+# compatibility with the R >= 4.1 package requirement).
+`%||%` <- function(a, b) if (is.null(a)) b else a
+
 # ============================================================================
 # Setup
 # ============================================================================
 
 # Initialize client (uses OMOPHUB_API_KEY environment variable)
 # You can also pass the API key directly:
-#   client <- omophub(api_key = "oh_your_api_key")
-client <- omophub()
+#   client <- OMOPHubClient$new(api_key = "oh_your_api_key")
+client <- OMOPHubClient$new()
 
 cat("OMOPHub R Client - Basic Usage Example\n")
 cat("======================================\n\n")

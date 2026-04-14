@@ -395,6 +395,117 @@ result <- client$fhir$resolve_codeable_concept(
 cat(result$best_match$resolution$source_concept$vocabulary_id)  # "SNOMED"
 ```
 
+### Tibble Output for Batch Resolution
+
+For `dplyr` / `tidyr` workflows, pass `as_tibble = TRUE` to get a flat
+tibble with one row per input coding and columns for the source and
+standard concepts, target CDM table, mapping type, and resolution status.
+This is the most ergonomic shape for ETL pipelines processing many codes:
+
+```{r fhir-batch-tibble}
+library(dplyr)
+
+tbl <- client$fhir$resolve_batch(
+  list(
+    list(system = "http://hl7.org/fhir/sid/icd-10-cm", code = "E11.9"),
+    list(system = "http://hl7.org/fhir/sid/icd-10-cm", code = "I10"),
+    list(system = "http://hl7.org/fhir/sid/icd-10-cm", code = "J45.909")
+  ),
+  as_tibble = TRUE
+)
+
+tbl |>
+  filter(status == "resolved") |>
+  select(source_code, standard_concept_name, target_table)
+```
+
+Failed rows are kept in-place with `status = "failed"` and the error
+text in `status_detail` --- you can filter them out rather than silently
+dropping them. The batch summary (`total` / `resolved` / `failed`) is
+attached as an attribute:
+
+```{r fhir-batch-summary}
+attr(tbl, "summary")
+```
+
+The default `as_tibble = FALSE` still returns the list-shaped
+`list(results, summary)`, so existing code keeps working unchanged.
+
+### Standalone Wrapper Functions
+
+For pipe-friendly workflows, `omophub` also exports standalone wrapper
+functions that take the client as their first argument. Both forms are
+fully supported --- pick whichever reads better for the surrounding
+code:
+
+```{r fhir-standalone-wrappers}
+# Equivalent to client$fhir$resolve()
+client |>
+  fhir_resolve(
+    system = "http://snomed.info/sct",
+    code = "44054006",
+    resource_type = "Condition"
+  )
+
+# Tibble-shaped batch in a pipe
+tbl <- client |>
+  fhir_resolve_batch(
+    codings = list(
+      list(system = "http://snomed.info/sct", code = "44054006"),
+      list(system = "http://loinc.org", code = "2339-0")
+    ),
+    as_tibble = TRUE
+  )
+
+client |>
+  fhir_resolve_codeable_concept(
+    coding = list(
+      list(system = "http://snomed.info/sct", code = "44054006"),
+      list(system = "http://hl7.org/fhir/sid/icd-10-cm", code = "E11.9")
+    ),
+    resource_type = "Condition"
+  )
+```
+
+### FHIR Client Interop with `omophub_fhir_url()`
+
+When you need raw FHIR `Parameters` / `Bundle` responses instead of the
+Concept Resolver envelope, `omophub_fhir_url()` returns the OMOPHub FHIR
+Terminology Service base URL so you can talk to it directly with
+`httr2` or `fhircrackr`. Supports FHIR versions `"r4"` (default),
+`"r4b"`, `"r5"`, and `"r6"`:
+
+```{r fhir-url-helper}
+omophub_fhir_url()
+#> "https://fhir.omophub.com/fhir/r4"
+
+omophub_fhir_url("r5")
+#> "https://fhir.omophub.com/fhir/r5"
+```
+
+Example: call `CodeSystem/$lookup` directly with `httr2`:
+
+```{r fhir-httr2}
+library(httr2)
+
+resp <- request(omophub_fhir_url()) |>
+  req_url_path_append("CodeSystem/$lookup") |>
+  req_url_query(
+    system = "http://snomed.info/sct",
+    code = "44054006"
+  ) |>
+  req_headers(Authorization = paste("Bearer", Sys.getenv("OMOPHUB_API_KEY"))) |>
+  req_perform()
+
+params <- resp_body_json(resp)
+# Raw FHIR Parameters resource with the concept display and designations.
+```
+
+Use `client$fhir$resolve()` (or `fhir_resolve()`) when you want
+OMOP-enriched answers (standard concept, CDM target table, mapping
+quality). Use `omophub_fhir_url()` + `httr2` when you need FHIR-native
+responses for FHIR-native tooling.
+
 ## Further Resources
 
 - [OMOPHub API Documentation](https://docs.omophub.com)
