@@ -11,7 +11,7 @@ concepts, CDM target tables, and optional Phoebe recommendations."></head><body>
 
     <a class="navbar-brand me-2" href="../index.html">omophub</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">1.6.0</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">1.7.0</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -36,7 +36,7 @@ concepts, CDM target tables, and optional Phoebe recommendations."></head><body>
   <main id="main" class="col-md-9"><div class="page-header">
 
       <h1>FHIR-to-OMOP Concept Resolver</h1>
-      <small class="dont-index">Source: <a href="https://github.com/omopHub/omophub-R/blob/v1.6.0/R/fhir.R" class="external-link"><code>R/fhir.R</code></a></small>
+      <small class="dont-index">Source: <a href="https://github.com/omopHub/omophub-R/blob/main/R/fhir.R" class="external-link"><code>R/fhir.R</code></a></small>
       <div class="d-none name"><code>FhirResource.Rd</code></div>
     </div>
 
@@ -51,8 +51,10 @@ concepts, CDM target tables, and optional Phoebe recommendations.</p>
     <h2 id="value">Value<a class="anchor" aria-label="anchor" href="#value"></a></h2>
     <p>A list with <code>input</code> and <code>resolution</code> containing source/standard
 concepts, target CDM table, and optional enrichments.</p>
-<p>A list with <code>results</code> (per-item) and <code>summary</code>
-(total/resolved/failed).</p>
+<p>When <code>as_tibble = FALSE</code> (default), a list with <code>results</code>
+(per-item) and <code>summary</code> (total/resolved/failed). When
+<code>as_tibble = TRUE</code>, a <a href="https://tibble.tidyverse.org/reference/tibble.html" class="external-link">tibble::tibble</a> suitable for
+<code>dplyr</code>/<code>tidyr</code> pipelines.</p>
 <p>A list with <code>best_match</code>, <code>alternatives</code>, and <code>unresolved</code>.</p>
     </div>
     <div class="section level2">
@@ -159,7 +161,8 @@ or <code>display</code>.</p><div class="section">
 <span>  resource_type <span class="op">=</span> <span class="cn">NULL</span>,</span>
 <span>  include_recommendations <span class="op">=</span> <span class="cn">FALSE</span>,</span>
 <span>  recommendations_limit <span class="op">=</span> <span class="fl">5L</span>,</span>
-<span>  include_quality <span class="op">=</span> <span class="cn">FALSE</span></span>
+<span>  include_quality <span class="op">=</span> <span class="cn">FALSE</span>,</span>
+<span>  as_tibble <span class="op">=</span> <span class="cn">FALSE</span></span>
 <span><span class="op">)</span></span></code></pre></div><p></p></div>
 </div>
 
@@ -184,6 +187,15 @@ or <code>display</code>.</p><div class="section">
 
 <dt><code>include_quality</code></dt>
 <dd><p>Logical. Default <code>FALSE</code>.</p></dd>
+
+
+<dt><code>as_tibble</code></dt>
+<dd><p>Logical. When <code>TRUE</code>, returns a <a href="https://tibble.tidyverse.org/reference/tibble.html" class="external-link">tibble::tibble</a>
+with one row per input coding and flat columns for the source
+concept, standard concept, target CDM table, mapping type, and
+resolution status. The batch <code>summary</code> (total/resolved/failed)
+is attached as <code>attr(result, "summary")</code>. Default <code>FALSE</code>
+keeps the legacy list-shaped return.</p></dd>
 
 
 </dl><p></p></div>

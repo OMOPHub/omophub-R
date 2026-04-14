@@ -10,7 +10,10 @@ recommendations.
 A list with `input` and `resolution` containing source/standard
 concepts, target CDM table, and optional enrichments.
 
-A list with `results` (per-item) and `summary` (total/resolved/failed).
+When `as_tibble = FALSE` (default), a list with `results` (per-item) and
+`summary` (total/resolved/failed). When `as_tibble = TRUE`, a
+[tibble::tibble](https://tibble.tidyverse.org/reference/tibble.html)
+suitable for `dplyr`/`tidyr` pipelines.
 
 A list with `best_match`, `alternatives`, and `unresolved`.
 
@@ -128,7 +131,8 @@ Failed items are reported inline without failing the batch.
       resource_type = NULL,
       include_recommendations = FALSE,
       recommendations_limit = 5L,
-      include_quality = FALSE
+      include_quality = FALSE,
+      as_tibble = FALSE
     )
 
 #### Arguments
@@ -153,6 +157,16 @@ Failed items are reported inline without failing the batch.
 - `include_quality`:
 
   Logical. Default `FALSE`.
+
+- `as_tibble`:
+
+  Logical. When `TRUE`, returns a
+  [tibble::tibble](https://tibble.tidyverse.org/reference/tibble.html)
+  with one row per input coding and flat columns for the source concept,
+  standard concept, target CDM table, mapping type, and resolution
+  status. The batch `summary` (total/resolved/failed) is attached as
+  `attr(result, "summary")`. Default `FALSE` keeps the legacy
+  list-shaped return.
 
 ------------------------------------------------------------------------
 

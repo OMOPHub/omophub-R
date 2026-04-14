@@ -27,6 +27,10 @@
 <url><loc>https://omophub.github.io/omophub-R/reference/dot-onLoad.html</loc></url>
 <url><loc>https://omophub.github.io/omophub-R/reference/extract_error_message.html</loc></url>
 <url><loc>https://omophub.github.io/omophub-R/reference/extract_pagination.html</loc></url>
+<url><loc>https://omophub.github.io/omophub-R/reference/fhir_batch_to_tibble.html</loc></url>
+<url><loc>https://omophub.github.io/omophub-R/reference/fhir_resolve.html</loc></url>
+<url><loc>https://omophub.github.io/omophub-R/reference/fhir_resolve_batch.html</loc></url>
+<url><loc>https://omophub.github.io/omophub-R/reference/fhir_resolve_codeable_concept.html</loc></url>
 <url><loc>https://omophub.github.io/omophub-R/reference/get_api_key.html</loc></url>
 <url><loc>https://omophub.github.io/omophub-R/reference/has_api_key.html</loc></url>
 <url><loc>https://omophub.github.io/omophub-R/reference/index.html</loc></url>
@@ -38,6 +42,7 @@
 <url><loc>https://omophub.github.io/omophub-R/reference/new_omophub_relationships.html</loc></url>
 <url><loc>https://omophub.github.io/omophub-R/reference/new_omophub_vocabularies.html</loc></url>
 <url><loc>https://omophub.github.io/omophub-R/reference/omophub-package.html</loc></url>
+<url><loc>https://omophub.github.io/omophub-R/reference/omophub_fhir_url.html</loc></url>
 <url><loc>https://omophub.github.io/omophub-R/reference/paginate_all.html</loc></url>
 <url><loc>https://omophub.github.io/omophub-R/reference/paginate_lazy.html</loc></url>
 <url><loc>https://omophub.github.io/omophub-R/reference/perform_get.html</loc></url>

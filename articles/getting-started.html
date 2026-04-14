@@ -20,7 +20,7 @@
 
     <a class="navbar-brand me-2" href="../index.html">omophub</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">1.6.0</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">1.7.0</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -58,7 +58,7 @@
       <h1>Getting Started with omophub</h1>
             
       
-      <small class="dont-index">Source: <a href="https://github.com/omopHub/omophub-R/blob/v1.6.0/vignettes/getting-started.Rmd" class="external-link"><code>vignettes/getting-started.Rmd</code></a></small>
+      <small class="dont-index">Source: <a href="https://github.com/omopHub/omophub-R/blob/main/vignettes/getting-started.Rmd" class="external-link"><code>vignettes/getting-started.Rmd</code></a></small>
       <div class="d-none name"><code>getting-started.Rmd</code></div>
     </div>
 
@@ -77,7 +77,7 @@ demonstrates basic usage patterns.</p>
 <p>Install from GitHub:</p>
 <div class="sourceCode" id="cb1"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="co"># install.packages("devtools")</span></span>
-<span><span class="fu">devtools</span><span class="fu">::</span><span class="fu">install_github</span><span class="op">(</span><span class="st">"omophub/omophub-R"</span><span class="op">)</span></span></code></pre></div>
+<span><span class="fu">devtools</span><span class="fu">::</span><span class="fu"><a href="https://devtools.r-lib.org/reference/install-deprecated.html" class="external-link">install_github</a></span><span class="op">(</span><span class="st">"omophub/omophub-R"</span><span class="op">)</span></span></code></pre></div>
 </div>
 <div class="section level2">
 <h2 id="authentication">Authentication<a class="anchor" aria-label="anchor" href="#authentication"></a>
@@ -408,6 +408,113 @@ automatically.</p>
 <span><span class="op">)</span></span>
 <span><span class="co"># SNOMED wins over ICD-10-CM per OHDSI preference</span></span>
 <span><span class="fu"><a href="https://rdrr.io/r/base/cat.html" class="external-link">cat</a></span><span class="op">(</span><span class="va">result</span><span class="op">$</span><span class="va">best_match</span><span class="op">$</span><span class="va">resolution</span><span class="op">$</span><span class="va">source_concept</span><span class="op">$</span><span class="va">vocabulary_id</span><span class="op">)</span>  <span class="co"># "SNOMED"</span></span></code></pre></div>
+</div>
+<div class="section level3">
+<h3 id="tibble-output-for-batch-resolution">Tibble Output for Batch Resolution<a class="anchor" aria-label="anchor" href="#tibble-output-for-batch-resolution"></a>
+</h3>
+<p>For <code>dplyr</code> / <code>tidyr</code> workflows, pass
+<code>as_tibble = TRUE</code> to get a flat tibble with one row per
+input coding and columns for the source and standard concepts, target
+CDM table, mapping type, and resolution status. This is the most
+ergonomic shape for ETL pipelines processing many codes:</p>
+<div class="sourceCode" id="cb30"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="https://dplyr.tidyverse.org" class="external-link">dplyr</a></span><span class="op">)</span></span>
+<span></span>
+<span><span class="va">tbl</span> <span class="op">&lt;-</span> <span class="va">client</span><span class="op">$</span><span class="va">fhir</span><span class="op">$</span><span class="fu">resolve_batch</span><span class="op">(</span></span>
+<span>  <span class="fu"><a href="https://rdrr.io/r/base/list.html" class="external-link">list</a></span><span class="op">(</span></span>
+<span>    <span class="fu"><a href="https://rdrr.io/r/base/list.html" class="external-link">list</a></span><span class="op">(</span>system <span class="op">=</span> <span class="st">"http://hl7.org/fhir/sid/icd-10-cm"</span>, code <span class="op">=</span> <span class="st">"E11.9"</span><span class="op">)</span>,</span>
+<span>    <span class="fu"><a href="https://rdrr.io/r/base/list.html" class="external-link">list</a></span><span class="op">(</span>system <span class="op">=</span> <span class="st">"http://hl7.org/fhir/sid/icd-10-cm"</span>, code <span class="op">=</span> <span class="st">"I10"</span><span class="op">)</span>,</span>
+<span>    <span class="fu"><a href="https://rdrr.io/r/base/list.html" class="external-link">list</a></span><span class="op">(</span>system <span class="op">=</span> <span class="st">"http://hl7.org/fhir/sid/icd-10-cm"</span>, code <span class="op">=</span> <span class="st">"J45.909"</span><span class="op">)</span></span>
+<span>  <span class="op">)</span>,</span>
+<span>  as_tibble <span class="op">=</span> <span class="cn">TRUE</span></span>
+<span><span class="op">)</span></span>
+<span></span>
+<span><span class="va">tbl</span> <span class="op">|&gt;</span></span>
+<span>  <span class="fu"><a href="https://rdrr.io/r/stats/filter.html" class="external-link">filter</a></span><span class="op">(</span><span class="va">status</span> <span class="op">==</span> <span class="st">"resolved"</span><span class="op">)</span> <span class="op">|&gt;</span></span>
+<span>  <span class="fu">select</span><span class="op">(</span><span class="va">source_code</span>, <span class="va">standard_concept_name</span>, <span class="va">target_table</span><span class="op">)</span></span></code></pre></div>
+<p>Failed rows are kept in-place with <code>status = "failed"</code> and
+the error text in <code>status_detail</code> — you can filter them out
+rather than silently dropping them. The batch summary
+(<code>total</code> / <code>resolved</code> / <code>failed</code>) is
+attached as an attribute:</p>
+<div class="sourceCode" id="cb31"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/base/attr.html" class="external-link">attr</a></span><span class="op">(</span><span class="va">tbl</span>, <span class="st">"summary"</span><span class="op">)</span></span></code></pre></div>
+<p>The default <code>as_tibble = FALSE</code> still returns the
+list-shaped <code>list(results, summary)</code>, so existing code keeps
+working unchanged.</p>
+</div>
+<div class="section level3">
+<h3 id="standalone-wrapper-functions">Standalone Wrapper Functions<a class="anchor" aria-label="anchor" href="#standalone-wrapper-functions"></a>
+</h3>
+<p>For pipe-friendly workflows, <code>omophub</code> also exports
+standalone wrapper functions that take the client as their first
+argument. Both forms are fully supported — pick whichever reads better
+for the surrounding code:</p>
+<div class="sourceCode" id="cb32"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="co"># Equivalent to client$fhir$resolve()</span></span>
+<span><span class="va">client</span> <span class="op">|&gt;</span></span>
+<span>  <span class="fu"><a href="../reference/fhir_resolve.html">fhir_resolve</a></span><span class="op">(</span></span>
+<span>    system <span class="op">=</span> <span class="st">"http://snomed.info/sct"</span>,</span>
+<span>    code <span class="op">=</span> <span class="st">"44054006"</span>,</span>
+<span>    resource_type <span class="op">=</span> <span class="st">"Condition"</span></span>
+<span>  <span class="op">)</span></span>
+<span></span>
+<span><span class="co"># Tibble-shaped batch in a pipe</span></span>
+<span><span class="va">tbl</span> <span class="op">&lt;-</span> <span class="va">client</span> <span class="op">|&gt;</span></span>
+<span>  <span class="fu"><a href="../reference/fhir_resolve_batch.html">fhir_resolve_batch</a></span><span class="op">(</span></span>
+<span>    codings <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/list.html" class="external-link">list</a></span><span class="op">(</span></span>
+<span>      <span class="fu"><a href="https://rdrr.io/r/base/list.html" class="external-link">list</a></span><span class="op">(</span>system <span class="op">=</span> <span class="st">"http://snomed.info/sct"</span>, code <span class="op">=</span> <span class="st">"44054006"</span><span class="op">)</span>,</span>
+<span>      <span class="fu"><a href="https://rdrr.io/r/base/list.html" class="external-link">list</a></span><span class="op">(</span>system <span class="op">=</span> <span class="st">"http://loinc.org"</span>, code <span class="op">=</span> <span class="st">"2339-0"</span><span class="op">)</span></span>
+<span>    <span class="op">)</span>,</span>
+<span>    as_tibble <span class="op">=</span> <span class="cn">TRUE</span></span>
+<span>  <span class="op">)</span></span>
+<span></span>
+<span><span class="va">client</span> <span class="op">|&gt;</span></span>
+<span>  <span class="fu"><a href="../reference/fhir_resolve_codeable_concept.html">fhir_resolve_codeable_concept</a></span><span class="op">(</span></span>
+<span>    coding <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/list.html" class="external-link">list</a></span><span class="op">(</span></span>
+<span>      <span class="fu"><a href="https://rdrr.io/r/base/list.html" class="external-link">list</a></span><span class="op">(</span>system <span class="op">=</span> <span class="st">"http://snomed.info/sct"</span>, code <span class="op">=</span> <span class="st">"44054006"</span><span class="op">)</span>,</span>
+<span>      <span class="fu"><a href="https://rdrr.io/r/base/list.html" class="external-link">list</a></span><span class="op">(</span>system <span class="op">=</span> <span class="st">"http://hl7.org/fhir/sid/icd-10-cm"</span>, code <span class="op">=</span> <span class="st">"E11.9"</span><span class="op">)</span></span>
+<span>    <span class="op">)</span>,</span>
+<span>    resource_type <span class="op">=</span> <span class="st">"Condition"</span></span>
+<span>  <span class="op">)</span></span></code></pre></div>
+</div>
+<div class="section level3">
+<h3 id="fhir-client-interop-with-omophub_fhir_url">FHIR Client Interop with <code>omophub_fhir_url()</code><a class="anchor" aria-label="anchor" href="#fhir-client-interop-with-omophub_fhir_url"></a>
+</h3>
+<p>When you need raw FHIR <code>Parameters</code> / <code>Bundle</code>
+responses instead of the Concept Resolver envelope,
+<code><a href="../reference/omophub_fhir_url.html">omophub_fhir_url()</a></code> returns the OMOPHub FHIR Terminology
+Service base URL so you can talk to it directly with <code>httr2</code>
+or <code>fhircrackr</code>. Supports FHIR versions <code>"r4"</code>
+(default), <code>"r4b"</code>, <code>"r5"</code>, and
+<code>"r6"</code>:</p>
+<div class="sourceCode" id="cb33"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="fu"><a href="../reference/omophub_fhir_url.html">omophub_fhir_url</a></span><span class="op">(</span><span class="op">)</span></span>
+<span><span class="co">#&gt; "https://fhir.omophub.com/fhir/r4"</span></span>
+<span></span>
+<span><span class="fu"><a href="../reference/omophub_fhir_url.html">omophub_fhir_url</a></span><span class="op">(</span><span class="st">"r5"</span><span class="op">)</span></span>
+<span><span class="co">#&gt; "https://fhir.omophub.com/fhir/r5"</span></span></code></pre></div>
+<p>Example: call <code>CodeSystem/$lookup</code> directly with
+<code>httr2</code>:</p>
+<div class="sourceCode" id="cb34"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="https://httr2.r-lib.org" class="external-link">httr2</a></span><span class="op">)</span></span>
+<span></span>
+<span><span class="va">resp</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://httr2.r-lib.org/reference/request.html" class="external-link">request</a></span><span class="op">(</span><span class="fu"><a href="../reference/omophub_fhir_url.html">omophub_fhir_url</a></span><span class="op">(</span><span class="op">)</span><span class="op">)</span> <span class="op">|&gt;</span></span>
+<span>  <span class="fu"><a href="https://httr2.r-lib.org/reference/req_url.html" class="external-link">req_url_path_append</a></span><span class="op">(</span><span class="st">"CodeSystem/$lookup"</span><span class="op">)</span> <span class="op">|&gt;</span></span>
+<span>  <span class="fu"><a href="https://httr2.r-lib.org/reference/req_url.html" class="external-link">req_url_query</a></span><span class="op">(</span></span>
+<span>    system <span class="op">=</span> <span class="st">"http://snomed.info/sct"</span>,</span>
+<span>    code <span class="op">=</span> <span class="st">"44054006"</span></span>
+<span>  <span class="op">)</span> <span class="op">|&gt;</span></span>
+<span>  <span class="fu"><a href="https://httr2.r-lib.org/reference/req_headers.html" class="external-link">req_headers</a></span><span class="op">(</span>Authorization <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/paste.html" class="external-link">paste</a></span><span class="op">(</span><span class="st">"Bearer"</span>, <span class="fu"><a href="https://rdrr.io/r/base/Sys.getenv.html" class="external-link">Sys.getenv</a></span><span class="op">(</span><span class="st">"OMOPHUB_API_KEY"</span><span class="op">)</span><span class="op">)</span><span class="op">)</span> <span class="op">|&gt;</span></span>
+<span>  <span class="fu"><a href="https://httr2.r-lib.org/reference/req_perform.html" class="external-link">req_perform</a></span><span class="op">(</span><span class="op">)</span></span>
+<span></span>
+<span><span class="va">params</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://httr2.r-lib.org/reference/resp_body_raw.html" class="external-link">resp_body_json</a></span><span class="op">(</span><span class="va">resp</span><span class="op">)</span></span>
+<span><span class="co"># Raw FHIR Parameters resource with the concept display and designations.</span></span></code></pre></div>
+<p>Use <code>client$fhir$resolve()</code> (or
+<code><a href="../reference/fhir_resolve.html">fhir_resolve()</a></code>) when you want OMOP-enriched answers
+(standard concept, CDM target table, mapping quality). Use
+<code><a href="../reference/omophub_fhir_url.html">omophub_fhir_url()</a></code> + <code>httr2</code> when you need
+FHIR-native responses for FHIR-native tooling.</p>
 </div>
 </div>
 <div class="section level2">
