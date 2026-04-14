@@ -301,3 +301,144 @@ test_that("fhir$resolve_codeable_concept includes text fallback", {
 
   expect_equal(called_with$body$text, "Blood Sugar")
 })
+
+# ==============================================================================
+# resolve_batch(as_tibble = TRUE)
+# ==============================================================================
+
+mock_fhir_batch_mixed <- function() {
+  list(
+    results = list(
+      mock_fhir_resolution(),
+      list(error = "unknown code", input = list(
+        system = "http://snomed.info/sct", code = "bogus"
+      ))
+    ),
+    summary = list(total = 2L, resolved = 1L, failed = 1L)
+  )
+}
+
+test_that("resolve_batch returns tibble when as_tibble = TRUE", {
+  base_req <- httr2::request("https://api.omophub.com/v1")
+  resource <- FhirResource$new(base_req)
+
+  local_mocked_bindings(
+    perform_post = function(req, path, body = NULL, query = NULL) {
+      mock_fhir_batch_mixed()
+    }
+  )
+
+  codings <- list(
+    list(system = "http://snomed.info/sct", code = "44054006"),
+    list(system = "http://snomed.info/sct", code = "bogus")
+  )
+  tbl <- resource$resolve_batch(codings, as_tibble = TRUE)
+
+  expect_s3_class(tbl, "tbl_df")
+  expect_equal(nrow(tbl), 2L)
+  expect_true(all(c(
+    "source_system", "source_code",
+    "source_concept_id", "source_concept_name",
+    "standard_concept_id", "standard_concept_name",
+    "standard_vocabulary_id", "domain_id", "target_table",
+    "mapping_type", "similarity_score",
+    "status", "status_detail"
+  ) %in% names(tbl)))
+
+  expect_equal(tbl$status[1], "resolved")
+  expect_equal(tbl$standard_concept_id[1], 201826L)
+  expect_equal(tbl$target_table[1], "condition_occurrence")
+
+  expect_equal(tbl$status[2], "failed")
+  expect_false(is.na(tbl$status_detail[2]))
+
+  # summary is attached as attribute
+  summary <- attr(tbl, "summary")
+  expect_equal(summary$total, 2L)
+  expect_equal(summary$resolved, 1L)
+  expect_equal(summary$failed, 1L)
+})
+
+test_that("resolve_batch default return is unchanged (list shape)", {
+  base_req <- httr2::request("https://api.omophub.com/v1")
+  resource <- FhirResource$new(base_req)
+
+  local_mocked_bindings(
+    perform_post = function(req, path, body = NULL, query = NULL) {
+      mock_fhir_batch()
+    }
+  )
+
+  result <- resource$resolve_batch(
+    list(list(system = "http://snomed.info/sct", code = "44054006"))
+  )
+
+  expect_false(inherits(result, "tbl_df"))
+  expect_true(is.list(result))
+  expect_named(result, c("results", "summary"))
+  expect_equal(result$summary$total, 1L)
+})
+
+# ==============================================================================
+# Standalone wrapper parity
+# ==============================================================================
+
+test_that("fhir_resolve standalone matches R6 method", {
+  base_req <- httr2::request("https://api.omophub.com/v1")
+  client_stub <- list(fhir = FhirResource$new(base_req))
+
+  local_mocked_bindings(
+    perform_post = function(req, path, body = NULL, query = NULL) {
+      mock_fhir_resolution()
+    }
+  )
+
+  r6_result <- client_stub$fhir$resolve(
+    system = "http://snomed.info/sct",
+    code = "44054006"
+  )
+  wrapper_result <- fhir_resolve(
+    client_stub,
+    system = "http://snomed.info/sct",
+    code = "44054006"
+  )
+
+  expect_identical(r6_result, wrapper_result)
+})
+
+test_that("fhir_resolve_batch standalone matches R6 method", {
+  base_req <- httr2::request("https://api.omophub.com/v1")
+  client_stub <- list(fhir = FhirResource$new(base_req))
+
+  local_mocked_bindings(
+    perform_post = function(req, path, body = NULL, query = NULL) {
+      mock_fhir_batch()
+    }
+  )
+
+  codings <- list(list(system = "http://snomed.info/sct", code = "44054006"))
+  r6_result <- client_stub$fhir$resolve_batch(codings)
+  wrapper_result <- fhir_resolve_batch(client_stub, codings)
+
+  expect_identical(r6_result, wrapper_result)
+})
+
+test_that("fhir_resolve_codeable_concept standalone matches R6 method", {
+  base_req <- httr2::request("https://api.omophub.com/v1")
+  client_stub <- list(fhir = FhirResource$new(base_req))
+
+  local_mocked_bindings(
+    perform_post = function(req, path, body = NULL, query = NULL) {
+      mock_fhir_codeable_concept()
+    }
+  )
+
+  coding <- list(
+    list(system = "http://snomed.info/sct", code = "44054006"),
+    list(system = "http://hl7.org/fhir/sid/icd-10-cm", code = "E11.9")
+  )
+  r6_result <- client_stub$fhir$resolve_codeable_concept(coding = coding)
+  wrapper_result <- fhir_resolve_codeable_concept(client_stub, coding = coding)
+
+  expect_identical(r6_result, wrapper_result)
+})
