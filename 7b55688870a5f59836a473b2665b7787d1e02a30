@@ -1,0 +1,37 @@
+DESCRIPTION
+  995c8e6367b1e02f 3
+NAMESPACE
+  995c8e6367b1e02f 14-16,19
+R/fhir_interop.R
+  995c8e6367b1e02f 1-41
+NEWS.md
+  995c8e6367b1e02f 1-31
+R/fhir.R
+  995c8e6367b1e02f 86-91,93-96,101-102,120-125,185-350
+tests/testthat/test-fhir-integration.R
+  995c8e6367b1e02f 72-127
+tests/testthat/test-fhir.R
+  995c8e6367b1e02f 304-444
+tests/testthat/test-fhir-interop.R
+  995c8e6367b1e02f 1-17
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.2.8",
+  "base_commit_sha": "7b55688870a5f59836a473b2665b7787d1e02a30",
+  "prompts": {
+    "995c8e6367b1e02f": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "ea546814-6533-459a-8829-c1e8c71caab6",
+        "model": "claude-opus-4-6"
+      },
+      "human_author": "alex-omophub",
+      "messages": [],
+      "total_additions": 852,
+      "total_deletions": 5,
+      "accepted_lines": 852,
+      "overriden_lines": 0
+    }
+  }
+}
