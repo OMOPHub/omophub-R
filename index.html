@@ -182,22 +182,28 @@
 </h3>
 <p>Search for multiple terms in a single API call:</p>
 <div class="sourceCode" id="cb5"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="co"># Bulk lexical search (up to 50 queries)</span></span>
+<code class="sourceCode R"><span><span class="co"># Bulk lexical search (up to 50 queries) - returns a flat list of</span></span>
+<span><span class="co"># per-query result objects; iterate it directly.</span></span>
 <span><span class="va">results</span> <span class="op">&lt;-</span> <span class="va">client</span><span class="op">$</span><span class="va">search</span><span class="op">$</span><span class="fu">bulk_basic</span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/list.html" class="external-link">list</a></span><span class="op">(</span></span>
 <span>  <span class="fu"><a href="https://rdrr.io/r/base/list.html" class="external-link">list</a></span><span class="op">(</span>search_id <span class="op">=</span> <span class="st">"q1"</span>, query <span class="op">=</span> <span class="st">"diabetes mellitus"</span><span class="op">)</span>,</span>
 <span>  <span class="fu"><a href="https://rdrr.io/r/base/list.html" class="external-link">list</a></span><span class="op">(</span>search_id <span class="op">=</span> <span class="st">"q2"</span>, query <span class="op">=</span> <span class="st">"hypertension"</span><span class="op">)</span>,</span>
 <span>  <span class="fu"><a href="https://rdrr.io/r/base/list.html" class="external-link">list</a></span><span class="op">(</span>search_id <span class="op">=</span> <span class="st">"q3"</span>, query <span class="op">=</span> <span class="st">"aspirin"</span><span class="op">)</span></span>
 <span><span class="op">)</span>, defaults <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/list.html" class="external-link">list</a></span><span class="op">(</span>vocabulary_ids <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/list.html" class="external-link">list</a></span><span class="op">(</span><span class="st">"SNOMED"</span><span class="op">)</span>, page_size <span class="op">=</span> <span class="fl">5</span><span class="op">)</span><span class="op">)</span></span>
 <span></span>
-<span><span class="kw">for</span> <span class="op">(</span><span class="va">item</span> <span class="kw">in</span> <span class="va">results</span><span class="op">$</span><span class="va">results</span><span class="op">)</span> <span class="op">{</span></span>
+<span><span class="kw">for</span> <span class="op">(</span><span class="va">item</span> <span class="kw">in</span> <span class="va">results</span><span class="op">)</span> <span class="op">{</span></span>
 <span>  <span class="fu"><a href="https://rdrr.io/r/base/cat.html" class="external-link">cat</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/sprintf.html" class="external-link">sprintf</a></span><span class="op">(</span><span class="st">"%s: %d results\n"</span>, <span class="va">item</span><span class="op">$</span><span class="va">search_id</span>, <span class="fu"><a href="https://rdrr.io/r/base/length.html" class="external-link">length</a></span><span class="op">(</span><span class="va">item</span><span class="op">$</span><span class="va">results</span><span class="op">)</span><span class="op">)</span><span class="op">)</span></span>
 <span><span class="op">}</span></span>
 <span></span>
-<span><span class="co"># Bulk semantic search (up to 25 queries)</span></span>
-<span><span class="va">results</span> <span class="op">&lt;-</span> <span class="va">client</span><span class="op">$</span><span class="va">search</span><span class="op">$</span><span class="fu">bulk_semantic</span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/list.html" class="external-link">list</a></span><span class="op">(</span></span>
+<span><span class="co"># Bulk semantic search (up to 25 queries) - returns a dict with</span></span>
+<span><span class="co"># `results`, `total_searches`, `completed_count`, and `total_duration`.</span></span>
+<span><span class="va">response</span> <span class="op">&lt;-</span> <span class="va">client</span><span class="op">$</span><span class="va">search</span><span class="op">$</span><span class="fu">bulk_semantic</span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/list.html" class="external-link">list</a></span><span class="op">(</span></span>
 <span>  <span class="fu"><a href="https://rdrr.io/r/base/list.html" class="external-link">list</a></span><span class="op">(</span>search_id <span class="op">=</span> <span class="st">"s1"</span>, query <span class="op">=</span> <span class="st">"heart failure treatment options"</span><span class="op">)</span>,</span>
 <span>  <span class="fu"><a href="https://rdrr.io/r/base/list.html" class="external-link">list</a></span><span class="op">(</span>search_id <span class="op">=</span> <span class="st">"s2"</span>, query <span class="op">=</span> <span class="st">"type 2 diabetes medication"</span><span class="op">)</span></span>
-<span><span class="op">)</span>, defaults <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/list.html" class="external-link">list</a></span><span class="op">(</span>threshold <span class="op">=</span> <span class="fl">0.5</span>, page_size <span class="op">=</span> <span class="fl">10</span><span class="op">)</span><span class="op">)</span></span></code></pre></div>
+<span><span class="op">)</span>, defaults <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/list.html" class="external-link">list</a></span><span class="op">(</span>threshold <span class="op">=</span> <span class="fl">0.5</span>, page_size <span class="op">=</span> <span class="fl">10</span><span class="op">)</span><span class="op">)</span></span>
+<span></span>
+<span><span class="kw">for</span> <span class="op">(</span><span class="va">item</span> <span class="kw">in</span> <span class="va">response</span><span class="op">$</span><span class="va">results</span><span class="op">)</span> <span class="op">{</span></span>
+<span>  <span class="fu"><a href="https://rdrr.io/r/base/cat.html" class="external-link">cat</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/sprintf.html" class="external-link">sprintf</a></span><span class="op">(</span><span class="st">"%s: %d results\n"</span>, <span class="va">item</span><span class="op">$</span><span class="va">search_id</span>, <span class="fu"><a href="https://rdrr.io/r/base/length.html" class="external-link">length</a></span><span class="op">(</span><span class="va">item</span><span class="op">$</span><span class="va">results</span><span class="op">)</span><span class="op">)</span><span class="op">)</span></span>
+<span><span class="op">}</span></span></code></pre></div>
 </div>
 </div>
 <div class="section level2">
@@ -240,6 +246,95 @@
 <span><span class="op">)</span></span>
 <span><span class="va">result</span><span class="op">$</span><span class="va">best_match</span><span class="op">$</span><span class="va">resolution</span><span class="op">$</span><span class="va">source_concept</span><span class="op">$</span><span class="va">vocabulary_id</span></span>
 <span><span class="co"># [1] "SNOMED"</span></span></code></pre></div>
+<div class="section level3">
+<h3 id="tibble-output-for-batch-resolution">Tibble Output for Batch Resolution<a class="anchor" aria-label="anchor" href="#tibble-output-for-batch-resolution"></a>
+</h3>
+<p>Pass <code>as_tibble = TRUE</code> to get a flat <a href="https://tibble.tidyverse.org/" class="external-link"><code>tibble</code></a> with one row per input coding - ready to pipe into <code>dplyr</code> / <code>tidyr</code>:</p>
+<div class="sourceCode" id="cb7"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="https://dplyr.tidyverse.org" class="external-link">dplyr</a></span><span class="op">)</span></span>
+<span></span>
+<span><span class="va">tbl</span> <span class="op">&lt;-</span> <span class="va">client</span><span class="op">$</span><span class="va">fhir</span><span class="op">$</span><span class="fu">resolve_batch</span><span class="op">(</span></span>
+<span>  <span class="fu"><a href="https://rdrr.io/r/base/list.html" class="external-link">list</a></span><span class="op">(</span></span>
+<span>    <span class="fu"><a href="https://rdrr.io/r/base/list.html" class="external-link">list</a></span><span class="op">(</span>system <span class="op">=</span> <span class="st">"http://hl7.org/fhir/sid/icd-10-cm"</span>, code <span class="op">=</span> <span class="st">"E11.9"</span><span class="op">)</span>,</span>
+<span>    <span class="fu"><a href="https://rdrr.io/r/base/list.html" class="external-link">list</a></span><span class="op">(</span>system <span class="op">=</span> <span class="st">"http://hl7.org/fhir/sid/icd-10-cm"</span>, code <span class="op">=</span> <span class="st">"I10"</span><span class="op">)</span>,</span>
+<span>    <span class="fu"><a href="https://rdrr.io/r/base/list.html" class="external-link">list</a></span><span class="op">(</span>system <span class="op">=</span> <span class="st">"http://hl7.org/fhir/sid/icd-10-cm"</span>, code <span class="op">=</span> <span class="st">"J45.909"</span><span class="op">)</span></span>
+<span>  <span class="op">)</span>,</span>
+<span>  as_tibble <span class="op">=</span> <span class="cn">TRUE</span></span>
+<span><span class="op">)</span></span>
+<span></span>
+<span><span class="va">tbl</span> <span class="op">|&gt;</span></span>
+<span>  <span class="fu"><a href="https://rdrr.io/r/stats/filter.html" class="external-link">filter</a></span><span class="op">(</span><span class="va">status</span> <span class="op">==</span> <span class="st">"resolved"</span><span class="op">)</span> <span class="op">|&gt;</span></span>
+<span>  <span class="fu">select</span><span class="op">(</span><span class="va">source_code</span>, <span class="va">standard_concept_name</span>, <span class="va">target_table</span><span class="op">)</span></span>
+<span><span class="co">#&gt; # A tibble: 3 x 3</span></span>
+<span><span class="co">#&gt;   source_code standard_concept_name       target_table</span></span>
+<span><span class="co">#&gt;   &lt;chr&gt;       &lt;chr&gt;                       &lt;chr&gt;</span></span>
+<span><span class="co">#&gt; 1 E11.9       Type 2 diabetes mellitus    condition_occurrence</span></span>
+<span><span class="co">#&gt; 2 I10         Essential hypertension      condition_occurrence</span></span>
+<span><span class="co">#&gt; 3 J45.909     Asthma                      condition_occurrence</span></span></code></pre></div>
+<p>The tibble columns are <code>source_system</code>, <code>source_code</code>, <code>source_concept_id</code>, <code>source_concept_name</code>, <code>standard_concept_id</code>, <code>standard_concept_name</code>, <code>standard_vocabulary_id</code>, <code>domain_id</code>, <code>target_table</code>, <code>mapping_type</code>, <code>similarity_score</code>, <code>status</code>, and <code>status_detail</code>. Failed rows stay in-place with <code>status = "failed"</code> and the API error text in <code>status_detail</code>. The batch summary (<code>total</code> / <code>resolved</code> / <code>failed</code>) is attached as <code>attr(tbl, "summary")</code>.</p>
+<p>Default <code>as_tibble = FALSE</code> still returns the legacy <code>list(results, summary)</code> shape.</p>
+</div>
+<div class="section level3">
+<h3 id="standalone-wrapper-functions">Standalone Wrapper Functions<a class="anchor" aria-label="anchor" href="#standalone-wrapper-functions"></a>
+</h3>
+<p>The R6 interface is always available:</p>
+<div class="sourceCode" id="cb8"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="va">client</span><span class="op">$</span><span class="va">fhir</span><span class="op">$</span><span class="fu">resolve</span><span class="op">(</span>system <span class="op">=</span> <span class="st">"http://snomed.info/sct"</span>, code <span class="op">=</span> <span class="st">"44054006"</span><span class="op">)</span></span></code></pre></div>
+<p>For pipe-friendly workflows, three standalone wrappers forward to the same R6 methods and take the client as their first argument:</p>
+<div class="sourceCode" id="cb9"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="co"># Equivalent to client$fhir$resolve()</span></span>
+<span><span class="va">client</span> <span class="op">|&gt;</span></span>
+<span>  <span class="fu"><a href="reference/fhir_resolve.html">fhir_resolve</a></span><span class="op">(</span></span>
+<span>    system <span class="op">=</span> <span class="st">"http://snomed.info/sct"</span>,</span>
+<span>    code <span class="op">=</span> <span class="st">"44054006"</span>,</span>
+<span>    resource_type <span class="op">=</span> <span class="st">"Condition"</span></span>
+<span>  <span class="op">)</span></span>
+<span></span>
+<span><span class="co"># Tibble-shaped batch in a pipe</span></span>
+<span><span class="va">tbl</span> <span class="op">&lt;-</span> <span class="va">client</span> <span class="op">|&gt;</span></span>
+<span>  <span class="fu"><a href="reference/fhir_resolve_batch.html">fhir_resolve_batch</a></span><span class="op">(</span></span>
+<span>    codings <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/list.html" class="external-link">list</a></span><span class="op">(</span></span>
+<span>      <span class="fu"><a href="https://rdrr.io/r/base/list.html" class="external-link">list</a></span><span class="op">(</span>system <span class="op">=</span> <span class="st">"http://snomed.info/sct"</span>, code <span class="op">=</span> <span class="st">"44054006"</span><span class="op">)</span>,</span>
+<span>      <span class="fu"><a href="https://rdrr.io/r/base/list.html" class="external-link">list</a></span><span class="op">(</span>system <span class="op">=</span> <span class="st">"http://loinc.org"</span>, code <span class="op">=</span> <span class="st">"2339-0"</span><span class="op">)</span></span>
+<span>    <span class="op">)</span>,</span>
+<span>    as_tibble <span class="op">=</span> <span class="cn">TRUE</span></span>
+<span>  <span class="op">)</span></span>
+<span></span>
+<span><span class="va">client</span> <span class="op">|&gt;</span></span>
+<span>  <span class="fu"><a href="reference/fhir_resolve_codeable_concept.html">fhir_resolve_codeable_concept</a></span><span class="op">(</span></span>
+<span>    coding <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/list.html" class="external-link">list</a></span><span class="op">(</span></span>
+<span>      <span class="fu"><a href="https://rdrr.io/r/base/list.html" class="external-link">list</a></span><span class="op">(</span>system <span class="op">=</span> <span class="st">"http://snomed.info/sct"</span>, code <span class="op">=</span> <span class="st">"44054006"</span><span class="op">)</span>,</span>
+<span>      <span class="fu"><a href="https://rdrr.io/r/base/list.html" class="external-link">list</a></span><span class="op">(</span>system <span class="op">=</span> <span class="st">"http://hl7.org/fhir/sid/icd-10-cm"</span>, code <span class="op">=</span> <span class="st">"E11.9"</span><span class="op">)</span></span>
+<span>    <span class="op">)</span>,</span>
+<span>    resource_type <span class="op">=</span> <span class="st">"Condition"</span></span>
+<span>  <span class="op">)</span></span></code></pre></div>
+<p>Both forms are fully supported - pick whichever reads better for the surrounding code.</p>
+</div>
+<div class="section level3">
+<h3 id="fhir-client-interop">FHIR Client Interop<a class="anchor" aria-label="anchor" href="#fhir-client-interop"></a>
+</h3>
+<p>When you need raw FHIR <code>Parameters</code> / <code>Bundle</code> responses instead of the Concept Resolver envelope, <code><a href="reference/omophub_fhir_url.html">omophub_fhir_url()</a></code> returns the OMOPHub FHIR Terminology Service base URL for a given FHIR version (<code>"r4"</code> default, plus <code>"r4b"</code>, <code>"r5"</code>, <code>"r6"</code>). Use it with <a href="https://httr2.r-lib.org/" class="external-link"><code>httr2</code></a> or <a href="https://cran.r-project.org/package=fhircrackr" class="external-link"><code>fhircrackr</code></a> to talk directly to OMOPHub’s FHIR endpoint.</p>
+<div class="sourceCode" id="cb10"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="https://httr2.r-lib.org" class="external-link">httr2</a></span><span class="op">)</span></span>
+<span></span>
+<span><span class="co"># Call CodeSystem/$lookup directly against OMOPHub's FHIR endpoint</span></span>
+<span><span class="va">resp</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://httr2.r-lib.org/reference/request.html" class="external-link">request</a></span><span class="op">(</span><span class="fu"><a href="reference/omophub_fhir_url.html">omophub_fhir_url</a></span><span class="op">(</span><span class="op">)</span><span class="op">)</span> <span class="op">|&gt;</span></span>
+<span>  <span class="fu"><a href="https://httr2.r-lib.org/reference/req_url.html" class="external-link">req_url_path_append</a></span><span class="op">(</span><span class="st">"CodeSystem/$lookup"</span><span class="op">)</span> <span class="op">|&gt;</span></span>
+<span>  <span class="fu"><a href="https://httr2.r-lib.org/reference/req_url.html" class="external-link">req_url_query</a></span><span class="op">(</span></span>
+<span>    system <span class="op">=</span> <span class="st">"http://snomed.info/sct"</span>,</span>
+<span>    code <span class="op">=</span> <span class="st">"44054006"</span></span>
+<span>  <span class="op">)</span> <span class="op">|&gt;</span></span>
+<span>  <span class="fu"><a href="https://httr2.r-lib.org/reference/req_headers.html" class="external-link">req_headers</a></span><span class="op">(</span>Authorization <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/paste.html" class="external-link">paste</a></span><span class="op">(</span><span class="st">"Bearer"</span>, <span class="fu"><a href="https://rdrr.io/r/base/Sys.getenv.html" class="external-link">Sys.getenv</a></span><span class="op">(</span><span class="st">"OMOPHUB_API_KEY"</span><span class="op">)</span><span class="op">)</span><span class="op">)</span> <span class="op">|&gt;</span></span>
+<span>  <span class="fu"><a href="https://httr2.r-lib.org/reference/req_perform.html" class="external-link">req_perform</a></span><span class="op">(</span><span class="op">)</span></span>
+<span></span>
+<span><span class="va">params</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://httr2.r-lib.org/reference/resp_body_raw.html" class="external-link">resp_body_json</a></span><span class="op">(</span><span class="va">resp</span><span class="op">)</span></span>
+<span><span class="co"># Raw FHIR Parameters resource with the concept display and designations.</span></span>
+<span></span>
+<span><span class="co"># R5 / R6 endpoints work the same way</span></span>
+<span><span class="fu"><a href="reference/omophub_fhir_url.html">omophub_fhir_url</a></span><span class="op">(</span><span class="st">"r5"</span><span class="op">)</span></span>
+<span><span class="co">#&gt; "https://fhir.omophub.com/fhir/r5"</span></span></code></pre></div>
+<p><strong>When to use which</strong>: Use <code>client$fhir$resolve()</code> (or <code><a href="reference/fhir_resolve.html">fhir_resolve()</a></code>) when you want OMOP-enriched answers (standard concept, CDM target table, mapping quality). Use <code><a href="reference/omophub_fhir_url.html">omophub_fhir_url()</a></code> + <code>httr2</code> when you need raw FHIR responses for FHIR-native tooling.</p>
+</div>
 </div>
 <div class="section level2">
 <h2 id="use-cases">Use Cases<a class="anchor" aria-label="anchor" href="#use-cases"></a>
@@ -248,7 +343,7 @@
 <h3 id="etl--data-pipelines">ETL &amp; Data Pipelines<a class="anchor" aria-label="anchor" href="#etl--data-pipelines"></a>
 </h3>
 <p>Validate and map clinical codes during OMOP CDM transformations:</p>
-<div class="sourceCode" id="cb7"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb11"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="co"># Validate source codes and find standard equivalents</span></span>
 <span><span class="va">validate_and_map</span> <span class="op">&lt;-</span> <span class="kw">function</span><span class="op">(</span><span class="va">source_vocab</span>, <span class="va">source_code</span><span class="op">)</span> <span class="op">{</span></span>
 <span>  <span class="va">concept</span> <span class="op">&lt;-</span> <span class="va">client</span><span class="op">$</span><span class="va">concepts</span><span class="op">$</span><span class="fu">get_by_code</span><span class="op">(</span><span class="va">source_vocab</span>, <span class="va">source_code</span><span class="op">)</span></span>
@@ -271,15 +366,16 @@
 <h3 id="data-quality-checks">Data Quality Checks<a class="anchor" aria-label="anchor" href="#data-quality-checks"></a>
 </h3>
 <p>Verify codes exist and are valid:</p>
-<div class="sourceCode" id="cb8"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="co"># Check if condition codes are valid</span></span>
+<div class="sourceCode" id="cb12"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="co"># Check if condition codes are valid. HTTP 404 responses come through</span></span>
+<span><span class="co"># as httr2's `httr2_http_404` condition class.</span></span>
 <span><span class="va">condition_codes</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"E11.9"</span>, <span class="st">"I10"</span>, <span class="st">"J44.9"</span><span class="op">)</span></span>
 <span></span>
 <span><span class="kw">for</span> <span class="op">(</span><span class="va">code</span> <span class="kw">in</span> <span class="va">condition_codes</span><span class="op">)</span> <span class="op">{</span></span>
 <span>  <span class="kw"><a href="https://rdrr.io/r/base/conditions.html" class="external-link">tryCatch</a></span><span class="op">(</span><span class="op">{</span></span>
 <span>    <span class="va">concept</span> <span class="op">&lt;-</span> <span class="va">client</span><span class="op">$</span><span class="va">concepts</span><span class="op">$</span><span class="fu">get_by_code</span><span class="op">(</span><span class="st">"ICD10CM"</span>, <span class="va">code</span><span class="op">)</span></span>
 <span>    <span class="fu"><a href="https://rdrr.io/r/base/message.html" class="external-link">message</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/sprintf.html" class="external-link">sprintf</a></span><span class="op">(</span><span class="st">"OK %s: %s"</span>, <span class="va">code</span>, <span class="va">concept</span><span class="op">$</span><span class="va">concept_name</span><span class="op">)</span><span class="op">)</span></span>
-<span>  <span class="op">}</span>, omophub_api_error <span class="op">=</span> <span class="kw">function</span><span class="op">(</span><span class="va">e</span><span class="op">)</span> <span class="op">{</span></span>
+<span>  <span class="op">}</span>, httr2_http_404 <span class="op">=</span> <span class="kw">function</span><span class="op">(</span><span class="va">e</span><span class="op">)</span> <span class="op">{</span></span>
 <span>    <span class="fu"><a href="https://rdrr.io/r/base/message.html" class="external-link">message</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/sprintf.html" class="external-link">sprintf</a></span><span class="op">(</span><span class="st">"ERROR %s: Invalid code!"</span>, <span class="va">code</span><span class="op">)</span><span class="op">)</span></span>
 <span>  <span class="op">}</span><span class="op">)</span></span>
 <span><span class="op">}</span></span></code></pre></div>
@@ -288,20 +384,22 @@
 <h3 id="phenotype-development">Phenotype Development<a class="anchor" aria-label="anchor" href="#phenotype-development"></a>
 </h3>
 <p>Explore hierarchies to build comprehensive concept sets:</p>
-<div class="sourceCode" id="cb9"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="co"># Get all descendants for phenotype definition</span></span>
+<div class="sourceCode" id="cb13"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="co"># Get all descendants for phenotype definition. `descendants()` returns</span></span>
+<span><span class="co"># `list(data = list(descendants = [...], concept_id, concept_name, ...), meta)`</span></span>
 <span><span class="va">descendants</span> <span class="op">&lt;-</span> <span class="va">client</span><span class="op">$</span><span class="va">hierarchy</span><span class="op">$</span><span class="fu">descendants</span><span class="op">(</span></span>
 <span>  <span class="fl">201826</span>,  <span class="co"># Type 2 diabetes mellitus</span></span>
 <span>  max_levels <span class="op">=</span> <span class="fl">5</span></span>
 <span><span class="op">)</span></span>
 <span></span>
-<span><span class="va">concept_set</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/lapply.html" class="external-link">sapply</a></span><span class="op">(</span><span class="va">descendants</span><span class="op">$</span><span class="va">concepts</span>, <span class="kw">function</span><span class="op">(</span><span class="va">x</span><span class="op">)</span> <span class="va">x</span><span class="op">$</span><span class="va">concept_id</span><span class="op">)</span></span>
+<span><span class="va">descendant_list</span> <span class="op">&lt;-</span> <span class="va">descendants</span><span class="op">$</span><span class="va">data</span><span class="op">$</span><span class="va">descendants</span></span>
+<span><span class="va">concept_set</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/lapply.html" class="external-link">vapply</a></span><span class="op">(</span><span class="va">descendant_list</span>, <span class="kw">function</span><span class="op">(</span><span class="va">x</span><span class="op">)</span> <span class="va">x</span><span class="op">$</span><span class="va">concept_id</span>, <span class="fu"><a href="https://rdrr.io/r/base/integer.html" class="external-link">integer</a></span><span class="op">(</span><span class="fl">1</span><span class="op">)</span><span class="op">)</span></span>
 <span><span class="fu"><a href="https://rdrr.io/r/base/message.html" class="external-link">message</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/sprintf.html" class="external-link">sprintf</a></span><span class="op">(</span><span class="st">"Found %d concepts for T2DM phenotype"</span>, <span class="fu"><a href="https://rdrr.io/r/base/length.html" class="external-link">length</a></span><span class="op">(</span><span class="va">concept_set</span><span class="op">)</span><span class="op">)</span><span class="op">)</span></span></code></pre></div>
 </div>
 <div class="section level3">
 <h3 id="integration-with-tidyverse">Integration with tidyverse<a class="anchor" aria-label="anchor" href="#integration-with-tidyverse"></a>
 </h3>
-<div class="sourceCode" id="cb10"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb14"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="https://dplyr.tidyverse.org" class="external-link">dplyr</a></span><span class="op">)</span></span>
 <span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="https://purrr.tidyverse.org/" class="external-link">purrr</a></span><span class="op">)</span></span>
 <span></span>
@@ -392,7 +490,7 @@
 <div class="section level2">
 <h2 id="pagination">Pagination<a class="anchor" aria-label="anchor" href="#pagination"></a>
 </h2>
-<div class="sourceCode" id="cb11"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb15"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="co"># Automatic pagination - fetch all results</span></span>
 <span><span class="va">all_results</span> <span class="op">&lt;-</span> <span class="va">client</span><span class="op">$</span><span class="va">search</span><span class="op">$</span><span class="fu">basic_all</span><span class="op">(</span><span class="st">"diabetes"</span>, page_size <span class="op">=</span> <span class="fl">100</span><span class="op">)</span></span>
 <span></span>
@@ -403,7 +501,7 @@
 <div class="section level2">
 <h2 id="configuration">Configuration<a class="anchor" aria-label="anchor" href="#configuration"></a>
 </h2>
-<div class="sourceCode" id="cb12"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb16"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="co"># Specify vocabulary version</span></span>
 <span><span class="va">client</span> <span class="op">&lt;-</span> <span class="va"><a href="reference/OMOPHubClient.html">OMOPHubClient</a></span><span class="op">$</span><span class="fu">new</span><span class="op">(</span>vocab_version <span class="op">=</span> <span class="st">"2025.2"</span><span class="op">)</span></span>
 <span></span>
@@ -417,18 +515,28 @@
 <div class="section level2">
 <h2 id="error-handling">Error Handling<a class="anchor" aria-label="anchor" href="#error-handling"></a>
 </h2>
-<div class="sourceCode" id="cb13"><pre class="downlit sourceCode r">
+<p>HTTP errors are raised as <a href="https://httr2.r-lib.org/reference/req_error.html" class="external-link">httr2 condition classes</a> (<code>httr2_http_404</code>, <code>httr2_http_401</code>, <code>httr2_http_429</code>, <code>httr2_http_403</code>, etc.). Pre-request input-validation errors use the SDK’s <code>omophub_validation_error</code> class.</p>
+<div class="sourceCode" id="cb17"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="kw"><a href="https://rdrr.io/r/base/conditions.html" class="external-link">tryCatch</a></span><span class="op">(</span><span class="op">{</span></span>
 <span>  <span class="va">result</span> <span class="op">&lt;-</span> <span class="va">client</span><span class="op">$</span><span class="va">concepts</span><span class="op">$</span><span class="fu">get</span><span class="op">(</span><span class="fl">999999999</span><span class="op">)</span></span>
-<span><span class="op">}</span>, omophub_not_found_error <span class="op">=</span> <span class="kw">function</span><span class="op">(</span><span class="va">e</span><span class="op">)</span> <span class="op">{</span></span>
-<span>  <span class="fu"><a href="https://rdrr.io/r/base/message.html" class="external-link">message</a></span><span class="op">(</span><span class="st">"Concept not found: "</span>, <span class="fu"><a href="https://rdrr.io/r/base/conditions.html" class="external-link">conditionMessage</a></span><span class="op">(</span><span class="va">e</span><span class="op">)</span><span class="op">)</span></span>
-<span><span class="op">}</span>, omophub_auth_error <span class="op">=</span> <span class="kw">function</span><span class="op">(</span><span class="va">e</span><span class="op">)</span> <span class="op">{</span></span>
-<span>  <span class="fu"><a href="https://rdrr.io/r/base/message.html" class="external-link">message</a></span><span class="op">(</span><span class="st">"Check your API key"</span><span class="op">)</span></span>
-<span><span class="op">}</span>, omophub_rate_limit_error <span class="op">=</span> <span class="kw">function</span><span class="op">(</span><span class="va">e</span><span class="op">)</span> <span class="op">{</span></span>
-<span>  <span class="fu"><a href="https://rdrr.io/r/base/message.html" class="external-link">message</a></span><span class="op">(</span><span class="st">"Rate limited, please wait"</span><span class="op">)</span></span>
-<span><span class="op">}</span>, omophub_api_error <span class="op">=</span> <span class="kw">function</span><span class="op">(</span><span class="va">e</span><span class="op">)</span> <span class="op">{</span></span>
-<span>  <span class="fu"><a href="https://rdrr.io/r/base/message.html" class="external-link">message</a></span><span class="op">(</span><span class="st">"API error: "</span>, <span class="fu"><a href="https://rdrr.io/r/base/conditions.html" class="external-link">conditionMessage</a></span><span class="op">(</span><span class="va">e</span><span class="op">)</span><span class="op">)</span></span>
+<span><span class="op">}</span>, httr2_http_404 <span class="op">=</span> <span class="kw">function</span><span class="op">(</span><span class="va">e</span><span class="op">)</span> <span class="op">{</span></span>
+<span>  <span class="fu"><a href="https://rdrr.io/r/base/message.html" class="external-link">message</a></span><span class="op">(</span><span class="st">"Concept not found: "</span>, <span class="fu"><a href="https://rdrr.io/r/base/conditions.html" class="external-link">conditionMessage</a></span><span class="op">(</span><span class="va">e</span><span class="op">)</span><span class="op">[[</span><span class="fl">1</span><span class="op">]</span><span class="op">]</span><span class="op">)</span></span>
+<span><span class="op">}</span>, httr2_http_401 <span class="op">=</span> <span class="kw">function</span><span class="op">(</span><span class="va">e</span><span class="op">)</span> <span class="op">{</span></span>
+<span>  <span class="fu"><a href="https://rdrr.io/r/base/message.html" class="external-link">message</a></span><span class="op">(</span><span class="st">"Unauthorized - check your API key"</span><span class="op">)</span></span>
+<span><span class="op">}</span>, httr2_http_403 <span class="op">=</span> <span class="kw">function</span><span class="op">(</span><span class="va">e</span><span class="op">)</span> <span class="op">{</span></span>
+<span>  <span class="fu"><a href="https://rdrr.io/r/base/message.html" class="external-link">message</a></span><span class="op">(</span><span class="st">"Forbidden - API key lacks permission or vocabulary restricted"</span><span class="op">)</span></span>
+<span><span class="op">}</span>, httr2_http_429 <span class="op">=</span> <span class="kw">function</span><span class="op">(</span><span class="va">e</span><span class="op">)</span> <span class="op">{</span></span>
+<span>  <span class="co"># The SDK already auto-retries 429 via httr2::req_retry() with</span></span>
+<span>  <span class="co"># exponential backoff; handle here only for custom logging.</span></span>
+<span>  <span class="fu"><a href="https://rdrr.io/r/base/message.html" class="external-link">message</a></span><span class="op">(</span><span class="st">"Rate limited ("</span>, <span class="va">e</span><span class="op">$</span><span class="va">retry_after</span> <span class="op"><a href="https://rdrr.io/r/base/Control.html" class="external-link">%||%</a></span> <span class="st">"?"</span>, <span class="st">"s)"</span><span class="op">)</span></span>
+<span><span class="op">}</span>, httr2_http <span class="op">=</span> <span class="kw">function</span><span class="op">(</span><span class="va">e</span><span class="op">)</span> <span class="op">{</span></span>
+<span>  <span class="co"># Generic HTTP error fallback (any 4xx/5xx not caught above)</span></span>
+<span>  <span class="fu"><a href="https://rdrr.io/r/base/message.html" class="external-link">message</a></span><span class="op">(</span><span class="st">"HTTP error: "</span>, <span class="fu"><a href="https://rdrr.io/r/base/conditions.html" class="external-link">conditionMessage</a></span><span class="op">(</span><span class="va">e</span><span class="op">)</span><span class="op">[[</span><span class="fl">1</span><span class="op">]</span><span class="op">]</span><span class="op">)</span></span>
+<span><span class="op">}</span>, omophub_validation_error <span class="op">=</span> <span class="kw">function</span><span class="op">(</span><span class="va">e</span><span class="op">)</span> <span class="op">{</span></span>
+<span>  <span class="co"># Pre-request validation (bad concept_id type, empty query, etc.)</span></span>
+<span>  <span class="fu"><a href="https://rdrr.io/r/base/message.html" class="external-link">message</a></span><span class="op">(</span><span class="st">"Validation error: "</span>, <span class="fu"><a href="https://rdrr.io/r/base/conditions.html" class="external-link">conditionMessage</a></span><span class="op">(</span><span class="va">e</span><span class="op">)</span><span class="op">[[</span><span class="fl">1</span><span class="op">]</span><span class="op">]</span><span class="op">)</span></span>
 <span><span class="op">}</span><span class="op">)</span></span></code></pre></div>
+<p>See <a href="inst/examples/error_handling.R"><code>inst/examples/error_handling.R</code></a> for the full set of patterns including graceful degradation and batch error collection.</p>
 </div>
 <div class="section level2">
 <h2 id="compared-to-alternatives">Compared to Alternatives<a class="anchor" aria-label="anchor" href="#compared-to-alternatives"></a>
@@ -503,10 +611,19 @@
 <td><code>error_handling.R</code></td>
 <td>Error handling patterns</td>
 </tr>
+<tr class="even">
+<td><code>fhir_resolver.R</code></td>
+<td>FHIR Concept Resolver - single / batch / CodeableConcept, quality, recommendations</td>
+</tr>
+<tr class="odd">
+<td><code>fhir_interop.R</code></td>
+<td>1.7.0 interop - tibble batch output, standalone wrappers, <code><a href="reference/omophub_fhir_url.html">omophub_fhir_url()</a></code>
+</td>
+</tr>
 </tbody>
 </table>
 <p>Run an example:</p>
-<div class="sourceCode" id="cb14"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb18"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">example_path</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/system.file.html" class="external-link">system.file</a></span><span class="op">(</span><span class="st">"examples"</span>, <span class="st">"basic_usage.R"</span>, package <span class="op">=</span> <span class="st">"omophub"</span><span class="op">)</span></span>
 <span><span class="kw"><a href="https://rdrr.io/r/base/source.html" class="external-link">source</a></span><span class="op">(</span><span class="va">example_path</span><span class="op">)</span></span></code></pre></div>
 </div>
@@ -524,7 +641,7 @@
 <h2 id="contributing">Contributing<a class="anchor" aria-label="anchor" href="#contributing"></a>
 </h2>
 <p>We welcome contributions!</p>
-<div class="sourceCode" id="cb15"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb19"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="co"># Clone and install for development</span></span>
 <span><span class="co"># install.packages("devtools")</span></span>
 <span><span class="fu">devtools</span><span class="fu">::</span><span class="fu"><a href="https://devtools.r-lib.org/reference/install-deprecated.html" class="external-link">install_github</a></span><span class="op">(</span><span class="st">"omopHub/omophub-R"</span><span class="op">)</span></span>
