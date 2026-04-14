@@ -216,7 +216,10 @@ fhir_batch_to_tibble <- function(result, codings) {
       return(paste(names(err) %||% "", unlist(lapply(err, as.character)),
                    sep = "=", collapse = "; "))
     }
-    as.character(err)[[1L]]
+    # Zero-length / non-character fallbacks: single-bracket indexing
+    # returns NA on a length-0 vector instead of throwing. Guards
+    # against `character(0)`, `integer(0)`, etc.
+    as.character(err)[1L]
   }
 
   make_row <- function(i) {

@@ -442,3 +442,68 @@ test_that("fhir_resolve_codeable_concept standalone matches R6 method", {
 
   expect_identical(r6_result, wrapper_result)
 })
+
+# ==============================================================================
+# resolve_batch(as_tibble = TRUE) with unusual `error` shapes
+# ==============================================================================
+
+test_that("resolve_batch(as_tibble = TRUE) handles zero-length error values", {
+  # Regression for a bug where `as.character(err)[[1L]]` crashed with
+  # "subscript out of bounds" when the API returned an empty character
+  # vector (or any other length-0 value) in the `error` field.
+  base_req <- httr2::request("https://api.omophub.com/v1")
+  resource <- FhirResource$new(base_req)
+
+  local_mocked_bindings(
+    perform_post = function(req, path, body = NULL, query = NULL) {
+      list(
+        results = list(
+          list(error = character(0)),       # empty character vector
+          list(error = integer(0)),         # empty integer vector
+          list(error = list())              # empty list
+        ),
+        summary = list(total = 3L, resolved = 0L, failed = 3L)
+      )
+    }
+  )
+
+  codings <- list(
+    list(system = "http://snomed.info/sct", code = "a"),
+    list(system = "http://snomed.info/sct", code = "b"),
+    list(system = "http://snomed.info/sct", code = "c")
+  )
+
+  # Must not throw, must return one row per input
+  tbl <- resource$resolve_batch(codings, as_tibble = TRUE)
+  expect_s3_class(tbl, "tbl_df")
+  expect_equal(nrow(tbl), 3L)
+  expect_true(all(tbl$status == "failed"))
+})
+
+test_that("resolve_batch(as_tibble = TRUE) handles unusual scalar error shapes", {
+  # Coverage for the non-character fallback: numeric and logical errors
+  # must be coerced via as.character() without throwing.
+  base_req <- httr2::request("https://api.omophub.com/v1")
+  resource <- FhirResource$new(base_req)
+
+  local_mocked_bindings(
+    perform_post = function(req, path, body = NULL, query = NULL) {
+      list(
+        results = list(
+          list(error = 42L),
+          list(error = TRUE)
+        ),
+        summary = list(total = 2L, resolved = 0L, failed = 2L)
+      )
+    }
+  )
+
+  codings <- list(
+    list(system = "http://snomed.info/sct", code = "a"),
+    list(system = "http://snomed.info/sct", code = "b")
+  )
+
+  tbl <- resource$resolve_batch(codings, as_tibble = TRUE)
+  expect_equal(nrow(tbl), 2L)
+  expect_equal(tbl$status_detail, c("42", "TRUE"))
+})

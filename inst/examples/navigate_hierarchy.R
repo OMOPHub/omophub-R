@@ -134,8 +134,12 @@ for (type_name in names(by_type)) {
   items <- by_type[[type_name]]
   cat(sprintf("\n  %s (%d):\n", type_name, length(items)))
   for (r in head(items, 3)) {
+    # Prefer the nested ``concept_2`` object (full concept details) but
+    # fall back to the flat ``concept_id_2`` field so deprecated or
+    # invalid target concepts without a populated nested object still
+    # surface an ID instead of rendering as unknown.
     target <- r$concept_2 %||% list()
-    target_id <- target$concept_id %||% "?"
+    target_id <- target$concept_id %||% r$concept_id_2 %||% "?"
     target_name <- target$concept_name %||% "Unknown"
     cat(sprintf("    -> [%s] %s\n", target_id, target_name))
   }

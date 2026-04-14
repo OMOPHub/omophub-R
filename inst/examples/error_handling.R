@@ -158,32 +158,40 @@ cat("\n")
 cat("5. Graceful degradation\n")
 cat("-----------------------\n")
 
-# Function that returns NULL on error instead of failing
+# Function that returns a structured result instead of failing. The
+# caller can distinguish "not found" from other error categories so
+# downstream logging / reporting is honest about what went wrong.
 safe_get_concept <- function(client, concept_id) {
   tryCatch(
-    client$concepts$get(concept_id),
-    httr2_http_404 = function(e) NULL,
+    list(ok = TRUE, value = client$concepts$get(concept_id), reason = NA_character_),
+    httr2_http_404 = function(e) {
+      list(ok = FALSE, value = NULL, reason = "not found")
+    },
     httr2_http = function(e) {
-      message("HTTP error for concept ", concept_id, ": ",
-              conditionMessage(e)[[1]])
-      NULL
+      list(
+        ok = FALSE,
+        value = NULL,
+        reason = sprintf("HTTP error: %s", conditionMessage(e)[[1]])
+      )
     },
     error = function(e) {
-      message("Error fetching concept ", concept_id, ": ",
-              conditionMessage(e)[[1]])
-      NULL
+      list(
+        ok = FALSE,
+        value = NULL,
+        reason = sprintf("error: %s", conditionMessage(e)[[1]])
+      )
     }
   )
 }
 
 concept_ids <- c(201826, 999999999, 320128)
-cat("  Fetching concepts with fallback to NULL:\n")
+cat("  Fetching concepts with structured results:\n")
 for (id in concept_ids) {
-  concept <- safe_get_concept(client, id)
-  if (!is.null(concept)) {
-    cat(sprintf("    [%d] %s\n", id, concept$concept_name))
+  result <- safe_get_concept(client, id)
+  if (isTRUE(result$ok)) {
+    cat(sprintf("    [%d] %s\n", id, result$value$concept_name))
   } else {
-    cat(sprintf("    [%d] (not found)\n", id))
+    cat(sprintf("    [%d] (%s)\n", id, result$reason))
   }
 }
 cat("\n")
