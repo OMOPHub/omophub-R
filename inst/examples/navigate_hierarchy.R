@@ -5,16 +5,21 @@
 #' - Getting ancestors (parent concepts)
 #' - Getting descendants (child concepts)
 #' - Exploring concept relationships
+#' - Finding related concepts
 #'
 #' Run with: Rscript inst/examples/navigate_hierarchy.R
 
 library(omophub)
 
+# Null-coalescing operator (available in base R 4.4+; define locally for
+# compatibility with the R >= 4.1 package requirement).
+`%||%` <- function(a, b) if (is.null(a)) b else a
+
 # ============================================================================
 # Setup
 # ============================================================================
 
-client <- omophub()
+client <- OMOPHubClient$new()
 
 cat("OMOPHub R Client - Hierarchy Navigation Examples\n")
 cat("=================================================\n\n")
@@ -36,12 +41,16 @@ ancestors <- client$hierarchy$ancestors(
   include_distance = TRUE
 )
 
-cat(sprintf("Ancestors of concept %d:\n", DIABETES_CONCEPT_ID))
-ancestor_list <- ancestors$ancestors %||% ancestors$data %||% ancestors
+cat(sprintf("Ancestors of concept %d (%s):\n",
+            DIABETES_CONCEPT_ID,
+            ancestors$data$concept_name))
+
+# Actual ancestor list lives at $data$ancestors
+ancestor_list <- ancestors$data$ancestors %||% list()
 for (a in ancestor_list) {
-  distance <- a$distance %||% a$min_levels_of_separation %||% "?"
+  level <- a$min_levels_of_separation %||% a$level %||% "?"
   cat(sprintf("  Level %s: [%d] %s\n",
-              distance,
+              level,
               a$concept_id,
               a$concept_name))
 }
@@ -62,11 +71,11 @@ descendants <- client$hierarchy$descendants(
 )
 
 cat(sprintf("Descendants of concept %d (first 10):\n", DIABETES_CONCEPT_ID))
-descendant_list <- descendants$descendants %||% descendants$data %||% descendants
+descendant_list <- descendants$data$descendants %||% list()
 for (d in descendant_list) {
-  distance <- d$distance %||% d$min_levels_of_separation %||% "?"
+  level <- d$min_levels_of_separation %||% d$level %||% "?"
   cat(sprintf("  Level %s: [%d] %s\n",
-              distance,
+              level,
               d$concept_id,
               d$concept_name))
 }
@@ -88,7 +97,7 @@ ancestors_snomed <- client$hierarchy$ancestors(
 )
 
 cat("SNOMED ancestors only:\n")
-ancestor_list <- ancestors_snomed$ancestors %||% ancestors_snomed$data %||% ancestors_snomed
+ancestor_list <- ancestors_snomed$data$ancestors %||% list()
 for (a in ancestor_list) {
   cat(sprintf("  [%d] %s (%s)\n",
               a$concept_id,
@@ -107,10 +116,11 @@ cat("----------------------------------\n")
 # Get all relationships for a concept
 relationships <- client$concepts$relationships(DIABETES_CONCEPT_ID)
 
-cat(sprintf("Relationships for concept %d:\n", DIABETES_CONCEPT_ID))
+rel_list <- relationships$data$relationships %||% list()
+cat(sprintf("Relationships for concept %d (%d total):\n",
+            DIABETES_CONCEPT_ID, length(rel_list)))
 
-# Group by relationship type
-rel_list <- relationships$relationships %||% relationships$data %||% relationships
+# Group by relationship type (first 3 per type)
 by_type <- list()
 for (r in rel_list) {
   rel_type <- r$relationship_id %||% "Unknown"
@@ -121,12 +131,20 @@ for (r in rel_list) {
 }
 
 for (type_name in names(by_type)) {
-  cat(sprintf("\n  %s:\n", type_name))
-  for (r in by_type[[type_name]]) {
-    target <- r$concept_2 %||% r$target_concept %||% r
+  items <- by_type[[type_name]]
+  cat(sprintf("\n  %s (%d):\n", type_name, length(items)))
+  for (r in head(items, 3)) {
+    # Prefer the nested ``concept_2`` object (full concept details) but
+    # fall back to the flat ``concept_id_2`` field so deprecated or
+    # invalid target concepts without a populated nested object still
+    # surface an ID instead of rendering as unknown.
+    target <- r$concept_2 %||% list()
     target_id <- target$concept_id %||% r$concept_id_2 %||% "?"
-    target_name <- target$concept_name %||% r$concept_name_2 %||% "Unknown"
+    target_name <- target$concept_name %||% "Unknown"
     cat(sprintf("    -> [%s] %s\n", target_id, target_name))
+  }
+  if (length(items) > 3) {
+    cat(sprintf("    ... and %d more\n", length(items) - 3))
   }
 }
 cat("\n")
@@ -138,20 +156,22 @@ cat("\n")
 cat("5. Finding semantically related concepts\n")
 cat("----------------------------------------\n")
 
-# Get concepts related by semantic similarity
-related <- client$concepts$related(
+# Get concepts related by semantic similarity. `related()` returns a flat
+# unnamed list of concept objects (not wrapped in $data / $meta).
+related_list <- client$concepts$related(
   DIABETES_CONCEPT_ID,
   page_size = 5
 )
 
-cat("Semantically related concepts:\n")
-related_list <- related$related_concepts %||% related$data %||% related
+cat("Top 5 semantically related concepts:\n")
 for (r in related_list) {
-  score <- r$relatedness_score %||% r$score %||% "?"
-  cat(sprintf("  [%d] %s (score: %s)\n",
+  score <- r$relationship_score %||% r$score %||% NA_real_
+  score_str <- if (is.na(score)) "?" else sprintf("%.2f", score)
+  cat(sprintf("  [%d] %s (score: %s, distance: %s)\n",
               r$concept_id,
               r$concept_name,
-              score))
+              score_str,
+              r$relationship_distance %||% "?"))
 }
 cat("\n")
 
@@ -162,26 +182,30 @@ cat("\n")
 cat("6. Building concept path to root\n")
 cat("---------------------------------\n")
 
-# Get ancestors with path information
+# Get ancestors sorted by distance to show the path from the starting
+# concept up through increasingly general parents.
 path_result <- client$hierarchy$ancestors(
   DIABETES_CONCEPT_ID,
-  include_paths = TRUE,
   max_levels = 10
 )
 
-cat("Path from 'Type 2 diabetes mellitus' to root:\n")
-ancestor_list <- path_result$ancestors %||% path_result$data %||% path_result
+ancestor_list <- path_result$data$ancestors %||% list()
 
-# Sort by distance if available
-if (length(ancestor_list) > 0 && !is.null(ancestor_list[[1]]$distance)) {
-  distances <- sapply(ancestor_list, function(x) x$distance %||% 999)
+# Sort by min_levels_of_separation (closest first)
+if (length(ancestor_list) > 0) {
+  distances <- sapply(
+    ancestor_list,
+    function(x) x$min_levels_of_separation %||% 999L
+  )
   ancestor_list <- ancestor_list[order(distances)]
 }
 
+cat(sprintf("Path from '%s' to root:\n",
+            path_result$data$concept_name %||% "Type 2 diabetes mellitus"))
 for (i in seq_along(ancestor_list)) {
   a <- ancestor_list[[i]]
   indent <- paste(rep("  ", i), collapse = "")
-  cat(sprintf("%s-> %s\n", indent, a$concept_name))
+  cat(sprintf("%s-> [%d] %s\n", indent, a$concept_id, a$concept_name))
 }
 cat("\n")
 

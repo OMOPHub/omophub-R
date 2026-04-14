@@ -38,3 +38,5 @@ codecov.yml
 .env.local
 .env.production
 cran-comments.md
+/doc/
+/Meta/

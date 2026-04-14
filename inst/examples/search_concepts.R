@@ -11,11 +11,15 @@
 
 library(omophub)
 
+# Null-coalescing operator (available in base R 4.4+; define locally for
+# compatibility with the R >= 4.1 package requirement).
+`%||%` <- function(a, b) if (is.null(a)) b else a
+
 # ============================================================================
 # Setup
 # ============================================================================
 
-client <- omophub()
+client <- OMOPHubClient$new()
 
 cat("OMOPHub R Client - Search Examples\n")
 cat("===================================\n\n")

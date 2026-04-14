@@ -201,6 +201,27 @@ fhir_batch_to_tibble <- function(result, codings) {
   items <- result$results %||% list()
   n <- length(codings)
 
+  # Collapse a possibly-nested error object to a scalar string. The API
+  # may return `error` as a plain string, a list like
+  # `list(code = "concept_not_found", message = "...")`, or something
+  # else. A list-column here would be expanded into extra tibble rows.
+  error_to_string <- function(err) {
+    if (is.null(err)) return(NA_character_)
+    if (is.character(err) && length(err) == 1L) return(err)
+    if (is.list(err)) {
+      msg <- err$message %||% err$code %||% err$detail
+      if (!is.null(msg) && is.character(msg) && length(msg) == 1L) {
+        return(msg)
+      }
+      return(paste(names(err) %||% "", unlist(lapply(err, as.character)),
+                   sep = "=", collapse = "; "))
+    }
+    # Zero-length / non-character fallbacks: single-bracket indexing
+    # returns NA on a length-0 vector instead of throwing. Guards
+    # against `character(0)`, `integer(0)`, etc.
+    as.character(err)[1L]
+  }
+
   make_row <- function(i) {
     input_coding <- codings[[i]]
     item <- if (i <= length(items)) items[[i]] else NULL
@@ -221,7 +242,7 @@ fhir_batch_to_tibble <- function(result, codings) {
         mapping_type = NA_character_,
         similarity_score = NA_real_,
         status = "failed",
-        status_detail = item$error %||% "unresolved"
+        status_detail = error_to_string(item$error)
       ))
     }
 

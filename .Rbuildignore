@@ -10,3 +10,5 @@
 ^\.Rproj\.user$
 ^\.env$
 ^cran-comments\.md$
+^doc$
+^Meta$
