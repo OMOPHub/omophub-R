@@ -116,22 +116,28 @@ for (s in similar$similar_concepts) {
 Search for multiple terms in a single API call:
 
 ```r
-# Bulk lexical search (up to 50 queries)
+# Bulk lexical search (up to 50 queries) - returns a flat list of
+# per-query result objects; iterate it directly.
 results <- client$search$bulk_basic(list(
   list(search_id = "q1", query = "diabetes mellitus"),
   list(search_id = "q2", query = "hypertension"),
   list(search_id = "q3", query = "aspirin")
 ), defaults = list(vocabulary_ids = list("SNOMED"), page_size = 5))
 
-for (item in results$results) {
+for (item in results) {
   cat(sprintf("%s: %d results\n", item$search_id, length(item$results)))
 }
 
-# Bulk semantic search (up to 25 queries)
-results <- client$search$bulk_semantic(list(
+# Bulk semantic search (up to 25 queries) - returns a dict with
+# `results`, `total_searches`, `completed_count`, and `total_duration`.
+response <- client$search$bulk_semantic(list(
   list(search_id = "s1", query = "heart failure treatment options"),
   list(search_id = "s2", query = "type 2 diabetes medication")
 ), defaults = list(threshold = 0.5, page_size = 10))
+
+for (item in response$results) {
+  cat(sprintf("%s: %d results\n", item$search_id, length(item$results)))
+}
 ```
 
 ## FHIR-to-OMOP Resolution
@@ -176,6 +182,105 @@ result$best_match$resolution$source_concept$vocabulary_id
 # [1] "SNOMED"
 ```
 
+### Tibble Output for Batch Resolution
+
+Pass `as_tibble = TRUE` to get a flat [`tibble`](https://tibble.tidyverse.org/) with one row per input coding - ready to pipe into `dplyr` / `tidyr`:
+
+```r
+library(dplyr)
+
+tbl <- client$fhir$resolve_batch(
+  list(
+    list(system = "http://hl7.org/fhir/sid/icd-10-cm", code = "E11.9"),
+    list(system = "http://hl7.org/fhir/sid/icd-10-cm", code = "I10"),
+    list(system = "http://hl7.org/fhir/sid/icd-10-cm", code = "J45.909")
+  ),
+  as_tibble = TRUE
+)
+
+tbl |>
+  filter(status == "resolved") |>
+  select(source_code, standard_concept_name, target_table)
+#> # A tibble: 3 x 3
+#>   source_code standard_concept_name       target_table
+#>   <chr>       <chr>                       <chr>
+#> 1 E11.9       Type 2 diabetes mellitus    condition_occurrence
+#> 2 I10         Essential hypertension      condition_occurrence
+#> 3 J45.909     Asthma                      condition_occurrence
+```
+
+The tibble columns are `source_system`, `source_code`, `source_concept_id`, `source_concept_name`, `standard_concept_id`, `standard_concept_name`, `standard_vocabulary_id`, `domain_id`, `target_table`, `mapping_type`, `similarity_score`, `status`, and `status_detail`. Failed rows stay in-place with `status = "failed"` and the API error text in `status_detail`. The batch summary (`total` / `resolved` / `failed`) is attached as `attr(tbl, "summary")`.
+
+Default `as_tibble = FALSE` still returns the legacy `list(results, summary)` shape.
+
+### Standalone Wrapper Functions
+
+The R6 interface is always available:
+
+```r
+client$fhir$resolve(system = "http://snomed.info/sct", code = "44054006")
+```
+
+For pipe-friendly workflows, three standalone wrappers forward to the same R6 methods and take the client as their first argument:
+
+```r
+# Equivalent to client$fhir$resolve()
+client |>
+  fhir_resolve(
+    system = "http://snomed.info/sct",
+    code = "44054006",
+    resource_type = "Condition"
+  )
+
+# Tibble-shaped batch in a pipe
+tbl <- client |>
+  fhir_resolve_batch(
+    codings = list(
+      list(system = "http://snomed.info/sct", code = "44054006"),
+      list(system = "http://loinc.org", code = "2339-0")
+    ),
+    as_tibble = TRUE
+  )
+
+client |>
+  fhir_resolve_codeable_concept(
+    coding = list(
+      list(system = "http://snomed.info/sct", code = "44054006"),
+      list(system = "http://hl7.org/fhir/sid/icd-10-cm", code = "E11.9")
+    ),
+    resource_type = "Condition"
+  )
+```
+
+Both forms are fully supported - pick whichever reads better for the surrounding code.
+
+### FHIR Client Interop
+
+When you need raw FHIR `Parameters` / `Bundle` responses instead of the Concept Resolver envelope, `omophub_fhir_url()` returns the OMOPHub FHIR Terminology Service base URL for a given FHIR version (`"r4"` default, plus `"r4b"`, `"r5"`, `"r6"`). Use it with [`httr2`](https://httr2.r-lib.org/) or [`fhircrackr`](https://cran.r-project.org/package=fhircrackr) to talk directly to OMOPHub's FHIR endpoint.
+
+```r
+library(httr2)
+
+# Call CodeSystem/$lookup directly against OMOPHub's FHIR endpoint
+resp <- request(omophub_fhir_url()) |>
+  req_url_path_append("CodeSystem/$lookup") |>
+  req_url_query(
+    system = "http://snomed.info/sct",
+    code = "44054006"
+  ) |>
+  req_headers(Authorization = paste("Bearer", Sys.getenv("OMOPHUB_API_KEY"))) |>
+  req_perform()
+
+params <- resp_body_json(resp)
+# Raw FHIR Parameters resource with the concept display and designations.
+
+# R5 / R6 endpoints work the same way
+omophub_fhir_url("r5")
+#> "https://fhir.omophub.com/fhir/r5"
+```
+
+**When to use which**: Use `client$fhir$resolve()` (or `fhir_resolve()`) when you want OMOP-enriched answers (standard concept, CDM target table, mapping quality). Use `omophub_fhir_url()` + `httr2` when you need raw FHIR responses for FHIR-native tooling.
+
 ## Use Cases
 
 ### ETL & Data Pipelines
@@ -207,14 +312,15 @@ standard_id <- validate_and_map("ICD10CM", "E11.9")
 Verify codes exist and are valid:
 
 ```r
-# Check if condition codes are valid
+# Check if condition codes are valid. HTTP 404 responses come through
+# as httr2's `httr2_http_404` condition class.
 condition_codes <- c("E11.9", "I10", "J44.9")
 
 for (code in condition_codes) {
   tryCatch({
     concept <- client$concepts$get_by_code("ICD10CM", code)
     message(sprintf("OK %s: %s", code, concept$concept_name))
-  }, omophub_api_error = function(e) {
+  }, httr2_http_404 = function(e) {
     message(sprintf("ERROR %s: Invalid code!", code))
   })
 }
@@ -225,13 +331,15 @@ for (code in condition_codes) {
 Explore hierarchies to build comprehensive concept sets:
 
 ```r
-# Get all descendants for phenotype definition
+# Get all descendants for phenotype definition. `descendants()` returns
+# `list(data = list(descendants = [...], concept_id, concept_name, ...), meta)`
 descendants <- client$hierarchy$descendants(
   201826,  # Type 2 diabetes mellitus
   max_levels = 5
 )
 
-concept_set <- sapply(descendants$concepts, function(x) x$concept_id)
+descendant_list <- descendants$data$descendants
+concept_set <- vapply(descendant_list, function(x) x$concept_id, integer(1))
 message(sprintf("Found %d concepts for T2DM phenotype", length(concept_set)))
 ```
 
@@ -297,19 +405,31 @@ client <- OMOPHubClient$new(
 
 ## Error Handling
 
+HTTP errors are raised as [httr2 condition classes](https://httr2.r-lib.org/reference/req_error.html) (`httr2_http_404`, `httr2_http_401`, `httr2_http_429`, `httr2_http_403`, etc.). Pre-request input-validation errors use the SDK's `omophub_validation_error` class.
+
 ```r
 tryCatch({
   result <- client$concepts$get(999999999)
-}, omophub_not_found_error = function(e) {
-  message("Concept not found: ", conditionMessage(e))
-}, omophub_auth_error = function(e) {
-  message("Check your API key")
-}, omophub_rate_limit_error = function(e) {
-  message("Rate limited, please wait")
-}, omophub_api_error = function(e) {
-  message("API error: ", conditionMessage(e))
+}, httr2_http_404 = function(e) {
+  message("Concept not found: ", conditionMessage(e)[[1]])
+}, httr2_http_401 = function(e) {
+  message("Unauthorized - check your API key")
+}, httr2_http_403 = function(e) {
+  message("Forbidden - API key lacks permission or vocabulary restricted")
+}, httr2_http_429 = function(e) {
+  # The SDK already auto-retries 429 via httr2::req_retry() with
+  # exponential backoff; handle here only for custom logging.
+  message("Rate limited (", e$retry_after %||% "?", "s)")
+}, httr2_http = function(e) {
+  # Generic HTTP error fallback (any 4xx/5xx not caught above)
+  message("HTTP error: ", conditionMessage(e)[[1]])
+}, omophub_validation_error = function(e) {
+  # Pre-request validation (bad concept_id type, empty query, etc.)
+  message("Validation error: ", conditionMessage(e)[[1]])
 })
 ```
+
+See [`inst/examples/error_handling.R`](inst/examples/error_handling.R) for the full set of patterns including graceful degradation and batch error collection.
 
 ## Compared to Alternatives
 
@@ -333,6 +453,8 @@ The package includes comprehensive examples in `inst/examples/`:
 | `navigate_hierarchy.R` | Hierarchy navigation - ancestors, descendants |
 | `map_between_vocabularies.R` | Cross-vocabulary mapping |
 | `error_handling.R` | Error handling patterns |
+| `fhir_resolver.R` | FHIR Concept Resolver - single / batch / CodeableConcept, quality, recommendations |
+| `fhir_interop.R` | 1.7.0 interop - tibble batch output, standalone wrappers, `omophub_fhir_url()` |
 
 Run an example:
 
