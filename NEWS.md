@@ -1,3 +1,34 @@
+# omophub 1.7.0
+
+## New Features
+
+* **Tibble output for batch FHIR resolution**
+  `FhirResource$resolve_batch()` (and the standalone `fhir_resolve_batch()`)
+  gained an `as_tibble` parameter. When `as_tibble = TRUE`, the call returns
+  a flat `tibble::tibble` with one row per input coding and columns for the
+  source concept, standard concept, target CDM table, mapping type, and
+  resolution status - ready to pipe into `dplyr` / `tidyr`. The batch
+  summary (`total` / `resolved` / `failed`) is attached as
+  `attr(result, "summary")`. Default behavior is unchanged: `as_tibble = FALSE`
+  still returns the legacy list shape.
+
+* **Standalone wrapper functions**
+  Thin, pipe-friendly wrappers around the R6 `FhirResource` methods:
+
+  - `fhir_resolve(client, ...)`
+  - `fhir_resolve_batch(client, ...)`
+  - `fhir_resolve_codeable_concept(client, ...)`
+
+  Both the R6 form (`client$fhir$resolve(...)`) and the standalone form
+  work; pick whichever reads better in your pipeline.
+
+* **FHIR client interop helper**
+  New exported function `omophub_fhir_url(version)` returning the OMOPHub
+  FHIR Terminology Service base URL for a given FHIR version (`"r4"`,
+  `"r4b"`, `"r5"`, `"r6"`). Use it with `httr2`, `fhircrackr`, or any
+  external FHIR client that wants to talk to OMOPHub's FHIR endpoint
+  directly.
+
 # omophub 1.6.0
 
 ## New Features

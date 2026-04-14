@@ -7,8 +7,10 @@
 A list with \code{input} and \code{resolution} containing source/standard
 concepts, target CDM table, and optional enrichments.
 
-A list with \code{results} (per-item) and \code{summary}
-(total/resolved/failed).
+When \code{as_tibble = FALSE} (default), a list with \code{results}
+(per-item) and \code{summary} (total/resolved/failed). When
+\code{as_tibble = TRUE}, a \link[tibble:tibble]{tibble::tibble} suitable for
+\code{dplyr}/\code{tidyr} pipelines.
 
 A list with \code{best_match}, \code{alternatives}, and \code{unresolved}.
 }
@@ -114,7 +116,8 @@ Failed items are reported inline without failing the batch.
   resource_type = NULL,
   include_recommendations = FALSE,
   recommendations_limit = 5L,
-  include_quality = FALSE
+  include_quality = FALSE,
+  as_tibble = FALSE
 )}\if{html}{\out{</div>}}
 }
 
@@ -131,6 +134,13 @@ Failed items are reported inline without failing the batch.
 \item{\code{recommendations_limit}}{Integer. Default \code{5L}.}
 
 \item{\code{include_quality}}{Logical. Default \code{FALSE}.}
+
+\item{\code{as_tibble}}{Logical. When \code{TRUE}, returns a \link[tibble:tibble]{tibble::tibble}
+with one row per input coding and flat columns for the source
+concept, standard concept, target CDM table, mapping type, and
+resolution status. The batch \code{summary} (total/resolved/failed)
+is attached as \code{attr(result, "summary")}. Default \code{FALSE}
+keeps the legacy list-shaped return.}
 }
 \if{html}{\out{</div>}}
 }

@@ -83,14 +83,23 @@ FhirResource <- R6::R6Class(
     #' @param include_recommendations Logical. Default `FALSE`.
     #' @param recommendations_limit Integer. Default `5L`.
     #' @param include_quality Logical. Default `FALSE`.
+    #' @param as_tibble Logical. When `TRUE`, returns a [tibble::tibble]
+    #'   with one row per input coding and flat columns for the source
+    #'   concept, standard concept, target CDM table, mapping type, and
+    #'   resolution status. The batch `summary` (total/resolved/failed)
+    #'   is attached as `attr(result, "summary")`. Default `FALSE`
+    #'   keeps the legacy list-shaped return.
     #'
-    #' @returns A list with `results` (per-item) and `summary`
-    #'   (total/resolved/failed).
+    #' @returns When `as_tibble = FALSE` (default), a list with `results`
+    #'   (per-item) and `summary` (total/resolved/failed). When
+    #'   `as_tibble = TRUE`, a [tibble::tibble] suitable for
+    #'   `dplyr`/`tidyr` pipelines.
     resolve_batch = function(codings,
                              resource_type = NULL,
                              include_recommendations = FALSE,
                              recommendations_limit = 5L,
-                             include_quality = FALSE) {
+                             include_quality = FALSE,
+                             as_tibble = FALSE) {
       stopifnot(is.list(codings), length(codings) >= 1, length(codings) <= 100)
       if (!all(vapply(codings, is.list, logical(1)))) {
         cli::cli_abort(c(
@@ -108,7 +117,12 @@ FhirResource <- R6::R6Class(
       }
       if (isTRUE(include_quality)) body$include_quality <- TRUE
 
-      perform_post(private$.base_req, "fhir/resolve/batch", body = body)
+      result <- perform_post(private$.base_req, "fhir/resolve/batch", body = body)
+
+      if (isTRUE(as_tibble)) {
+        return(fhir_batch_to_tibble(result, codings))
+      }
+      result
     },
 
     #' @description
@@ -167,4 +181,170 @@ FhirResource <- R6::R6Class(
 compact_list <- function(...) {
   args <- list(...)
   args[!vapply(args, is.null, logical(1))]
+}
+
+
+#' Flatten a batch resolver response into a tibble.
+#'
+#' Internal helper used by `FhirResource$resolve_batch(as_tibble = TRUE)`.
+#' Produces one row per input coding with flat columns for the source
+#' concept, standard concept, target CDM table, and status. The original
+#' `summary` list is attached to the returned tibble via
+#' `attr(x, "summary")`.
+#'
+#' @param result The raw list result from `perform_post`.
+#' @param codings The original input `codings` list, used to align rows
+#'   when items fail resolution and no `source_concept` is returned.
+#' @returns A [tibble::tibble].
+#' @keywords internal
+fhir_batch_to_tibble <- function(result, codings) {
+  items <- result$results %||% list()
+  n <- length(codings)
+
+  make_row <- function(i) {
+    input_coding <- codings[[i]]
+    item <- if (i <= length(items)) items[[i]] else NULL
+
+    # Failed items: the API returns them without a resolution block.
+    resolution <- item$resolution
+    if (is.null(resolution)) {
+      return(tibble::tibble(
+        source_system = input_coding$system %||% NA_character_,
+        source_code = input_coding$code %||% NA_character_,
+        source_concept_id = NA_integer_,
+        source_concept_name = NA_character_,
+        standard_concept_id = NA_integer_,
+        standard_concept_name = NA_character_,
+        standard_vocabulary_id = NA_character_,
+        domain_id = NA_character_,
+        target_table = NA_character_,
+        mapping_type = NA_character_,
+        similarity_score = NA_real_,
+        status = "failed",
+        status_detail = item$error %||% "unresolved"
+      ))
+    }
+
+    src <- resolution$source_concept %||% list()
+    std <- resolution$standard_concept %||% list()
+
+    tibble::tibble(
+      source_system = input_coding$system %||% NA_character_,
+      source_code = input_coding$code %||% NA_character_,
+      source_concept_id = src$concept_id %||% NA_integer_,
+      source_concept_name = src$concept_name %||% NA_character_,
+      standard_concept_id = std$concept_id %||% NA_integer_,
+      standard_concept_name = std$concept_name %||% NA_character_,
+      standard_vocabulary_id = std$vocabulary_id %||% NA_character_,
+      domain_id = std$domain_id %||% NA_character_,
+      target_table = resolution$target_table %||% NA_character_,
+      mapping_type = resolution$mapping_type %||% NA_character_,
+      similarity_score = resolution$similarity_score %||% NA_real_,
+      status = "resolved",
+      status_detail = NA_character_
+    )
+  }
+
+  rows <- lapply(seq_len(n), make_row)
+  tbl <- do.call(rbind, rows)
+  attr(tbl, "summary") <- result$summary
+  tbl
+}
+
+
+#' Null-coalescing operator.
+#' @noRd
+`%||%` <- function(a, b) if (is.null(a)) b else a
+
+
+# =============================================================================
+# Standalone wrapper functions
+#
+# Thin wrappers around the R6 `FhirResource` methods so users can write
+# pipe-friendly code without dereferencing the client every call:
+#
+#   client |> fhir_resolve(system = "http://snomed.info/sct", code = "44054006")
+#
+# These forward all arguments to the underlying R6 method.
+# =============================================================================
+
+#' Resolve a FHIR Coding to an OMOP standard concept
+#'
+#' Standalone wrapper for `client$fhir$resolve()`. See
+#' [FhirResource] for full parameter documentation.
+#'
+#' @param client An [OMOPHubClient] instance.
+#' @param ... Arguments passed to `FhirResource$resolve()`.
+#' @returns A list with `input` and `resolution`.
+#' @seealso [FhirResource], [fhir_resolve_batch()],
+#'   [fhir_resolve_codeable_concept()]
+#' @examples
+#' \dontrun{
+#' client <- OMOPHubClient$new(api_key = Sys.getenv("OMOPHUB_API_KEY"))
+#' fhir_resolve(
+#'   client,
+#'   system = "http://snomed.info/sct",
+#'   code = "44054006",
+#'   resource_type = "Condition"
+#' )
+#' }
+#' @export
+fhir_resolve <- function(client, ...) {
+  client$fhir$resolve(...)
+}
+
+
+#' Batch-resolve FHIR Codings
+#'
+#' Standalone wrapper for `client$fhir$resolve_batch()`. When
+#' `as_tibble = TRUE`, the result is a flat `tibble` suitable for
+#' `dplyr`/`tidyr` pipelines.
+#'
+#' @param client An [OMOPHubClient] instance.
+#' @param ... Arguments passed to `FhirResource$resolve_batch()`.
+#' @returns See `FhirResource$resolve_batch()`.
+#' @seealso [FhirResource], [fhir_resolve()],
+#'   [fhir_resolve_codeable_concept()]
+#' @examples
+#' \dontrun{
+#' client <- OMOPHubClient$new(api_key = Sys.getenv("OMOPHUB_API_KEY"))
+#' tbl <- fhir_resolve_batch(
+#'   client,
+#'   codings = list(
+#'     list(system = "http://snomed.info/sct", code = "44054006"),
+#'     list(system = "http://loinc.org", code = "2339-0")
+#'   ),
+#'   as_tibble = TRUE
+#' )
+#' dplyr::filter(tbl, status == "resolved")
+#' }
+#' @export
+fhir_resolve_batch <- function(client, ...) {
+  client$fhir$resolve_batch(...)
+}
+
+
+#' Resolve a FHIR CodeableConcept with vocabulary preference
+#'
+#' Standalone wrapper for `client$fhir$resolve_codeable_concept()`.
+#'
+#' @param client An [OMOPHubClient] instance.
+#' @param ... Arguments passed to `FhirResource$resolve_codeable_concept()`.
+#' @returns See `FhirResource$resolve_codeable_concept()`.
+#' @seealso [FhirResource], [fhir_resolve()], [fhir_resolve_batch()]
+#' @examples
+#' \dontrun{
+#' client <- OMOPHubClient$new(api_key = Sys.getenv("OMOPHUB_API_KEY"))
+#' fhir_resolve_codeable_concept(
+#'   client,
+#'   coding = list(
+#'     list(system = "http://snomed.info/sct", code = "44054006"),
+#'     list(system = "http://hl7.org/fhir/sid/icd-10-cm", code = "E11.9")
+#'   ),
+#'   resource_type = "Condition"
+#' )
+#' }
+#' @export
+fhir_resolve_codeable_concept <- function(client, ...) {
+  client$fhir$resolve_codeable_concept(...)
 }
