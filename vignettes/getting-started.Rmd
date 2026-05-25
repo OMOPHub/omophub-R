@@ -395,12 +395,32 @@ result <- client$fhir$resolve_codeable_concept(
 cat(result$best_match$resolution$source_concept$vocabulary_id)  # "SNOMED"
 ```
 
+To override the vocabulary preference, mark a coding with `user_selected = TRUE`
+(mirroring FHIR `Coding.userSelected`); that coding then wins `best_match`
+regardless of its vocabulary:
+
+```r
+client$fhir$resolve_codeable_concept(
+  coding = list(
+    list(
+      system = "http://hl7.org/fhir/sid/icd-10-cm", code = "E11.9",
+      user_selected = TRUE
+    ),
+    list(system = "http://snomed.info/sct", code = "44054006")
+  ),
+  resource_type = "Condition"
+)
+```
+
 ### Tibble Output for Batch Resolution
 
 For `dplyr` / `tidyr` workflows, pass `as_tibble = TRUE` to get a flat
 tibble with one row per input coding and columns for the source and
 standard concepts, target CDM table, mapping type, and resolution status.
-This is the most ergonomic shape for ETL pipelines processing many codes:
+Composite concepts decomposed via `Maps to value` (the HL7 FHIR-to-OMOP IG
+Value-as-Concept pattern) also populate `value_as_concept_id` /
+`value_as_concept_name`. This is the most ergonomic shape for ETL pipelines
+processing many codes:
 
 ```{r fhir-batch-tibble}
 library(dplyr)

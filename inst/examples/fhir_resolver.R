@@ -14,6 +14,9 @@
 #'   - Mapping quality signal
 #'   - Batch resolution
 #'   - CodeableConcept resolution with OHDSI vocabulary preference
+#'   - Administrative codes via the IG ConceptMap layer (gender, ...)
+#'   - user_selected coding precedence
+#'   - on_unmapped = "sentinel" (concept_id 0 instead of a 404)
 #'   - Error handling
 #'
 #' For tibble-shaped batch output, standalone wrapper functions, and the
@@ -284,10 +287,78 @@ if (!is.null(best)) {
 cat("  Failed codings:", length(result$unresolved), "\n\n")
 
 # ============================================================================
-# 12. Error handling
+# 12. Administrative code via the IG ConceptMap layer (gender, encounter, ...)
 # ============================================================================
 
-cat("12. Error handling\n")
+cat("12. Administrative gender (IG ConceptMap)\n")
+cat("-----------------------------------------\n")
+
+result <- client$fhir$resolve(
+  system = "http://hl7.org/fhir/administrative-gender",
+  code = "male",
+  resource_type = "Patient"
+)
+
+res <- result$resolution
+cat(sprintf("  male -> %s (%s)\n",
+            res$standard_concept$concept_name,
+            res$standard_concept$concept_id))
+cat("  Target table:     ", res$target_table, "\n")
+cat("  Via IG ConceptMap:", res$concept_map_id %||% "N/A", "\n")
+# Composite source concepts also surface value_as_concept (IG 'Maps to value').
+if (!is.null(res$value_as_concept)) {
+  cat("  Value concept:    ", res$value_as_concept$concept_name, "\n")
+}
+cat("\n")
+
+# ============================================================================
+# 13. CodeableConcept with user_selected (overrides vocabulary preference)
+# ============================================================================
+
+cat("13. CodeableConcept with user_selected\n")
+cat("--------------------------------------\n")
+
+result <- client$fhir$resolve_codeable_concept(
+  coding = list(
+    # SNOMED would normally win; the user-selected ICD-10-CM coding wins.
+    list(system = "http://snomed.info/sct", code = "44054006"),
+    list(
+      system = "http://hl7.org/fhir/sid/icd-10-cm",
+      code = "E11.9",
+      user_selected = TRUE
+    )
+  ),
+  resource_type = "Condition"
+)
+
+best <- result$best_match
+if (!is.null(best)) {
+  cat("  best_match source:", best$resolution$source_concept$vocabulary_id, "\n")
+}
+cat("\n")
+
+# ============================================================================
+# 14. on_unmapped = "sentinel" (concept_id 0 record instead of a 404)
+# ============================================================================
+
+cat("14. on_unmapped = 'sentinel'\n")
+cat("----------------------------\n")
+
+result <- client$fhir$resolve(
+  system = "http://snomed.info/sct",
+  code = "00000000",
+  on_unmapped = "sentinel"
+)
+
+res <- result$resolution
+cat("  Mapping type:       ", res$mapping_type, "\n")
+cat("  Standard concept_id:", res$standard_concept$concept_id, "\n\n")
+
+# ============================================================================
+# 15. Error handling
+# ============================================================================
+
+cat("15. Error handling\n")
 cat("------------------\n")
 
 # Restricted vocabulary (CPT4) -> 403

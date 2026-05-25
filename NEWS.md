@@ -1,3 +1,28 @@
+# omophub 1.8.0
+
+## New Features
+
+* **FHIR Value-as-Concept** — the `resolve_batch(as_tibble = TRUE)` tibble now
+  includes `value_as_concept_id` and `value_as_concept_name` columns, populated
+  when the resolver decomposes a composite concept via the `Maps to value`
+  relationship (HL7 FHIR-to-OMOP IG Value-as-Concept pattern — e.g. "Allergy to
+  penicillin" yields a standard "Allergy to drug" plus a value "Penicillin G").
+
+* **`on_unmapped` for FHIR resolution** — `resolve()`, `resolve_batch()`, and
+  `resolve_codeable_concept()` gained an `on_unmapped` argument (`"error"`
+  default / `"sentinel"`). With `"sentinel"` the resolver returns a
+  `concept_id` 0 record instead of a 404 when nothing resolves, so ETL
+  pipelines always get a row (matches the Python SDK).
+
+## Behavior Changes
+
+* **Unmapped rows in the batch tibble** — a coding that resolves to a source
+  concept but has no standard `Maps to` target now reports `status = "unmapped"`
+  (with `standard_concept_id = 0`) instead of `"resolved"`, matching the OMOP /
+  FHIR-to-OMOP IG convention that an unmapped concept is `concept_id 0`. Code
+  that filters `status == "resolved"` will no longer treat these sentinels as
+  successful mappings.
+
 # omophub 1.7.0
 
 ## New Features
