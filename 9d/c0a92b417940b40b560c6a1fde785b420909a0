@@ -1,0 +1,51 @@
+DESCRIPTION
+  s_c995e58523efd2::t_8a78e4de5f7a27 3
+README.md
+  s_c995e58523efd2::t_fc859416008fa9 230
+  s_c995e58523efd2::t_dfec91d4b8d3d2 185-202
+  s_c995e58523efd2::t_fca09bc32ab6b3 474
+NEWS.md
+  s_c995e58523efd2::t_5c4fd1324ac3a9 1
+  s_c995e58523efd2::t_1553dbf16ae649 11-16
+  s_c995e58523efd2::t_86ef8a21949fc4 2-10
+  s_c995e58523efd2::t_8c38ae071ef1a0 17-25
+inst/examples/fhir_resolver.R
+  s_c995e58523efd2::t_4e328df02c0c7e 17-19
+  s_c995e58523efd2::t_45c8108f520717 290,293-361
+vignettes/getting-started.Rmd
+  s_c995e58523efd2::t_28e2d7652601d6 420-423
+  s_c995e58523efd2::t_c3f33ec451aef8 398-414
+tests/testthat/test-fhir.R
+  s_c995e58523efd2::t_ebaf196e9d9b17 102-134
+  s_c995e58523efd2::t_e45b992f2070a8 429-462
+  s_c995e58523efd2::t_4e9f54e0d6b81c 376-377
+  s_c995e58523efd2::t_f5049aae59599c 396-428
+R/fhir.R
+  s_c995e58523efd2::t_cccba034afd6bc 46-47
+  s_c995e58523efd2::t_ec32e75692aa13 150-151
+  s_c995e58523efd2::t_6be9fe25dc9728 159-160
+  s_c995e58523efd2::t_e5510ae475c6f2 126
+  s_c995e58523efd2::t_919ebe1f170fa9 253-254,265-267
+  s_c995e58523efd2::t_529d515cd0c938 284-285
+  s_c995e58523efd2::t_ebcabb6db557a8 178
+  s_c995e58523efd2::t_97aaa58f69d62f 90-91
+  s_c995e58523efd2::t_bbaba2362b5239 58-59,65-66
+  s_c995e58523efd2::t_9cb4f8bf35969e 108
+  s_c995e58523efd2::t_28c8cdf579f5c9 269-273,280,289-294
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.5.0",
+  "base_commit_sha": "9dc0a92b417940b40b560c6a1fde785b420909a0",
+  "prompts": {},
+  "sessions": {
+    "s_c995e58523efd2": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "98408716-d0fe-4669-a33d-cdf3c6afe981",
+        "model": "claude-opus-4-7"
+      },
+      "human_author": "alex-omophub <sdk@omophub.com>"
+    }
+  }
+}
