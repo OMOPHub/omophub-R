@@ -7,8 +7,8 @@
 <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
 <title>R Client for the OMOPHub Medical Vocabulary API • omophub</title>
 <script src="deps/jquery-3.6.0/jquery-3.6.0.min.js"></script><meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
-<link href="deps/bootstrap-5.3.1/bootstrap.min.css" rel="stylesheet">
-<script src="deps/bootstrap-5.3.1/bootstrap.bundle.min.js"></script><link href="deps/font-awesome-6.5.2/css/all.min.css" rel="stylesheet">
+<link href="deps/bootstrap-5.3.8/bootstrap.min.css" rel="stylesheet">
+<script src="deps/bootstrap-5.3.8/bootstrap.bundle.min.js"></script><link href="deps/font-awesome-6.5.2/css/all.min.css" rel="stylesheet">
 <link href="deps/font-awesome-6.5.2/css/v4-shims.min.css" rel="stylesheet">
 <script src="deps/headroom-0.11.0/headroom.min.js"></script><script src="deps/headroom-0.11.0/jQuery.headroom.min.js"></script><script src="deps/bootstrap-toc-1.0.1/bootstrap-toc.min.js"></script><script src="deps/clipboard.js-2.0.11/clipboard.min.js"></script><script src="deps/search-1.0.0/autocomplete.jquery.min.js"></script><script src="deps/search-1.0.0/fuse.min.js"></script><script src="deps/search-1.0.0/mark.min.js"></script><!-- pkgdown --><script src="pkgdown.js"></script><meta property="og:title" content="R Client for the OMOPHub Medical Vocabulary API">
 <meta name="description" content="Provides an R interface to the OMOPHub API for accessing OHDSI ATHENA standardized medical vocabularies. Supports concept search, semantic search using neural embeddings, concept similarity, vocabulary exploration, hierarchy navigation, relationship queries, concept mappings, and FHIR-to-OMOP concept resolution with automatic pagination.">
@@ -22,7 +22,7 @@
 
     <a class="navbar-brand me-2" href="index.html">omophub</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">1.7.0</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">1.8.0</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -68,28 +68,28 @@
 <col width="60%">
 <col width="40%">
 </colgroup>
-<thead><tr class="header">
+<thead><tr>
 <th>Traditional Approach</th>
 <th>With OMOPHub</th>
 </tr></thead>
 <tbody>
-<tr class="odd">
+<tr>
 <td>Download 5GB+ ATHENA vocabulary files</td>
 <td><code>install.packages("omophub")</code></td>
 </tr>
-<tr class="even">
+<tr>
 <td>Set up and maintain database instance</td>
 <td>One API call</td>
 </tr>
-<tr class="odd">
+<tr>
 <td>Write complex SQL with multiple JOINs</td>
 <td>Simple R functions</td>
 </tr>
-<tr class="even">
+<tr>
 <td>Manually update vocabularies quarterly</td>
 <td>Always current data</td>
 </tr>
-<tr class="odd">
+<tr>
 <td>Local infrastructure required</td>
 <td>Works anywhere R runs</td>
 </tr>
@@ -246,11 +246,25 @@
 <span><span class="op">)</span></span>
 <span><span class="va">result</span><span class="op">$</span><span class="va">best_match</span><span class="op">$</span><span class="va">resolution</span><span class="op">$</span><span class="va">source_concept</span><span class="op">$</span><span class="va">vocabulary_id</span></span>
 <span><span class="co"># [1] "SNOMED"</span></span></code></pre></div>
+<p>The resolver also follows the <a href="https://hl7.org/fhir/uv/omop/INFORMATIVE1/en/" class="external-link">HL7 FHIR-to-OMOP IG</a>: it resolves FHIR administrative codes via the IG ConceptMaps, decomposes composite concepts (<code>Maps to value</code>), honors <code>Coding.userSelected</code>, and can return a <code>concept_id</code> 0 sentinel instead of an error.</p>
+<div class="sourceCode" id="cb7"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="co"># Administrative gender -&gt; person (via IG ConceptMap)</span></span>
+<span><span class="va">client</span><span class="op">$</span><span class="va">fhir</span><span class="op">$</span><span class="fu">resolve</span><span class="op">(</span>system <span class="op">=</span> <span class="st">"http://hl7.org/fhir/administrative-gender"</span>, code <span class="op">=</span> <span class="st">"male"</span><span class="op">)</span></span>
+<span></span>
+<span><span class="co"># A user-selected coding wins over vocabulary preference</span></span>
+<span><span class="va">client</span><span class="op">$</span><span class="va">fhir</span><span class="op">$</span><span class="fu">resolve_codeable_concept</span><span class="op">(</span>coding <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/list.html" class="external-link">list</a></span><span class="op">(</span></span>
+<span>  <span class="fu"><a href="https://rdrr.io/r/base/list.html" class="external-link">list</a></span><span class="op">(</span>system <span class="op">=</span> <span class="st">"http://snomed.info/sct"</span>, code <span class="op">=</span> <span class="st">"44054006"</span><span class="op">)</span>,</span>
+<span>  <span class="fu"><a href="https://rdrr.io/r/base/list.html" class="external-link">list</a></span><span class="op">(</span>system <span class="op">=</span> <span class="st">"http://hl7.org/fhir/sid/icd-10-cm"</span>, code <span class="op">=</span> <span class="st">"E11.9"</span>, user_selected <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span></span>
+<span><span class="op">)</span><span class="op">)</span></span>
+<span></span>
+<span><span class="co"># on_unmapped = "sentinel" -&gt; a concept_id 0 record instead of an error (one row per input)</span></span>
+<span><span class="va">client</span><span class="op">$</span><span class="va">fhir</span><span class="op">$</span><span class="fu">resolve</span><span class="op">(</span>system <span class="op">=</span> <span class="st">"http://snomed.info/sct"</span>, code <span class="op">=</span> <span class="st">"00000000"</span>, on_unmapped <span class="op">=</span> <span class="st">"sentinel"</span><span class="op">)</span></span></code></pre></div>
+<p>Composite concepts (e.g. “Allergy to penicillin”) additionally surface <code>resolution$value_as_concept</code> (the IG Value-as-Concept pattern). <code>on_unmapped</code> is accepted by <code>resolve()</code>, <code>resolve_batch()</code>, and <code>resolve_codeable_concept()</code>.</p>
 <div class="section level3">
 <h3 id="tibble-output-for-batch-resolution">Tibble Output for Batch Resolution<a class="anchor" aria-label="anchor" href="#tibble-output-for-batch-resolution"></a>
 </h3>
 <p>Pass <code>as_tibble = TRUE</code> to get a flat <a href="https://tibble.tidyverse.org/" class="external-link"><code>tibble</code></a> with one row per input coding - ready to pipe into <code>dplyr</code> / <code>tidyr</code>:</p>
-<div class="sourceCode" id="cb7"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb8"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="https://dplyr.tidyverse.org" class="external-link">dplyr</a></span><span class="op">)</span></span>
 <span></span>
 <span><span class="va">tbl</span> <span class="op">&lt;-</span> <span class="va">client</span><span class="op">$</span><span class="va">fhir</span><span class="op">$</span><span class="fu">resolve_batch</span><span class="op">(</span></span>
@@ -271,17 +285,17 @@
 <span><span class="co">#&gt; 1 E11.9       Type 2 diabetes mellitus    condition_occurrence</span></span>
 <span><span class="co">#&gt; 2 I10         Essential hypertension      condition_occurrence</span></span>
 <span><span class="co">#&gt; 3 J45.909     Asthma                      condition_occurrence</span></span></code></pre></div>
-<p>The tibble columns are <code>source_system</code>, <code>source_code</code>, <code>source_concept_id</code>, <code>source_concept_name</code>, <code>standard_concept_id</code>, <code>standard_concept_name</code>, <code>standard_vocabulary_id</code>, <code>domain_id</code>, <code>target_table</code>, <code>mapping_type</code>, <code>similarity_score</code>, <code>status</code>, and <code>status_detail</code>. Failed rows stay in-place with <code>status = "failed"</code> and the API error text in <code>status_detail</code>. The batch summary (<code>total</code> / <code>resolved</code> / <code>failed</code>) is attached as <code>attr(tbl, "summary")</code>.</p>
+<p>The tibble columns are <code>source_system</code>, <code>source_code</code>, <code>source_concept_id</code>, <code>source_concept_name</code>, <code>standard_concept_id</code>, <code>standard_concept_name</code>, <code>standard_vocabulary_id</code>, <code>domain_id</code>, <code>value_as_concept_id</code>, <code>value_as_concept_name</code>, <code>target_table</code>, <code>mapping_type</code>, <code>similarity_score</code>, <code>status</code>, and <code>status_detail</code>. Failed rows stay in-place with <code>status = "failed"</code> and the API error text in <code>status_detail</code>; a coding that resolves but has no standard target gets <code>status = "unmapped"</code> (<code>standard_concept_id = 0</code>). The batch summary (<code>total</code> / <code>resolved</code> / <code>failed</code>) is attached as <code>attr(tbl, "summary")</code>.</p>
 <p>Default <code>as_tibble = FALSE</code> still returns the legacy <code>list(results, summary)</code> shape.</p>
 </div>
 <div class="section level3">
 <h3 id="standalone-wrapper-functions">Standalone Wrapper Functions<a class="anchor" aria-label="anchor" href="#standalone-wrapper-functions"></a>
 </h3>
 <p>The R6 interface is always available:</p>
-<div class="sourceCode" id="cb8"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb9"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">client</span><span class="op">$</span><span class="va">fhir</span><span class="op">$</span><span class="fu">resolve</span><span class="op">(</span>system <span class="op">=</span> <span class="st">"http://snomed.info/sct"</span>, code <span class="op">=</span> <span class="st">"44054006"</span><span class="op">)</span></span></code></pre></div>
 <p>For pipe-friendly workflows, three standalone wrappers forward to the same R6 methods and take the client as their first argument:</p>
-<div class="sourceCode" id="cb9"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb10"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="co"># Equivalent to client$fhir$resolve()</span></span>
 <span><span class="va">client</span> <span class="op">|&gt;</span></span>
 <span>  <span class="fu"><a href="reference/fhir_resolve.html">fhir_resolve</a></span><span class="op">(</span></span>
@@ -314,7 +328,7 @@
 <h3 id="fhir-client-interop">FHIR Client Interop<a class="anchor" aria-label="anchor" href="#fhir-client-interop"></a>
 </h3>
 <p>When you need raw FHIR <code>Parameters</code> / <code>Bundle</code> responses instead of the Concept Resolver envelope, <code><a href="reference/omophub_fhir_url.html">omophub_fhir_url()</a></code> returns the OMOPHub FHIR Terminology Service base URL for a given FHIR version (<code>"r4"</code> default, plus <code>"r4b"</code>, <code>"r5"</code>, <code>"r6"</code>). Use it with <a href="https://httr2.r-lib.org/" class="external-link"><code>httr2</code></a> or <a href="https://cran.r-project.org/package=fhircrackr" class="external-link"><code>fhircrackr</code></a> to talk directly to OMOPHub’s FHIR endpoint.</p>
-<div class="sourceCode" id="cb10"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb11"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="https://httr2.r-lib.org" class="external-link">httr2</a></span><span class="op">)</span></span>
 <span></span>
 <span><span class="co"># Call CodeSystem/$lookup directly against OMOPHub's FHIR endpoint</span></span>
@@ -343,7 +357,7 @@
 <h3 id="etl--data-pipelines">ETL &amp; Data Pipelines<a class="anchor" aria-label="anchor" href="#etl--data-pipelines"></a>
 </h3>
 <p>Validate and map clinical codes during OMOP CDM transformations:</p>
-<div class="sourceCode" id="cb11"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb12"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="co"># Validate source codes and find standard equivalents</span></span>
 <span><span class="va">validate_and_map</span> <span class="op">&lt;-</span> <span class="kw">function</span><span class="op">(</span><span class="va">source_vocab</span>, <span class="va">source_code</span><span class="op">)</span> <span class="op">{</span></span>
 <span>  <span class="va">concept</span> <span class="op">&lt;-</span> <span class="va">client</span><span class="op">$</span><span class="va">concepts</span><span class="op">$</span><span class="fu">get_by_code</span><span class="op">(</span><span class="va">source_vocab</span>, <span class="va">source_code</span><span class="op">)</span></span>
@@ -366,7 +380,7 @@
 <h3 id="data-quality-checks">Data Quality Checks<a class="anchor" aria-label="anchor" href="#data-quality-checks"></a>
 </h3>
 <p>Verify codes exist and are valid:</p>
-<div class="sourceCode" id="cb12"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb13"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="co"># Check if condition codes are valid. HTTP 404 responses come through</span></span>
 <span><span class="co"># as httr2's `httr2_http_404` condition class.</span></span>
 <span><span class="va">condition_codes</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"E11.9"</span>, <span class="st">"I10"</span>, <span class="st">"J44.9"</span><span class="op">)</span></span>
@@ -384,7 +398,7 @@
 <h3 id="phenotype-development">Phenotype Development<a class="anchor" aria-label="anchor" href="#phenotype-development"></a>
 </h3>
 <p>Explore hierarchies to build comprehensive concept sets:</p>
-<div class="sourceCode" id="cb13"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb14"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="co"># Get all descendants for phenotype definition. `descendants()` returns</span></span>
 <span><span class="co"># `list(data = list(descendants = [...], concept_id, concept_name, ...), meta)`</span></span>
 <span><span class="va">descendants</span> <span class="op">&lt;-</span> <span class="va">client</span><span class="op">$</span><span class="va">hierarchy</span><span class="op">$</span><span class="fu">descendants</span><span class="op">(</span></span>
@@ -399,7 +413,7 @@
 <div class="section level3">
 <h3 id="integration-with-tidyverse">Integration with tidyverse<a class="anchor" aria-label="anchor" href="#integration-with-tidyverse"></a>
 </h3>
-<div class="sourceCode" id="cb14"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb15"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="https://dplyr.tidyverse.org" class="external-link">dplyr</a></span><span class="op">)</span></span>
 <span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="https://purrr.tidyverse.org/" class="external-link">purrr</a></span><span class="op">)</span></span>
 <span></span>
@@ -429,55 +443,55 @@
 <col width="36%">
 <col width="36%">
 </colgroup>
-<thead><tr class="header">
+<thead><tr>
 <th>Resource</th>
 <th>Description</th>
 <th>Key Methods</th>
 </tr></thead>
 <tbody>
-<tr class="odd">
+<tr>
 <td><code>concepts</code></td>
 <td>Concept lookup and batch operations</td>
 <td>
 <code><a href="https://rdrr.io/r/base/get.html" class="external-link">get()</a></code>, <code>get_by_code()</code>, <code>batch()</code>, <code>suggest()</code>
 </td>
 </tr>
-<tr class="even">
+<tr>
 <td><code>search</code></td>
 <td>Full-text and semantic search</td>
 <td>
 <code>basic()</code>, <code>advanced()</code>, <code>semantic()</code>, <code>similar()</code>, <code>bulk_basic()</code>, <code>bulk_semantic()</code>
 </td>
 </tr>
-<tr class="odd">
+<tr>
 <td><code>hierarchy</code></td>
 <td>Navigate concept relationships</td>
 <td>
 <code>ancestors()</code>, <code>descendants()</code>
 </td>
 </tr>
-<tr class="even">
+<tr>
 <td><code>mappings</code></td>
 <td>Cross-vocabulary mappings</td>
 <td>
 <code><a href="https://rdrr.io/r/base/get.html" class="external-link">get()</a></code>, <code><a href="https://purrr.tidyverse.org/reference/map.html" class="external-link">map()</a></code>
 </td>
 </tr>
-<tr class="odd">
+<tr>
 <td><code>vocabularies</code></td>
 <td>Vocabulary metadata</td>
 <td>
 <code><a href="https://rdrr.io/r/base/list.html" class="external-link">list()</a></code>, <code><a href="https://rdrr.io/r/base/get.html" class="external-link">get()</a></code>, <code>stats()</code>
 </td>
 </tr>
-<tr class="even">
+<tr>
 <td><code>domains</code></td>
 <td>Domain information</td>
 <td>
 <code><a href="https://rdrr.io/r/base/list.html" class="external-link">list()</a></code>, <code><a href="https://rdrr.io/r/base/get.html" class="external-link">get()</a></code>, <code>concepts()</code>
 </td>
 </tr>
-<tr class="odd">
+<tr>
 <td><code>fhir</code></td>
 <td>FHIR-to-OMOP resolution</td>
 <td>
@@ -490,7 +504,7 @@
 <div class="section level2">
 <h2 id="pagination">Pagination<a class="anchor" aria-label="anchor" href="#pagination"></a>
 </h2>
-<div class="sourceCode" id="cb15"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb16"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="co"># Automatic pagination - fetch all results</span></span>
 <span><span class="va">all_results</span> <span class="op">&lt;-</span> <span class="va">client</span><span class="op">$</span><span class="va">search</span><span class="op">$</span><span class="fu">basic_all</span><span class="op">(</span><span class="st">"diabetes"</span>, page_size <span class="op">=</span> <span class="fl">100</span><span class="op">)</span></span>
 <span></span>
@@ -501,7 +515,7 @@
 <div class="section level2">
 <h2 id="configuration">Configuration<a class="anchor" aria-label="anchor" href="#configuration"></a>
 </h2>
-<div class="sourceCode" id="cb16"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb17"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="co"># Specify vocabulary version</span></span>
 <span><span class="va">client</span> <span class="op">&lt;-</span> <span class="va"><a href="reference/OMOPHubClient.html">OMOPHubClient</a></span><span class="op">$</span><span class="fu">new</span><span class="op">(</span>vocab_version <span class="op">=</span> <span class="st">"2025.2"</span><span class="op">)</span></span>
 <span></span>
@@ -516,7 +530,7 @@
 <h2 id="error-handling">Error Handling<a class="anchor" aria-label="anchor" href="#error-handling"></a>
 </h2>
 <p>HTTP errors are raised as <a href="https://httr2.r-lib.org/reference/req_error.html" class="external-link">httr2 condition classes</a> (<code>httr2_http_404</code>, <code>httr2_http_401</code>, <code>httr2_http_429</code>, <code>httr2_http_403</code>, etc.). Pre-request input-validation errors use the SDK’s <code>omophub_validation_error</code> class.</p>
-<div class="sourceCode" id="cb17"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb18"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="kw"><a href="https://rdrr.io/r/base/conditions.html" class="external-link">tryCatch</a></span><span class="op">(</span><span class="op">{</span></span>
 <span>  <span class="va">result</span> <span class="op">&lt;-</span> <span class="va">client</span><span class="op">$</span><span class="va">concepts</span><span class="op">$</span><span class="fu">get</span><span class="op">(</span><span class="fl">999999999</span><span class="op">)</span></span>
 <span><span class="op">}</span>, httr2_http_404 <span class="op">=</span> <span class="kw">function</span><span class="op">(</span><span class="va">e</span><span class="op">)</span> <span class="op">{</span></span>
@@ -542,32 +556,32 @@
 <h2 id="compared-to-alternatives">Compared to Alternatives<a class="anchor" aria-label="anchor" href="#compared-to-alternatives"></a>
 </h2>
 <table class="table">
-<thead><tr class="header">
+<thead><tr>
 <th>Feature</th>
 <th>OMOPHub SDK</th>
 <th>ATHENA Download</th>
 <th>OHDSI WebAPI</th>
 </tr></thead>
 <tbody>
-<tr class="odd">
+<tr>
 <td>Setup time</td>
 <td>1 minute</td>
 <td>Hours</td>
 <td>Hours</td>
 </tr>
-<tr class="even">
+<tr>
 <td>Infrastructure</td>
 <td>None</td>
 <td>PostgreSQL required</td>
 <td>Full OHDSI stack</td>
 </tr>
-<tr class="odd">
+<tr>
 <td>Updates</td>
 <td>Automatic</td>
 <td>Manual download</td>
 <td>Manual</td>
 </tr>
-<tr class="even">
+<tr>
 <td>Programmatic access</td>
 <td>Native R</td>
 <td>SQL/DatabaseConnector</td>
@@ -586,36 +600,37 @@
 <col width="40%">
 <col width="59%">
 </colgroup>
-<thead><tr class="header">
+<thead><tr>
 <th>Example</th>
 <th>Description</th>
 </tr></thead>
 <tbody>
-<tr class="odd">
+<tr>
 <td><code>basic_usage.R</code></td>
 <td>Getting started - client setup, concept lookup, search</td>
 </tr>
-<tr class="even">
+<tr>
 <td><code>search_concepts.R</code></td>
 <td>Search capabilities - filters, autocomplete, pagination</td>
 </tr>
-<tr class="odd">
+<tr>
 <td><code>navigate_hierarchy.R</code></td>
 <td>Hierarchy navigation - ancestors, descendants</td>
 </tr>
-<tr class="even">
+<tr>
 <td><code>map_between_vocabularies.R</code></td>
 <td>Cross-vocabulary mapping</td>
 </tr>
-<tr class="odd">
+<tr>
 <td><code>error_handling.R</code></td>
 <td>Error handling patterns</td>
 </tr>
-<tr class="even">
+<tr>
 <td><code>fhir_resolver.R</code></td>
-<td>FHIR Concept Resolver - single / batch / CodeableConcept, quality, recommendations</td>
+<td>FHIR Concept Resolver - single / batch / CodeableConcept, quality, recommendations, administrative codes, <code>user_selected</code>, <code>on_unmapped</code>
+</td>
 </tr>
-<tr class="odd">
+<tr>
 <td><code>fhir_interop.R</code></td>
 <td>1.7.0 interop - tibble batch output, standalone wrappers, <code><a href="reference/omophub_fhir_url.html">omophub_fhir_url()</a></code>
 </td>
@@ -623,7 +638,7 @@
 </tbody>
 </table>
 <p>Run an example:</p>
-<div class="sourceCode" id="cb18"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb19"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">example_path</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/system.file.html" class="external-link">system.file</a></span><span class="op">(</span><span class="st">"examples"</span>, <span class="st">"basic_usage.R"</span>, package <span class="op">=</span> <span class="st">"omophub"</span><span class="op">)</span></span>
 <span><span class="kw"><a href="https://rdrr.io/r/base/source.html" class="external-link">source</a></span><span class="op">(</span><span class="va">example_path</span><span class="op">)</span></span></code></pre></div>
 </div>
@@ -641,16 +656,16 @@
 <h2 id="contributing">Contributing<a class="anchor" aria-label="anchor" href="#contributing"></a>
 </h2>
 <p>We welcome contributions!</p>
-<div class="sourceCode" id="cb19"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb20"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="co"># Clone and install for development</span></span>
 <span><span class="co"># install.packages("devtools")</span></span>
-<span><span class="fu">devtools</span><span class="fu">::</span><span class="fu"><a href="https://devtools.r-lib.org/reference/install-deprecated.html" class="external-link">install_github</a></span><span class="op">(</span><span class="st">"omopHub/omophub-R"</span><span class="op">)</span></span>
+<span><span class="fu">devtools</span><span class="fu">::</span><span class="fu">install_github</span><span class="op">(</span><span class="st">"omopHub/omophub-R"</span><span class="op">)</span></span>
 <span></span>
 <span><span class="co"># Run tests</span></span>
-<span><span class="fu">devtools</span><span class="fu">::</span><span class="fu"><a href="https://devtools.r-lib.org/reference/test.html" class="external-link">test</a></span><span class="op">(</span><span class="op">)</span></span>
+<span><span class="fu">devtools</span><span class="fu">::</span><span class="fu">test</span><span class="op">(</span><span class="op">)</span></span>
 <span></span>
 <span><span class="co"># Check package</span></span>
-<span><span class="fu">devtools</span><span class="fu">::</span><span class="fu"><a href="https://devtools.r-lib.org/reference/check.html" class="external-link">check</a></span><span class="op">(</span><span class="op">)</span></span></code></pre></div>
+<span><span class="fu">devtools</span><span class="fu">::</span><span class="fu">check</span><span class="op">(</span><span class="op">)</span></span></code></pre></div>
 </div>
 <div class="section level2">
 <h2 id="support">Support<a class="anchor" aria-label="anchor" href="#support"></a>

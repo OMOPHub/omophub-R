@@ -79,7 +79,8 @@ or `display`.
       resource_type = NULL,
       include_recommendations = FALSE,
       recommendations_limit = 5L,
-      include_quality = FALSE
+      include_quality = FALSE,
+      on_unmapped = NULL
     )
 
 #### Arguments
@@ -116,6 +117,11 @@ or `display`.
 
   Logical. Include mapping quality signal. Default `FALSE`.
 
+- `on_unmapped`:
+
+  Optional. `"error"` (default) returns a 404 when no concept resolves;
+  `"sentinel"` returns a `concept_id` 0 record instead.
+
 ------------------------------------------------------------------------
 
 ### Method `resolve_batch()`
@@ -132,6 +138,7 @@ Failed items are reported inline without failing the batch.
       include_recommendations = FALSE,
       recommendations_limit = 5L,
       include_quality = FALSE,
+      on_unmapped = NULL,
       as_tibble = FALSE
     )
 
@@ -157,6 +164,10 @@ Failed items are reported inline without failing the batch.
 - `include_quality`:
 
   Logical. Default `FALSE`.
+
+- `on_unmapped`:
+
+  Optional `"error"` (default) / `"sentinel"`; see `resolve()`.
 
 - `as_tibble`:
 
@@ -186,7 +197,8 @@ coding resolves.
       resource_type = NULL,
       include_recommendations = FALSE,
       recommendations_limit = 5L,
-      include_quality = FALSE
+      include_quality = FALSE,
+      on_unmapped = NULL
     )
 
 #### Arguments
@@ -215,6 +227,10 @@ coding resolves.
 - `include_quality`:
 
   Logical. Default `FALSE`.
+
+- `on_unmapped`:
+
+  Optional `"error"` (default) / `"sentinel"`; see `resolve()`.
 
 ------------------------------------------------------------------------
 

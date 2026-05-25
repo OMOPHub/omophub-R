@@ -38,6 +38,7 @@ complex SQL queries. **OMOPHub eliminates this friction.**
 ## Installation
 
 ``` r
+
 # Install from CRAN
 install.packages("omophub")
 
@@ -49,6 +50,7 @@ pak::pak("omopHub/omophub-R")
 ## Authentication
 
 ``` r
+
 library(omophub)
 
 # Option 1: Environment variable (recommended)
@@ -67,6 +69,7 @@ Dashboard](https://dashboard.omophub.com/api-keys).
 ## Quick Start
 
 ``` r
+
 library(omophub)
 
 # Create client
@@ -96,6 +99,7 @@ ancestors <- client$hierarchy$ancestors(201826, max_levels = 3)
 Use natural language queries to find concepts using neural embeddings:
 
 ``` r
+
 # Natural language search - understands clinical intent
 results <- client$search$semantic("high blood sugar levels")
 for (r in results$data$results) {
@@ -125,6 +129,7 @@ for (s in similar$similar_concepts) {
 Search for multiple terms in a single API call:
 
 ``` r
+
 # Bulk lexical search (up to 50 queries) - returns a flat list of
 # per-query result objects; iterate it directly.
 results <- client$search$bulk_basic(list(
@@ -154,6 +159,7 @@ for (item in response$results) {
 Resolve FHIR coded values to OMOP standard concepts in one call:
 
 ``` r
+
 # Single FHIR Coding -> OMOP concept + CDM target table
 result <- client$fhir$resolve(
   system = "http://snomed.info/sct",
@@ -191,6 +197,32 @@ result$best_match$resolution$source_concept$vocabulary_id
 # [1] "SNOMED"
 ```
 
+The resolver also follows the [HL7 FHIR-to-OMOP
+IG](https://hl7.org/fhir/uv/omop/INFORMATIVE1/en/): it resolves FHIR
+administrative codes via the IG ConceptMaps, decomposes composite
+concepts (`Maps to value`), honors `Coding.userSelected`, and can return
+a `concept_id` 0 sentinel instead of an error.
+
+``` r
+
+# Administrative gender -> person (via IG ConceptMap)
+client$fhir$resolve(system = "http://hl7.org/fhir/administrative-gender", code = "male")
+
+# A user-selected coding wins over vocabulary preference
+client$fhir$resolve_codeable_concept(coding = list(
+  list(system = "http://snomed.info/sct", code = "44054006"),
+  list(system = "http://hl7.org/fhir/sid/icd-10-cm", code = "E11.9", user_selected = TRUE)
+))
+
+# on_unmapped = "sentinel" -> a concept_id 0 record instead of an error (one row per input)
+client$fhir$resolve(system = "http://snomed.info/sct", code = "00000000", on_unmapped = "sentinel")
+```
+
+Composite concepts (e.g. “Allergy to penicillin”) additionally surface
+`resolution$value_as_concept` (the IG Value-as-Concept pattern).
+`on_unmapped` is accepted by `resolve()`, `resolve_batch()`, and
+`resolve_codeable_concept()`.
+
 ### Tibble Output for Batch Resolution
 
 Pass `as_tibble = TRUE` to get a flat
@@ -198,6 +230,7 @@ Pass `as_tibble = TRUE` to get a flat
 coding - ready to pipe into `dplyr` / `tidyr`:
 
 ``` r
+
 library(dplyr)
 
 tbl <- client$fhir$resolve_batch(
@@ -223,10 +256,13 @@ tbl |>
 The tibble columns are `source_system`, `source_code`,
 `source_concept_id`, `source_concept_name`, `standard_concept_id`,
 `standard_concept_name`, `standard_vocabulary_id`, `domain_id`,
-`target_table`, `mapping_type`, `similarity_score`, `status`, and
-`status_detail`. Failed rows stay in-place with `status = "failed"` and
-the API error text in `status_detail`. The batch summary (`total` /
-`resolved` / `failed`) is attached as `attr(tbl, "summary")`.
+`value_as_concept_id`, `value_as_concept_name`, `target_table`,
+`mapping_type`, `similarity_score`, `status`, and `status_detail`.
+Failed rows stay in-place with `status = "failed"` and the API error
+text in `status_detail`; a coding that resolves but has no standard
+target gets `status = "unmapped"` (`standard_concept_id = 0`). The batch
+summary (`total` / `resolved` / `failed`) is attached as
+`attr(tbl, "summary")`.
 
 Default `as_tibble = FALSE` still returns the legacy
 `list(results, summary)` shape.
@@ -236,6 +272,7 @@ Default `as_tibble = FALSE` still returns the legacy
 The R6 interface is always available:
 
 ``` r
+
 client$fhir$resolve(system = "http://snomed.info/sct", code = "44054006")
 ```
 
@@ -243,6 +280,7 @@ For pipe-friendly workflows, three standalone wrappers forward to the
 same R6 methods and take the client as their first argument:
 
 ``` r
+
 # Equivalent to client$fhir$resolve()
 client |>
   fhir_resolve(
@@ -286,6 +324,7 @@ version (`"r4"` default, plus `"r4b"`, `"r5"`, `"r6"`). Use it with
 directly to OMOPHub’s FHIR endpoint.
 
 ``` r
+
 library(httr2)
 
 # Call CodeSystem/$lookup directly against OMOPHub's FHIR endpoint
@@ -320,6 +359,7 @@ mapping quality). Use
 Validate and map clinical codes during OMOP CDM transformations:
 
 ``` r
+
 # Validate source codes and find standard equivalents
 validate_and_map <- function(source_vocab, source_code) {
   concept <- client$concepts$get_by_code(source_vocab, source_code)
@@ -344,6 +384,7 @@ standard_id <- validate_and_map("ICD10CM", "E11.9")
 Verify codes exist and are valid:
 
 ``` r
+
 # Check if condition codes are valid. HTTP 404 responses come through
 # as httr2's `httr2_http_404` condition class.
 condition_codes <- c("E11.9", "I10", "J44.9")
@@ -363,6 +404,7 @@ for (code in condition_codes) {
 Explore hierarchies to build comprehensive concept sets:
 
 ``` r
+
 # Get all descendants for phenotype definition. `descendants()` returns
 # `list(data = list(descendants = [...], concept_id, concept_name, ...), meta)`
 descendants <- client$hierarchy$descendants(
@@ -378,6 +420,7 @@ message(sprintf("Found %d concepts for T2DM phenotype", length(concept_set)))
 ### Integration with tidyverse
 
 ``` r
+
 library(dplyr)
 library(purrr)
 
@@ -400,19 +443,20 @@ concepts_df %>%
 
 ## API Resources
 
-| Resource       | Description                         | Key Methods                                                                                            |
-|----------------|-------------------------------------|--------------------------------------------------------------------------------------------------------|
-| `concepts`     | Concept lookup and batch operations | [`get()`](https://rdrr.io/r/base/get.html), `get_by_code()`, `batch()`, `suggest()`                    |
-| `search`       | Full-text and semantic search       | `basic()`, `advanced()`, `semantic()`, `similar()`, `bulk_basic()`, `bulk_semantic()`                  |
-| `hierarchy`    | Navigate concept relationships      | `ancestors()`, `descendants()`                                                                         |
-| `mappings`     | Cross-vocabulary mappings           | [`get()`](https://rdrr.io/r/base/get.html), [`map()`](https://purrr.tidyverse.org/reference/map.html)  |
-| `vocabularies` | Vocabulary metadata                 | [`list()`](https://rdrr.io/r/base/list.html), [`get()`](https://rdrr.io/r/base/get.html), `stats()`    |
-| `domains`      | Domain information                  | [`list()`](https://rdrr.io/r/base/list.html), [`get()`](https://rdrr.io/r/base/get.html), `concepts()` |
-| `fhir`         | FHIR-to-OMOP resolution             | `resolve()`, `resolve_batch()`, `resolve_codeable_concept()`                                           |
+| Resource | Description | Key Methods |
+|----|----|----|
+| `concepts` | Concept lookup and batch operations | [`get()`](https://rdrr.io/r/base/get.html), `get_by_code()`, `batch()`, `suggest()` |
+| `search` | Full-text and semantic search | `basic()`, `advanced()`, `semantic()`, `similar()`, `bulk_basic()`, `bulk_semantic()` |
+| `hierarchy` | Navigate concept relationships | `ancestors()`, `descendants()` |
+| `mappings` | Cross-vocabulary mappings | [`get()`](https://rdrr.io/r/base/get.html), [`map()`](https://purrr.tidyverse.org/reference/map.html) |
+| `vocabularies` | Vocabulary metadata | [`list()`](https://rdrr.io/r/base/list.html), [`get()`](https://rdrr.io/r/base/get.html), `stats()` |
+| `domains` | Domain information | [`list()`](https://rdrr.io/r/base/list.html), [`get()`](https://rdrr.io/r/base/get.html), `concepts()` |
+| `fhir` | FHIR-to-OMOP resolution | `resolve()`, `resolve_batch()`, `resolve_codeable_concept()` |
 
 ## Pagination
 
 ``` r
+
 # Automatic pagination - fetch all results
 all_results <- client$search$basic_all("diabetes", page_size = 100)
 
@@ -424,6 +468,7 @@ page2 <- client$search$basic("diabetes", page = 2, page_size = 20)
 ## Configuration
 
 ``` r
+
 # Specify vocabulary version
 client <- OMOPHubClient$new(vocab_version = "2025.2")
 
@@ -444,6 +489,7 @@ etc.). Pre-request input-validation errors use the SDK’s
 `omophub_validation_error` class.
 
 ``` r
+
 tryCatch({
   result <- client$concepts$get(999999999)
 }, httr2_http_404 = function(e) {
@@ -486,19 +532,20 @@ vocabularies without infrastructure overhead.
 
 The package includes comprehensive examples in `inst/examples/`:
 
-| Example                      | Description                                                                                                                                         |
-|------------------------------|-----------------------------------------------------------------------------------------------------------------------------------------------------|
-| `basic_usage.R`              | Getting started - client setup, concept lookup, search                                                                                              |
-| `search_concepts.R`          | Search capabilities - filters, autocomplete, pagination                                                                                             |
-| `navigate_hierarchy.R`       | Hierarchy navigation - ancestors, descendants                                                                                                       |
-| `map_between_vocabularies.R` | Cross-vocabulary mapping                                                                                                                            |
-| `error_handling.R`           | Error handling patterns                                                                                                                             |
-| `fhir_resolver.R`            | FHIR Concept Resolver - single / batch / CodeableConcept, quality, recommendations                                                                  |
-| `fhir_interop.R`             | 1.7.0 interop - tibble batch output, standalone wrappers, [`omophub_fhir_url()`](https://omophub.github.io/omophub-R/reference/omophub_fhir_url.md) |
+| Example | Description |
+|----|----|
+| `basic_usage.R` | Getting started - client setup, concept lookup, search |
+| `search_concepts.R` | Search capabilities - filters, autocomplete, pagination |
+| `navigate_hierarchy.R` | Hierarchy navigation - ancestors, descendants |
+| `map_between_vocabularies.R` | Cross-vocabulary mapping |
+| `error_handling.R` | Error handling patterns |
+| `fhir_resolver.R` | FHIR Concept Resolver - single / batch / CodeableConcept, quality, recommendations, administrative codes, `user_selected`, `on_unmapped` |
+| `fhir_interop.R` | 1.7.0 interop - tibble batch output, standalone wrappers, [`omophub_fhir_url()`](https://omophub.github.io/omophub-R/reference/omophub_fhir_url.md) |
 
 Run an example:
 
 ``` r
+
 example_path <- system.file("examples", "basic_usage.R", package = "omophub")
 source(example_path)
 ```
@@ -515,6 +562,7 @@ source(example_path)
 We welcome contributions!
 
 ``` r
+
 # Clone and install for development
 # install.packages("devtools")
 devtools::install_github("omopHub/omophub-R")

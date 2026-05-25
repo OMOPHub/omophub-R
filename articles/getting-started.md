@@ -11,6 +11,7 @@ demonstrates basic usage patterns.
 Install from GitHub:
 
 ``` r
+
 # install.packages("devtools")
 devtools::install_github("omophub/omophub-R")
 ```
@@ -23,6 +24,7 @@ The package requires an API key from
 Set your API key as an environment variable:
 
 ``` r
+
 Sys.setenv(OMOPHUB_API_KEY = "your_api_key_here")
 ```
 
@@ -33,6 +35,7 @@ Or add it to your `.Renviron` file for persistence:
 ## Creating a Client
 
 ``` r
+
 library(omophub)
 
 # Create client (reads API key from environment)
@@ -55,6 +58,7 @@ client <- OMOPHubClient$new(
 Retrieve a concept by its OMOP concept ID:
 
 ``` r
+
 concept <- client$concepts$get(201826)
 print(concept$concept_name)
 # [1] "Type 2 diabetes mellitus"
@@ -63,6 +67,7 @@ print(concept$concept_name)
 Get a concept by vocabulary-specific code:
 
 ``` r
+
 concept <- client$concepts$get_by_code("SNOMED", "44054006")
 print(concept$concept_name)
 # [1] "Type 2 diabetes mellitus"
@@ -73,6 +78,7 @@ print(concept$concept_name)
 Retrieve multiple concepts in a single request:
 
 ``` r
+
 result <- client$concepts$batch(c(201826, 4329847, 1112807))
 for (concept in result$concepts) {
   cat(sprintf("%s: %s\n", concept$concept_id, concept$concept_name))
@@ -84,6 +90,7 @@ for (concept in result$concepts) {
 Basic search:
 
 ``` r
+
 results <- client$search$basic("diabetes mellitus", page_size = 10)
 for (concept in results$data) {
   cat(sprintf("%s: %s\n", concept$concept_id, concept$concept_name))
@@ -93,6 +100,7 @@ for (concept in results$data) {
 Search with filters:
 
 ``` r
+
 results <- client$search$basic(
   "heart attack",
   vocabulary_ids = "SNOMED",
@@ -106,6 +114,7 @@ results <- client$search$basic(
 Search using natural language queries powered by neural embeddings:
 
 ``` r
+
 # Natural language search - understands clinical intent
 results <- client$search$semantic("high blood sugar levels")
 for (r in results$data$results) {
@@ -116,6 +125,7 @@ for (r in results$data$results) {
 Filter semantic search results:
 
 ``` r
+
 results <- client$search$semantic(
   "heart attack",
   vocabulary_ids = "SNOMED",
@@ -127,6 +137,7 @@ results <- client$search$semantic(
 Fetch all semantic search results with automatic pagination:
 
 ``` r
+
 all_results <- client$search$semantic_all(
   "chronic kidney disease",
   page_size = 50,
@@ -141,6 +152,7 @@ print(nrow(all_results))
 Find concepts similar to a reference concept:
 
 ``` r
+
 # Find concepts similar to Type 2 diabetes mellitus
 similar <- client$search$similar(concept_id = 201826)
 for (s in similar$similar_concepts) {
@@ -151,6 +163,7 @@ for (s in similar$similar_concepts) {
 Search by natural language query with different algorithms:
 
 ``` r
+
 # Semantic similarity (neural embeddings)
 similar <- client$search$similar(
   query = "high blood pressure",
@@ -182,6 +195,7 @@ individual requests when you have many terms to look up.
 Execute up to 50 keyword searches at once:
 
 ``` r
+
 results <- client$search$bulk_basic(list(
   list(search_id = "q1", query = "diabetes mellitus"),
   list(search_id = "q2", query = "hypertension"),
@@ -199,6 +213,7 @@ for (item in results$results) {
 Execute up to 25 natural-language searches using neural embeddings:
 
 ``` r
+
 results <- client$search$bulk_semantic(list(
   list(search_id = "s1", query = "heart failure treatment options"),
   list(search_id = "s2", query = "type 2 diabetes medication")
@@ -213,6 +228,7 @@ for (item in results$results) {
 Defaults apply to all searches; per-search values override them:
 
 ``` r
+
 # Different domains per query, shared vocabulary filter
 results <- client$search$bulk_basic(list(
   list(search_id = "cond", query = "diabetes", domain_ids = list("Condition")),
@@ -225,6 +241,7 @@ results <- client$search$bulk_basic(list(
 Get suggestions for autocomplete:
 
 ``` r
+
 suggestions <- client$concepts$suggest("diab", page_size = 5)
 for (s in suggestions$suggestions) {
   print(s$suggestion)
@@ -236,6 +253,7 @@ for (s in suggestions$suggestions) {
 ### Manual Pagination
 
 ``` r
+
 # First page
 results <- client$search$basic("diabetes", page = 1, page_size = 50)
 
@@ -254,6 +272,7 @@ if (isTRUE(results$meta$has_next)) {
 Fetch all results as a tibble:
 
 ``` r
+
 all_results <- client$search$basic_all(
   "diabetes",
   page_size = 100,
@@ -271,6 +290,7 @@ print(names(all_results))
 Get ancestors (parent concepts):
 
 ``` r
+
 result <- client$hierarchy$ancestors(201826, max_levels = 3)
 for (ancestor in result$ancestors) {
   print(ancestor$concept_name)
@@ -280,6 +300,7 @@ for (ancestor in result$ancestors) {
 Get descendants (child concepts):
 
 ``` r
+
 result <- client$hierarchy$descendants(201826, max_levels = 2)
 for (descendant in result$descendants) {
   print(descendant$concept_name)
@@ -291,6 +312,7 @@ for (descendant in result$descendants) {
 Find how a concept maps to other vocabularies:
 
 ``` r
+
 result <- client$mappings$get(201826)
 for (mapping in result$mappings) {
   cat(sprintf("%s: %s\n",
@@ -302,6 +324,7 @@ for (mapping in result$mappings) {
 Map to specific vocabularies:
 
 ``` r
+
 result <- client$mappings$get(
   201826,
   target_vocabulary = "ICD10CM"
@@ -313,6 +336,7 @@ result <- client$mappings$get(
 Use `tryCatch` to handle errors:
 
 ``` r
+
 tryCatch(
   {
     concept <- client$concepts$get(999999999)
@@ -335,6 +359,7 @@ traversal, and CDM target table assignment automatically.
 ### Single Coding
 
 ``` r
+
 result <- client$fhir$resolve(
   system = "http://snomed.info/sct",
   code = "44054006",
@@ -348,6 +373,7 @@ cat(result$resolution$mapping_type)   # "direct"
 ### Non-Standard Code (Automatic Maps-to Traversal)
 
 ``` r
+
 result <- client$fhir$resolve(
   system = "http://hl7.org/fhir/sid/icd-10-cm",
   code = "E11.9"
@@ -359,6 +385,7 @@ cat(result$resolution$standard_concept$vocabulary_id)  # "SNOMED"
 ### Batch Resolution
 
 ``` r
+
 batch <- client$fhir$resolve_batch(list(
   list(system = "http://snomed.info/sct", code = "44054006"),
   list(system = "http://loinc.org", code = "2339-0")
@@ -369,6 +396,7 @@ cat(sprintf("Resolved: %d/%d\n", batch$summary$resolved, batch$summary$total))
 ### CodeableConcept with Vocabulary Preference
 
 ``` r
+
 result <- client$fhir$resolve_codeable_concept(
   coding = list(
     list(system = "http://snomed.info/sct", code = "44054006"),
@@ -380,15 +408,36 @@ result <- client$fhir$resolve_codeable_concept(
 cat(result$best_match$resolution$source_concept$vocabulary_id)  # "SNOMED"
 ```
 
+To override the vocabulary preference, mark a coding with
+`user_selected = TRUE` (mirroring FHIR `Coding.userSelected`); that
+coding then wins `best_match` regardless of its vocabulary:
+
+``` r
+
+client$fhir$resolve_codeable_concept(
+  coding = list(
+    list(
+      system = "http://hl7.org/fhir/sid/icd-10-cm", code = "E11.9",
+      user_selected = TRUE
+    ),
+    list(system = "http://snomed.info/sct", code = "44054006")
+  ),
+  resource_type = "Condition"
+)
+```
+
 ### Tibble Output for Batch Resolution
 
 For `dplyr` / `tidyr` workflows, pass `as_tibble = TRUE` to get a flat
 tibble with one row per input coding and columns for the source and
 standard concepts, target CDM table, mapping type, and resolution
-status. This is the most ergonomic shape for ETL pipelines processing
-many codes:
+status. Composite concepts decomposed via `Maps to value` (the HL7
+FHIR-to-OMOP IG Value-as-Concept pattern) also populate
+`value_as_concept_id` / `value_as_concept_name`. This is the most
+ergonomic shape for ETL pipelines processing many codes:
 
 ``` r
+
 library(dplyr)
 
 tbl <- client$fhir$resolve_batch(
@@ -411,6 +460,7 @@ dropping them. The batch summary (`total` / `resolved` / `failed`) is
 attached as an attribute:
 
 ``` r
+
 attr(tbl, "summary")
 ```
 
@@ -424,6 +474,7 @@ functions that take the client as their first argument. Both forms are
 fully supported — pick whichever reads better for the surrounding code:
 
 ``` r
+
 # Equivalent to client$fhir$resolve()
 client |>
   fhir_resolve(
@@ -462,6 +513,7 @@ it directly with `httr2` or `fhircrackr`. Supports FHIR versions `"r4"`
 (default), `"r4b"`, `"r5"`, and `"r6"`:
 
 ``` r
+
 omophub_fhir_url()
 #> "https://fhir.omophub.com/fhir/r4"
 
@@ -472,6 +524,7 @@ omophub_fhir_url("r5")
 Example: call `CodeSystem/$lookup` directly with `httr2`:
 
 ``` r
+
 library(httr2)
 
 resp <- request(omophub_fhir_url()) |>
