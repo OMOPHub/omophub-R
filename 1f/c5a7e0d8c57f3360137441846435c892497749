@@ -1,0 +1,28 @@
+.github/workflows/pkgdown.yaml
+  s_c995e58523efd2::t_05cb226bc192ac 23
+  s_c995e58523efd2::t_48279a503d539f 43
+.github/workflows/integration-tests.yaml
+  s_c995e58523efd2::t_f056455853e5ce 22
+  s_c995e58523efd2::t_6ae4770f76613d 64
+.github/workflows/test-coverage.yaml
+  s_c995e58523efd2::t_b2732826429deb 20
+  s_c995e58523efd2::t_22bca918527b7a 51
+.github/workflows/R-CMD-check.yaml
+  s_c995e58523efd2::t_7ae8d2cfdb04ca 29,92
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.5.1",
+  "base_commit_sha": "1fc5a7e0d8c57f3360137441846435c892497749",
+  "prompts": {},
+  "sessions": {
+    "s_c995e58523efd2": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "98408716-d0fe-4669-a33d-cdf3c6afe981",
+        "model": "claude-opus-4-7"
+      },
+      "human_author": "alex-omophub <sdk@omophub.com>"
+    }
+  }
+}
