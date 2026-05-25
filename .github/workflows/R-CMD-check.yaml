@@ -26,7 +26,7 @@ jobs:
       OMOPHUB_API_KEY: ${{ secrets.OMOPHUB_API_KEY }}
 
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v6
 
       - uses: r-lib/actions/setup-pandoc@v2
 
@@ -89,7 +89,7 @@ jobs:
       OMOPHUB_API_KEY: ${{ secrets.OMOPHUB_API_KEY }}
 
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v6
 
       - uses: r-lib/actions/setup-pandoc@v2
 

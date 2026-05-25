@@ -99,6 +99,39 @@ test_that("fhir$resolve calls correct endpoint with body", {
   # Optional flags should NOT be in body when FALSE
   expect_null(called_with$body$include_recommendations)
   expect_null(called_with$body$include_quality)
+  # on_unmapped omitted by default (API defaults to "error")
+  expect_null(called_with$body$on_unmapped)
+})
+
+test_that("fhir resolve methods forward on_unmapped when set", {
+  base_req <- httr2::request("https://api.omophub.com/v1")
+  resource <- FhirResource$new(base_req)
+
+  called_with <- NULL
+  local_mocked_bindings(
+    perform_post = function(req, path, body = NULL, query = NULL) {
+      called_with <<- list(body = body)
+      mock_fhir_resolution()
+    }
+  )
+
+  resource$resolve(
+    system = "http://snomed.info/sct", code = "44054006",
+    on_unmapped = "sentinel"
+  )
+  expect_equal(called_with$body$on_unmapped, "sentinel")
+
+  resource$resolve_batch(
+    list(list(system = "http://snomed.info/sct", code = "44054006")),
+    on_unmapped = "sentinel"
+  )
+  expect_equal(called_with$body$on_unmapped, "sentinel")
+
+  resource$resolve_codeable_concept(
+    list(list(system = "http://snomed.info/sct", code = "44054006")),
+    on_unmapped = "sentinel"
+  )
+  expect_equal(called_with$body$on_unmapped, "sentinel")
 })
 
 test_that("fhir$resolve includes recommendation flags when requested", {
@@ -340,7 +373,8 @@ test_that("resolve_batch returns tibble when as_tibble = TRUE", {
     "source_system", "source_code",
     "source_concept_id", "source_concept_name",
     "standard_concept_id", "standard_concept_name",
-    "standard_vocabulary_id", "domain_id", "target_table",
+    "standard_vocabulary_id", "domain_id",
+    "value_as_concept_id", "value_as_concept_name", "target_table",
     "mapping_type", "similarity_score",
     "status", "status_detail"
   ) %in% names(tbl)))
@@ -357,6 +391,108 @@ test_that("resolve_batch returns tibble when as_tibble = TRUE", {
   expect_equal(summary$total, 2L)
   expect_equal(summary$resolved, 1L)
   expect_equal(summary$failed, 1L)
+})
+
+test_that("resolve_batch tibble surfaces value_as_concept (Maps to value)", {
+  base_req <- httr2::request("https://api.omophub.com/v1")
+  resource <- FhirResource$new(base_req)
+
+  local_mocked_bindings(
+    perform_post = function(req, path, body = NULL, query = NULL) {
+      list(
+        results = list(list(resolution = list(
+          source_concept = list(concept_id = 4222295L, concept_name = "Allergy to penicillin"),
+          standard_concept = list(
+            concept_id = 439224L, concept_name = "Allergy to drug",
+            vocabulary_id = "SNOMED", domain_id = "Observation"
+          ),
+          value_as_concept = list(concept_id = 1728416L, concept_name = "Penicillin G"),
+          value_target_field = "value_as_concept_id",
+          mapping_type = "mapped",
+          target_table = "observation"
+        ))),
+        summary = list(total = 1L, resolved = 1L, failed = 0L)
+      )
+    }
+  )
+
+  tbl <- resource$resolve_batch(
+    list(list(system = "http://snomed.info/sct", code = "294499007")),
+    as_tibble = TRUE
+  )
+
+  expect_equal(tbl$standard_concept_id[1], 439224L)
+  expect_equal(tbl$value_as_concept_id[1], 1728416L)
+  expect_equal(tbl$value_as_concept_name[1], "Penicillin G")
+})
+
+test_that("resolve_batch tibble flags concept_id 0 as status 'unmapped'", {
+  base_req <- httr2::request("https://api.omophub.com/v1")
+  resource <- FhirResource$new(base_req)
+
+  local_mocked_bindings(
+    perform_post = function(req, path, body = NULL, query = NULL) {
+      list(
+        results = list(list(resolution = list(
+          source_concept = list(
+            concept_id = 45576876L,
+            concept_name = "Some non-standard code",
+            vocabulary_id = "ICD10CM"
+          ),
+          standard_concept = list(concept_id = 0L, concept_name = "No matching concept"),
+          mapping_type = "unmapped",
+          target_table = NULL
+        ))),
+        summary = list(total = 1L, resolved = 0L, failed = 0L)
+      )
+    }
+  )
+
+  tbl <- resource$resolve_batch(
+    list(list(system = "http://hl7.org/fhir/sid/icd-10-cm", code = "E11.9")),
+    as_tibble = TRUE
+  )
+
+  # A concept_id 0 sentinel must not be reported as a successful resolution.
+  expect_equal(tbl$standard_concept_id[1], 0L)
+  expect_equal(tbl$status[1], "unmapped")
+  expect_false(is.na(tbl$status_detail[1]))
+  expect_equal(tbl$source_concept_id[1], 45576876L)
+})
+
+test_that("resolve_batch tibble does not mislabel a missing standard id as 'unmapped'", {
+  base_req <- httr2::request("https://api.omophub.com/v1")
+  resource <- FhirResource$new(base_req)
+
+  local_mocked_bindings(
+    perform_post = function(req, path, body = NULL, query = NULL) {
+      list(
+        # Malformed/partial resolution: standard_concept present but no
+        # concept_id. This must not be folded into the concept_id 0 sentinel.
+        results = list(list(resolution = list(
+          source_concept = list(
+            concept_id = 45576876L,
+            concept_name = "Some non-standard code",
+            vocabulary_id = "ICD10CM"
+          ),
+          standard_concept = list(concept_name = "Partial response"),
+          target_table = NULL
+        ))),
+        summary = list(total = 1L, resolved = 1L, failed = 0L)
+      )
+    }
+  )
+
+  tbl <- resource$resolve_batch(
+    list(list(system = "http://hl7.org/fhir/sid/icd-10-cm", code = "E11.9")),
+    as_tibble = TRUE
+  )
+
+  # NA id is a malformed response, not the explicit 0 sentinel: it stays
+  # "resolved" (with an NA id) and never claims "concept_id 0".
+  expect_true(is.na(tbl$standard_concept_id[1]))
+  expect_equal(tbl$status[1], "resolved")
+  expect_true(is.na(tbl$status_detail[1]))
 })
 
 test_that("resolve_batch default return is unchanged (list shape)", {
