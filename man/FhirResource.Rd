@@ -77,7 +77,8 @@ or \code{display}.
   resource_type = NULL,
   include_recommendations = FALSE,
   recommendations_limit = 5L,
-  include_quality = FALSE
+  include_quality = FALSE,
+  on_unmapped = NULL
 )}\if{html}{\out{</div>}}
 }
 
@@ -99,6 +100,9 @@ or \code{display}.
 \item{\code{recommendations_limit}}{Integer. Max recommendations (1-20). Default \code{5L}.}
 
 \item{\code{include_quality}}{Logical. Include mapping quality signal. Default \code{FALSE}.}
+
+\item{\code{on_unmapped}}{Optional. \code{"error"} (default) returns a 404 when no
+concept resolves; \code{"sentinel"} returns a \code{concept_id} 0 record instead.}
 }
 \if{html}{\out{</div>}}
 }
@@ -117,6 +121,7 @@ Failed items are reported inline without failing the batch.
   include_recommendations = FALSE,
   recommendations_limit = 5L,
   include_quality = FALSE,
+  on_unmapped = NULL,
   as_tibble = FALSE
 )}\if{html}{\out{</div>}}
 }
@@ -134,6 +139,9 @@ Failed items are reported inline without failing the batch.
 \item{\code{recommendations_limit}}{Integer. Default \code{5L}.}
 
 \item{\code{include_quality}}{Logical. Default \code{FALSE}.}
+
+\item{\code{on_unmapped}}{Optional \code{"error"} (default) / \code{"sentinel"}; see
+\code{resolve()}.}
 
 \item{\code{as_tibble}}{Logical. When \code{TRUE}, returns a \link[tibble:tibble]{tibble::tibble}
 with one row per input coding and flat columns for the source
@@ -161,7 +169,8 @@ via semantic search if no coding resolves.
   resource_type = NULL,
   include_recommendations = FALSE,
   recommendations_limit = 5L,
-  include_quality = FALSE
+  include_quality = FALSE,
+  on_unmapped = NULL
 )}\if{html}{\out{</div>}}
 }
 
@@ -180,6 +189,9 @@ and optional \code{display}.}
 \item{\code{recommendations_limit}}{Integer. Default \code{5L}.}
 
 \item{\code{include_quality}}{Logical. Default \code{FALSE}.}
+
+\item{\code{on_unmapped}}{Optional \code{"error"} (default) / \code{"sentinel"}; see
+\code{resolve()}.}
 }
 \if{html}{\out{</div>}}
 }

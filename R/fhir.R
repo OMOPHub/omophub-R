@@ -43,6 +43,8 @@ FhirResource <- R6::R6Class(
     #' @param include_recommendations Logical. Include Phoebe recommendations. Default `FALSE`.
     #' @param recommendations_limit Integer. Max recommendations (1-20). Default `5L`.
     #' @param include_quality Logical. Include mapping quality signal. Default `FALSE`.
+    #' @param on_unmapped Optional. `"error"` (default) returns a 404 when no
+    #'   concept resolves; `"sentinel"` returns a `concept_id` 0 record instead.
     #'
     #' @returns A list with `input` and `resolution` containing source/standard
     #'   concepts, target CDM table, and optional enrichments.
@@ -53,13 +55,15 @@ FhirResource <- R6::R6Class(
                        resource_type = NULL,
                        include_recommendations = FALSE,
                        recommendations_limit = 5L,
-                       include_quality = FALSE) {
+                       include_quality = FALSE,
+                       on_unmapped = NULL) {
       body <- compact_list(
         system = system,
         code = code,
         display = display,
         vocabulary_id = vocabulary_id,
-        resource_type = resource_type
+        resource_type = resource_type,
+        on_unmapped = on_unmapped
       )
       if (isTRUE(include_recommendations)) {
         body$include_recommendations <- TRUE
@@ -83,6 +87,8 @@ FhirResource <- R6::R6Class(
     #' @param include_recommendations Logical. Default `FALSE`.
     #' @param recommendations_limit Integer. Default `5L`.
     #' @param include_quality Logical. Default `FALSE`.
+    #' @param on_unmapped Optional `"error"` (default) / `"sentinel"`; see
+    #'   `resolve()`.
     #' @param as_tibble Logical. When `TRUE`, returns a [tibble::tibble]
     #'   with one row per input coding and flat columns for the source
     #'   concept, standard concept, target CDM table, mapping type, and
@@ -99,6 +105,7 @@ FhirResource <- R6::R6Class(
                              include_recommendations = FALSE,
                              recommendations_limit = 5L,
                              include_quality = FALSE,
+                             on_unmapped = NULL,
                              as_tibble = FALSE) {
       stopifnot(is.list(codings), length(codings) >= 1, length(codings) <= 100)
       if (!all(vapply(codings, is.list, logical(1)))) {
@@ -116,6 +123,7 @@ FhirResource <- R6::R6Class(
         body$recommendations_limit <- as.integer(recommendations_limit)
       }
       if (isTRUE(include_quality)) body$include_quality <- TRUE
+      if (!is.null(on_unmapped)) body$on_unmapped <- on_unmapped
 
       result <- perform_post(private$.base_req, "fhir/resolve/batch", body = body)
 
@@ -139,6 +147,8 @@ FhirResource <- R6::R6Class(
     #' @param include_recommendations Logical. Default `FALSE`.
     #' @param recommendations_limit Integer. Default `5L`.
     #' @param include_quality Logical. Default `FALSE`.
+    #' @param on_unmapped Optional `"error"` (default) / `"sentinel"`; see
+    #'   `resolve()`.
     #'
     #' @returns A list with `best_match`, `alternatives`, and `unresolved`.
     resolve_codeable_concept = function(coding,
@@ -146,7 +156,8 @@ FhirResource <- R6::R6Class(
                                         resource_type = NULL,
                                         include_recommendations = FALSE,
                                         recommendations_limit = 5L,
-                                        include_quality = FALSE) {
+                                        include_quality = FALSE,
+                                        on_unmapped = NULL) {
       stopifnot(is.list(coding), length(coding) >= 1, length(coding) <= 20)
       if (!all(vapply(coding, is.list, logical(1)))) {
         cli::cli_abort(c(
@@ -164,6 +175,7 @@ FhirResource <- R6::R6Class(
         body$recommendations_limit <- as.integer(recommendations_limit)
       }
       if (isTRUE(include_quality)) body$include_quality <- TRUE
+      if (!is.null(on_unmapped)) body$on_unmapped <- on_unmapped
 
       perform_post(private$.base_req, "fhir/resolve/codeable-concept", body = body)
     }
@@ -238,6 +250,8 @@ fhir_batch_to_tibble <- function(result, codings) {
         standard_concept_name = NA_character_,
         standard_vocabulary_id = NA_character_,
         domain_id = NA_character_,
+        value_as_concept_id = NA_integer_,
+        value_as_concept_name = NA_character_,
         target_table = NA_character_,
         mapping_type = NA_character_,
         similarity_score = NA_real_,
@@ -248,21 +262,40 @@ fhir_batch_to_tibble <- function(result, codings) {
 
     src <- resolution$source_concept %||% list()
     std <- resolution$standard_concept %||% list()
+    # Value concept from `Maps to value` decomposition (FHIR-to-OMOP IG
+    # Value-as-Concept pattern); NA when the source is not composite.
+    val <- resolution$value_as_concept %||% list()
+
+    # A resolved-but-unmapped row carries concept_id 0 (OMOP "no matching
+    # concept"). Surface it as status "unmapped" so callers filtering
+    # `status == "resolved"` don't mistake the sentinel for a real mapping.
+    std_id <- std$concept_id %||% NA_integer_
+    # Only an explicit concept_id 0 is the OMOP "no matching concept" sentinel.
+    # A missing/NA id signals a malformed or partial response (not an unmapped
+    # code), so it stays "resolved" with an NA id rather than being mislabeled
+    # "unmapped" with a misleading "concept_id 0" detail.
+    unmapped <- !is.na(std_id) && std_id == 0L
 
     tibble::tibble(
       source_system = input_coding$system %||% NA_character_,
       source_code = input_coding$code %||% NA_character_,
       source_concept_id = src$concept_id %||% NA_integer_,
       source_concept_name = src$concept_name %||% NA_character_,
-      standard_concept_id = std$concept_id %||% NA_integer_,
+      standard_concept_id = std_id,
       standard_concept_name = std$concept_name %||% NA_character_,
       standard_vocabulary_id = std$vocabulary_id %||% NA_character_,
       domain_id = std$domain_id %||% NA_character_,
+      value_as_concept_id = val$concept_id %||% NA_integer_,
+      value_as_concept_name = val$concept_name %||% NA_character_,
       target_table = resolution$target_table %||% NA_character_,
       mapping_type = resolution$mapping_type %||% NA_character_,
       similarity_score = resolution$similarity_score %||% NA_real_,
-      status = "resolved",
-      status_detail = NA_character_
+      status = if (unmapped) "unmapped" else "resolved",
+      status_detail = if (unmapped) {
+        "no standard concept (concept_id 0)"
+      } else {
+        NA_character_
+      }
     )
   }
 

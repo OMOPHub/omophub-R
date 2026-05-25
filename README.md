@@ -182,6 +182,24 @@ result$best_match$resolution$source_concept$vocabulary_id
 # [1] "SNOMED"
 ```
 
+The resolver also follows the [HL7 FHIR-to-OMOP IG](https://hl7.org/fhir/uv/omop/INFORMATIVE1/en/): it resolves FHIR administrative codes via the IG ConceptMaps, decomposes composite concepts (`Maps to value`), honors `Coding.userSelected`, and can return a `concept_id` 0 sentinel instead of an error.
+
+```r
+# Administrative gender -> person (via IG ConceptMap)
+client$fhir$resolve(system = "http://hl7.org/fhir/administrative-gender", code = "male")
+
+# A user-selected coding wins over vocabulary preference
+client$fhir$resolve_codeable_concept(coding = list(
+  list(system = "http://snomed.info/sct", code = "44054006"),
+  list(system = "http://hl7.org/fhir/sid/icd-10-cm", code = "E11.9", user_selected = TRUE)
+))
+
+# on_unmapped = "sentinel" -> a concept_id 0 record instead of an error (one row per input)
+client$fhir$resolve(system = "http://snomed.info/sct", code = "00000000", on_unmapped = "sentinel")
+```
+
+Composite concepts (e.g. "Allergy to penicillin") additionally surface `resolution$value_as_concept` (the IG Value-as-Concept pattern). `on_unmapped` is accepted by `resolve()`, `resolve_batch()`, and `resolve_codeable_concept()`.
+
 ### Tibble Output for Batch Resolution
 
 Pass `as_tibble = TRUE` to get a flat [`tibble`](https://tibble.tidyverse.org/) with one row per input coding - ready to pipe into `dplyr` / `tidyr`:
@@ -209,7 +227,7 @@ tbl |>
 #> 3 J45.909     Asthma                      condition_occurrence
 ```
 
-The tibble columns are `source_system`, `source_code`, `source_concept_id`, `source_concept_name`, `standard_concept_id`, `standard_concept_name`, `standard_vocabulary_id`, `domain_id`, `target_table`, `mapping_type`, `similarity_score`, `status`, and `status_detail`. Failed rows stay in-place with `status = "failed"` and the API error text in `status_detail`. The batch summary (`total` / `resolved` / `failed`) is attached as `attr(tbl, "summary")`.
+The tibble columns are `source_system`, `source_code`, `source_concept_id`, `source_concept_name`, `standard_concept_id`, `standard_concept_name`, `standard_vocabulary_id`, `domain_id`, `value_as_concept_id`, `value_as_concept_name`, `target_table`, `mapping_type`, `similarity_score`, `status`, and `status_detail`. Failed rows stay in-place with `status = "failed"` and the API error text in `status_detail`; a coding that resolves but has no standard target gets `status = "unmapped"` (`standard_concept_id = 0`). The batch summary (`total` / `resolved` / `failed`) is attached as `attr(tbl, "summary")`.
 
 Default `as_tibble = FALSE` still returns the legacy `list(results, summary)` shape.
 
@@ -453,7 +471,7 @@ The package includes comprehensive examples in `inst/examples/`:
 | `navigate_hierarchy.R` | Hierarchy navigation - ancestors, descendants |
 | `map_between_vocabularies.R` | Cross-vocabulary mapping |
 | `error_handling.R` | Error handling patterns |
-| `fhir_resolver.R` | FHIR Concept Resolver - single / batch / CodeableConcept, quality, recommendations |
+| `fhir_resolver.R` | FHIR Concept Resolver - single / batch / CodeableConcept, quality, recommendations, administrative codes, `user_selected`, `on_unmapped` |
 | `fhir_interop.R` | 1.7.0 interop - tibble batch output, standalone wrappers, `omophub_fhir_url()` |
 
 Run an example:
