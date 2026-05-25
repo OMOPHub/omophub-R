@@ -270,7 +270,11 @@ fhir_batch_to_tibble <- function(result, codings) {
     # concept"). Surface it as status "unmapped" so callers filtering
     # `status == "resolved"` don't mistake the sentinel for a real mapping.
     std_id <- std$concept_id %||% NA_integer_
-    unmapped <- is.na(std_id) || std_id == 0L
+    # Only an explicit concept_id 0 is the OMOP "no matching concept" sentinel.
+    # A missing/NA id signals a malformed or partial response (not an unmapped
+    # code), so it stays "resolved" with an NA id rather than being mislabeled
+    # "unmapped" with a misleading "concept_id 0" detail.
+    unmapped <- !is.na(std_id) && std_id == 0L
 
     tibble::tibble(
       source_system = input_coding$system %||% NA_character_,

@@ -460,6 +460,41 @@ test_that("resolve_batch tibble flags concept_id 0 as status 'unmapped'", {
   expect_equal(tbl$source_concept_id[1], 45576876L)
 })
 
+test_that("resolve_batch tibble does not mislabel a missing standard id as 'unmapped'", {
+  base_req <- httr2::request("https://api.omophub.com/v1")
+  resource <- FhirResource$new(base_req)
+
+  local_mocked_bindings(
+    perform_post = function(req, path, body = NULL, query = NULL) {
+      list(
+        # Malformed/partial resolution: standard_concept present but no
+        # concept_id. This must not be folded into the concept_id 0 sentinel.
+        results = list(list(resolution = list(
+          source_concept = list(
+            concept_id = 45576876L,
+            concept_name = "Some non-standard code",
+            vocabulary_id = "ICD10CM"
+          ),
+          standard_concept = list(concept_name = "Partial response"),
+          target_table = NULL
+        ))),
+        summary = list(total = 1L, resolved = 1L, failed = 0L)
+      )
+    }
+  )
+
+  tbl <- resource$resolve_batch(
+    list(list(system = "http://hl7.org/fhir/sid/icd-10-cm", code = "E11.9")),
+    as_tibble = TRUE
+  )
+
+  # NA id is a malformed response, not the explicit 0 sentinel: it stays
+  # "resolved" (with an NA id) and never claims "concept_id 0".
+  expect_true(is.na(tbl$standard_concept_id[1]))
+  expect_equal(tbl$status[1], "resolved")
+  expect_true(is.na(tbl$status_detail[1]))
+})
+
 test_that("resolve_batch default return is unchanged (list shape)", {
   base_req <- httr2::request("https://api.omophub.com/v1")
   resource <- FhirResource$new(base_req)
