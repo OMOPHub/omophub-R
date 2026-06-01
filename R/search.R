@@ -273,7 +273,7 @@ SearchResource <- R6::R6Class(
         params$threshold <- threshold
       }
 
-      perform_get(private$.base_req, "concepts/semantic-search", query = params)
+      perform_get(private$.base_req, "search/semantic", query = params)
     },
 
     #' @description

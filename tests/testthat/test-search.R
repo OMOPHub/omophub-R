@@ -406,7 +406,7 @@ test_that("search$semantic calls correct endpoint", {
 
   resource$semantic("heart attack", page = 1, page_size = 20)
 
-  expect_equal(called_with$path, "concepts/semantic-search")
+  expect_equal(called_with$path, "search/semantic")
   expect_equal(called_with$query$query, "heart attack")
   expect_equal(called_with$query$page, 1L)
   expect_equal(called_with$query$page_size, 20L)
