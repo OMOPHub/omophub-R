@@ -1,3 +1,14 @@
+# omophub 1.8.1
+
+## Changed
+
+* **Canonical endpoint path** — `client$search$semantic()` and
+  `client$search$semantic_all()` now call `GET /v1/search/semantic` instead of
+  `GET /v1/concepts/semantic-search`. The legacy path remains a permanent
+  server-side alias (emits `Deprecation: true` + `Link: …rel="successor-version"`
+  headers), so older installations of this SDK continue to work - no breaking
+  change for callers.
+
 # omophub 1.8.0
 
 ## New Features
