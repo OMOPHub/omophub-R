@@ -45,8 +45,10 @@ if (!is.null(pag)) {
               pag$page, pag$total_pages, pag$total_items))
 }
 for (m in mappings$mappings) {
-  # A mapping row carries only these fields. Vocabulary id and concept code
-  # are NOT part of it -- fetch the target concept if you need them.
+  # This endpoint projects each row down to source/target id + name,
+  # relationship_id and confidence. Vocabulary id and concept code are not
+  # included -- resolve them with client$concepts$get(target_concept_id),
+  # as section 2 does. (client$mappings$map() does return them.)
   cat(sprintf("  %s: %s %s\n",
               m$relationship_id, m$target_concept_id, m$target_concept_name))
 }
@@ -77,10 +79,13 @@ icd_mappings <- client$mappings$get_all(
   progress = FALSE
 )
 cat(sprintf("  'Mapped from' + ICD10CM: %d rows\n", nrow(icd_mappings)))
+
+# The mapping row has the target's id and name but not its code, so resolve
+# the first few. One request each -- fine for five rows, not for all 74.
 for (i in seq_len(min(5, nrow(icd_mappings)))) {
-  cat(sprintf("    <- %s %s\n",
-              icd_mappings$target_concept_id[i],
-              icd_mappings$target_concept_name[i]))
+  target <- client$concepts$get(icd_mappings$target_concept_id[i])
+  cat(sprintf("    <- [%s] %s %s\n",
+              target$vocabulary_id, target$concept_code, target$concept_name))
 }
 cat("\n")
 
