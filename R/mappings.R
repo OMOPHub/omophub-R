@@ -15,21 +15,35 @@ MappingsResource <- R6::R6Class(
     },
 
     #' @description
-    #' Get mappings for a concept.
+    #' Get one page of mappings for a concept.
+    #'
+    #' The endpoint is paginated and a concept can easily have more mappings
+    #' than one page holds, so a full page means "there is probably more",
+    #' not "this is everything". Read the `pagination` attribute on the
+    #' result, or use `get_all()` to walk every page.
     #'
     #' @param concept_id The concept ID.
     #' @param target_vocabulary Filter to a specific target vocabulary (e.g., "ICD10CM").
     #' @param include_invalid Include invalid/deprecated mappings. Default `FALSE`.
+    #' @param page Page number. Default 1.
+    #' @param page_size Mappings per page. Default 100, maximum 200.
     #' @param vocab_release Specific vocabulary release version (e.g., "2025.1"). Default `NULL`.
     #'
-    #' @returns Mappings for the concept.
+    #' @returns Mappings for the concept, with pagination metadata attached as
+    #'   the `pagination` attribute.
     get = function(concept_id,
                    target_vocabulary = NULL,
                    include_invalid = FALSE,
+                   page = 1,
+                   page_size = 100,
                    vocab_release = NULL) {
       concept_id <- validate_concept_id(concept_id)
+      pag <- validate_pagination(page, page_size, max_page_size = 200)
 
-      params <- list()
+      params <- list(
+        page = pag$page,
+        page_size = pag$page_size
+      )
 
       if (!is.null(target_vocabulary)) {
         checkmate::assert_string(target_vocabulary, min.chars = 1)
@@ -43,10 +57,60 @@ MappingsResource <- R6::R6Class(
         params$vocab_release <- vocab_release
       }
 
-      perform_get(
+      result <- perform_get(
         private$.base_req,
         paste0("concepts/", concept_id, "/mappings"),
-        query = if (length(params) > 0) params else NULL
+        query = params
+      )
+
+      private$.with_pagination(result)
+    },
+
+    #' @description
+    #' Get every mapping for a concept, walking all pages.
+    #'
+    #' Prefer this over `get()` when assembling a code list — `get()` returns
+    #' a single page, and a partial code list is wrong in a way nothing in
+    #' the result reveals.
+    #'
+    #' @param concept_id The concept ID.
+    #' @param target_vocabulary Filter to a specific target vocabulary (e.g., "ICD10CM").
+    #' @param include_invalid Include invalid/deprecated mappings. Default `FALSE`.
+    #' @param page_size Mappings fetched per request. Default 100, maximum 200.
+    #' @param max_pages Maximum pages to fetch. Default `Inf`.
+    #' @param progress Show progress bar. Default `TRUE`.
+    #' @param vocab_release Specific vocabulary release version (e.g., "2025.1"). Default `NULL`.
+    #'
+    #' @returns A tibble of all mappings for the concept.
+    get_all = function(concept_id,
+                       target_vocabulary = NULL,
+                       include_invalid = FALSE,
+                       page_size = 100,
+                       max_pages = Inf,
+                       progress = TRUE,
+                       vocab_release = NULL) {
+      concept_id <- validate_concept_id(concept_id)
+
+      fetch_fn <- function(page, size) {
+        result <- self$get(
+          concept_id,
+          target_vocabulary = target_vocabulary,
+          include_invalid = include_invalid,
+          page = page,
+          page_size = size,
+          vocab_release = vocab_release
+        )
+        list(
+          data = result$mappings %||% list(),
+          meta = attr(result, "pagination") %||% list()
+        )
+      }
+
+      paginate_all(
+        fetch_fn,
+        page_size = page_size,
+        max_pages = max_pages,
+        progress = progress
       )
     },
 
@@ -120,11 +184,31 @@ MappingsResource <- R6::R6Class(
     #' Print resource information.
     print = function() {
       cat("<OMOPHub MappingsResource>\n")
-      cat("  Methods: get, map\n")
+      cat("  Methods: get, get_all, map\n")
       invisible(self)
     }
   ),
   private = list(
-    .base_req = NULL
+    .base_req = NULL,
+
+    # Keep get()'s return shape stable across the API gaining pagination.
+    #
+    # perform_get() switches shape based on the response: without
+    # meta.pagination it unwraps to body$data (so `result$mappings` works),
+    # with it, it returns list(data = <body$data>, meta = <pagination>). When
+    # GET /concepts/{id}/mappings became paginated on 2026-08-04 that flipped
+    # this method's result out from under existing callers — `result$mappings`
+    # started returning NULL against an unchanged SDK, with no error.
+    #
+    # So unwrap back to the documented shape and carry the pagination as an
+    # attribute, which adds the new information without moving the old.
+    .with_pagination = function(result) {
+      if (is.list(result) && !is.null(result$data) && !is.null(result$meta)) {
+        out <- result$data
+        attr(out, "pagination") <- result$meta
+        return(out)
+      }
+      result
+    }
   )
 )

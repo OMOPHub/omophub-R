@@ -4,7 +4,10 @@
 \alias{MappingsResource}
 \title{Mappings Resource}
 \value{
-Mappings for the concept.
+Mappings for the concept, with pagination metadata attached as
+the \code{pagination} attribute.
+
+A tibble of all mappings for the concept.
 
 Mapping results with summary.
 }
@@ -17,6 +20,7 @@ R6 class providing access to mapping operations.
 \itemize{
 \item \href{#method-MappingsResource-new}{\code{MappingsResource$new()}}
 \item \href{#method-MappingsResource-get}{\code{MappingsResource$get()}}
+\item \href{#method-MappingsResource-get_all}{\code{MappingsResource$get_all()}}
 \item \href{#method-MappingsResource-map}{\code{MappingsResource$map()}}
 \item \href{#method-MappingsResource-print}{\code{MappingsResource$print()}}
 \item \href{#method-MappingsResource-clone}{\code{MappingsResource$clone()}}
@@ -43,12 +47,19 @@ Create a new MappingsResource.
 \if{html}{\out{<a id="method-MappingsResource-get"></a>}}
 \if{latex}{\out{\hypertarget{method-MappingsResource-get}{}}}
 \subsection{Method \code{get()}}{
-Get mappings for a concept.
+Get one page of mappings for a concept.
+
+The endpoint is paginated and a concept can easily have more mappings
+than one page holds, so a full page means "there is probably more",
+not "this is everything". Read the \code{pagination} attribute on the
+result, or use \code{get_all()} to walk every page.
 \subsection{Usage}{
 \if{html}{\out{<div class="r">}}\preformatted{MappingsResource$get(
   concept_id,
   target_vocabulary = NULL,
   include_invalid = FALSE,
+  page = 1,
+  page_size = 100,
   vocab_release = NULL
 )}\if{html}{\out{</div>}}
 }
@@ -61,6 +72,51 @@ Get mappings for a concept.
 \item{\code{target_vocabulary}}{Filter to a specific target vocabulary (e.g., "ICD10CM").}
 
 \item{\code{include_invalid}}{Include invalid/deprecated mappings. Default \code{FALSE}.}
+
+\item{\code{page}}{Page number. Default 1.}
+
+\item{\code{page_size}}{Mappings per page. Default 100, maximum 200.}
+
+\item{\code{vocab_release}}{Specific vocabulary release version (e.g., "2025.1"). Default \code{NULL}.}
+}
+\if{html}{\out{</div>}}
+}
+}
+\if{html}{\out{<hr>}}
+\if{html}{\out{<a id="method-MappingsResource-get_all"></a>}}
+\if{latex}{\out{\hypertarget{method-MappingsResource-get_all}{}}}
+\subsection{Method \code{get_all()}}{
+Get every mapping for a concept, walking all pages.
+
+Prefer this over \code{get()} when assembling a code list — \code{get()} returns
+a single page, and a partial code list is wrong in a way nothing in
+the result reveals.
+\subsection{Usage}{
+\if{html}{\out{<div class="r">}}\preformatted{MappingsResource$get_all(
+  concept_id,
+  target_vocabulary = NULL,
+  include_invalid = FALSE,
+  page_size = 100,
+  max_pages = Inf,
+  progress = TRUE,
+  vocab_release = NULL
+)}\if{html}{\out{</div>}}
+}
+
+\subsection{Arguments}{
+\if{html}{\out{<div class="arguments">}}
+\describe{
+\item{\code{concept_id}}{The concept ID.}
+
+\item{\code{target_vocabulary}}{Filter to a specific target vocabulary (e.g., "ICD10CM").}
+
+\item{\code{include_invalid}}{Include invalid/deprecated mappings. Default \code{FALSE}.}
+
+\item{\code{page_size}}{Mappings fetched per request. Default 100, maximum 200.}
+
+\item{\code{max_pages}}{Maximum pages to fetch. Default \code{Inf}.}
+
+\item{\code{progress}}{Show progress bar. Default \code{TRUE}.}
 
 \item{\code{vocab_release}}{Specific vocabulary release version (e.g., "2025.1"). Default \code{NULL}.}
 }

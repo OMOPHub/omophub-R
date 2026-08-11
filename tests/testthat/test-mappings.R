@@ -18,7 +18,7 @@ test_that("MappingsResource print method works", {
   resource <- MappingsResource$new(base_req)
 
   expect_output(print(resource), "<OMOPHub MappingsResource>")
-  expect_output(print(resource), "get, map")
+  expect_output(print(resource), "get, get_all, map")
 })
 
 # ==============================================================================
@@ -48,6 +48,105 @@ test_that("mappings$get calls correct endpoint", {
   resource$get(201826)
 
   expect_equal(called_with$path, "concepts/201826/mappings")
+})
+
+test_that("mappings$get sends pagination params, defaults included", {
+  base_req <- httr2::request("https://api.omophub.com/v1")
+  resource <- MappingsResource$new(base_req)
+
+  called_with <- NULL
+  local_mocked_bindings(
+    perform_get = function(req, path, query = NULL) {
+      called_with <<- list(query = query)
+      list(mappings = list())
+    }
+  )
+
+  resource$get(201826)
+  expect_equal(called_with$query$page, 1L)
+  expect_equal(called_with$query$page_size, 100L)
+
+  resource$get(201826, page = 3, page_size = 200)
+  expect_equal(called_with$query$page, 3L)
+  expect_equal(called_with$query$page_size, 200L)
+})
+
+test_that("mappings$get rejects a page_size above the server ceiling", {
+  base_req <- httr2::request("https://api.omophub.com/v1")
+  resource <- MappingsResource$new(base_req)
+
+  expect_error(resource$get(201826, page_size = 500))
+  expect_error(resource$get(201826, page = 0))
+})
+
+test_that("mappings$get keeps $mappings reachable when the API returns pagination", {
+  # Regression guard: perform_get() changes shape once meta.pagination is
+  # present, which silently moved mappings to $data$mappings for callers.
+  base_req <- httr2::request("https://api.omophub.com/v1")
+  resource <- MappingsResource$new(base_req)
+
+  pagination <- list(
+    page = 1L, page_size = 100L, total_items = 232L,
+    total_pages = 3L, has_next = TRUE, has_previous = FALSE
+  )
+  local_mocked_bindings(
+    perform_get = function(req, path, query = NULL) {
+      list(
+        data = list(mappings = list(list(target_concept_id = 1))),
+        meta = pagination
+      )
+    }
+  )
+
+  result <- resource$get(201826)
+
+  expect_length(result$mappings, 1)
+  expect_equal(attr(result, "pagination")$total_items, 232L)
+  expect_true(attr(result, "pagination")$has_next)
+})
+
+test_that("mappings$get_all walks every page", {
+  base_req <- httr2::request("https://api.omophub.com/v1")
+  resource <- MappingsResource$new(base_req)
+
+  pages_requested <- integer(0)
+  local_mocked_bindings(
+    perform_get = function(req, path, query = NULL) {
+      page <- query$page
+      pages_requested <<- c(pages_requested, page)
+      list(
+        data = list(mappings = list(list(target_concept_id = page))),
+        meta = list(
+          page = page, page_size = 1L, total_items = 2L,
+          total_pages = 2L, has_next = page < 2L, has_previous = page > 1L
+        )
+      )
+    }
+  )
+
+  result <- resource$get_all(201826, page_size = 1, progress = FALSE)
+
+  expect_equal(pages_requested, c(1L, 2L))
+  expect_equal(nrow(result), 2)
+  expect_equal(result$target_concept_id, c(1L, 2L))
+})
+
+test_that("mappings$get_all stops after one page without pagination metadata", {
+  base_req <- httr2::request("https://api.omophub.com/v1")
+  resource <- MappingsResource$new(base_req)
+
+  calls <- 0L
+  local_mocked_bindings(
+    perform_get = function(req, path, query = NULL) {
+      calls <<- calls + 1L
+      list(mappings = list(list(target_concept_id = 1)))
+    }
+  )
+
+  result <- resource$get_all(201826, page_size = 100, progress = FALSE)
+
+  expect_equal(calls, 1L)
+  expect_equal(nrow(result), 1)
 })
 
 test_that("mappings$get includes target vocabulary filter", {
