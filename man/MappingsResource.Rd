@@ -57,6 +57,7 @@ result, or use \code{get_all()} to walk every page.
 \if{html}{\out{<div class="r">}}\preformatted{MappingsResource$get(
   concept_id,
   target_vocabulary = NULL,
+  relationship_ids = NULL,
   include_invalid = NULL,
   page = 1,
   page_size = 100,
@@ -70,6 +71,13 @@ result, or use \code{get_all()} to walk every page.
 \item{\code{concept_id}}{The concept ID.}
 
 \item{\code{target_vocabulary}}{Filter to a specific target vocabulary (e.g., "ICD10CM").}
+
+\item{\code{relationship_ids}}{Character vector of relationship types to return.
+Defaults server-side to \code{"Maps to"}. Pass \code{c("Maps to", "Maps to value")}
+to also get the Value-as-Concept decomposition of composite concepts -
+"Allergy to penicillin G" maps to "Allergy to drug" via \verb{Maps to} and to
+"penicillin G" via \verb{Maps to value}, and the default returns only the
+first of those.}
 
 \item{\code{include_invalid}}{Whether to return mappings whose relationship or
 target concept is deprecated. Default \code{NULL} takes the server default,
@@ -99,6 +107,7 @@ the result reveals.
 \if{html}{\out{<div class="r">}}\preformatted{MappingsResource$get_all(
   concept_id,
   target_vocabulary = NULL,
+  relationship_ids = NULL,
   include_invalid = NULL,
   page_size = 100,
   max_pages = Inf,
@@ -113,6 +122,13 @@ the result reveals.
 \item{\code{concept_id}}{The concept ID.}
 
 \item{\code{target_vocabulary}}{Filter to a specific target vocabulary (e.g., "ICD10CM").}
+
+\item{\code{relationship_ids}}{Character vector of relationship types to return.
+Defaults server-side to \code{"Maps to"}. Pass \code{c("Maps to", "Maps to value")}
+to also get the Value-as-Concept decomposition of composite concepts -
+"Allergy to penicillin G" maps to "Allergy to drug" via \verb{Maps to} and to
+"penicillin G" via \verb{Maps to value}, and the default returns only the
+first of those.}
 
 \item{\code{include_invalid}}{Whether to return mappings whose relationship or
 target concept is deprecated. Default \code{NULL} takes the server default,

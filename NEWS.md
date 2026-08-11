@@ -14,6 +14,14 @@
   list; a partial code list is wrong in a way nothing in the result reveals.
   Takes `max_pages` and `progress` like the other `*_all()` methods.
 
+* **`relationship_ids`** on `client$mappings$get()` and `get_all()` - a
+  character vector of relationship types. The server defaults to `"Maps to"`,
+  so a composite concept returns only half its decomposition unless
+  `"Maps to value"` is asked for too: "Allergy to penicillin G" maps to
+  "Allergy to drug" via `Maps to` and to "penicillin G" via `Maps to value`.
+  The parameter existed on the endpoint but was ignored server-side until
+  2026-08-11, so there was nothing to expose before now.
+
 ## Bug Fixes
 
 * **`client$mappings$get()` returned a different shape once the API added

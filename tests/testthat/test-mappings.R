@@ -183,6 +183,69 @@ test_that("mappings$get includes include_invalid option", {
   expect_equal(called_with$query$include_invalid, "true")
 })
 
+test_that("mappings$get comma-joins relationship_ids", {
+  # Value-as-Concept is unreachable without this: the server defaults to
+  # "Maps to" alone, so a composite concept returns only half its
+  # decomposition unless "Maps to value" is asked for too.
+  base_req <- httr2::request("https://api.omophub.com/v1")
+  resource <- MappingsResource$new(base_req)
+
+  called_with <- NULL
+  local_mocked_bindings(
+    perform_get = function(req, path, query = NULL) {
+      called_with <<- list(query = query)
+      list(mappings = list())
+    }
+  )
+
+  resource$get(4167462)
+  expect_null(called_with$query$relationship_ids)
+
+  resource$get(4167462, relationship_ids = c("Maps to", "Maps to value"))
+  expect_equal(called_with$query$relationship_ids, "Maps to,Maps to value")
+
+  resource$get(4167462, relationship_ids = "Maps to value")
+  expect_equal(called_with$query$relationship_ids, "Maps to value")
+})
+
+test_that("mappings$get_all forwards relationship_ids", {
+  base_req <- httr2::request("https://api.omophub.com/v1")
+  resource <- MappingsResource$new(base_req)
+
+  called_with <- NULL
+  local_mocked_bindings(
+    perform_get = function(req, path, query = NULL) {
+      called_with <<- list(query = query)
+      structure(
+        list(mappings = list()),
+        pagination = list(
+          page = 1, page_size = 100, total_items = 0,
+          total_pages = 0, has_next = FALSE, has_previous = FALSE
+        )
+      )
+    }
+  )
+
+  resource$get_all(
+    4167462,
+    relationship_ids = c("Maps to", "Maps to value"),
+    progress = FALSE
+  )
+
+  expect_equal(called_with$query$relationship_ids, "Maps to,Maps to value")
+})
+
+test_that("mappings$get rejects a non-character relationship_ids", {
+  base_req <- httr2::request("https://api.omophub.com/v1")
+  resource <- MappingsResource$new(base_req)
+
+  local_mocked_bindings(
+    perform_get = function(req, path, query = NULL) list(mappings = list())
+  )
+
+  expect_error(resource$get(4167462, relationship_ids = 42))
+})
+
 test_that("mappings$get treats include_invalid as tri-state, not a flag", {
   # This endpoint defaults to *including* deprecated mappings, so omitting the
   # parameter and sending "false" are different requests. FALSE used to be

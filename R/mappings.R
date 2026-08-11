@@ -24,6 +24,12 @@ MappingsResource <- R6::R6Class(
     #'
     #' @param concept_id The concept ID.
     #' @param target_vocabulary Filter to a specific target vocabulary (e.g., "ICD10CM").
+    #' @param relationship_ids Character vector of relationship types to return.
+    #'   Defaults server-side to `"Maps to"`. Pass `c("Maps to", "Maps to value")`
+    #'   to also get the Value-as-Concept decomposition of composite concepts -
+    #'   "Allergy to penicillin G" maps to "Allergy to drug" via `Maps to` and to
+    #'   "penicillin G" via `Maps to value`, and the default returns only the
+    #'   first of those.
     #' @param include_invalid Whether to return mappings whose relationship or
     #'   target concept is deprecated. Default `NULL` takes the server default,
     #'   which for this endpoint is to *include* them; pass `FALSE` to exclude
@@ -37,6 +43,7 @@ MappingsResource <- R6::R6Class(
     #'   the `pagination` attribute.
     get = function(concept_id,
                    target_vocabulary = NULL,
+                   relationship_ids = NULL,
                    include_invalid = NULL,
                    page = 1,
                    page_size = 100,
@@ -52,6 +59,14 @@ MappingsResource <- R6::R6Class(
       if (!is.null(target_vocabulary)) {
         checkmate::assert_string(target_vocabulary, min.chars = 1)
         params$target_vocabulary <- target_vocabulary
+      }
+      if (!is.null(relationship_ids)) {
+        checkmate::assert_character(
+          relationship_ids,
+          min.len = 1,
+          any.missing = FALSE
+        )
+        params$relationship_ids <- paste(relationship_ids, collapse = ",")
       }
       # Tri-state, not a flag. This endpoint defaults to *including* deprecated
       # mappings, so omitting the parameter and sending "false" are different
@@ -84,6 +99,12 @@ MappingsResource <- R6::R6Class(
     #'
     #' @param concept_id The concept ID.
     #' @param target_vocabulary Filter to a specific target vocabulary (e.g., "ICD10CM").
+    #' @param relationship_ids Character vector of relationship types to return.
+    #'   Defaults server-side to `"Maps to"`. Pass `c("Maps to", "Maps to value")`
+    #'   to also get the Value-as-Concept decomposition of composite concepts -
+    #'   "Allergy to penicillin G" maps to "Allergy to drug" via `Maps to` and to
+    #'   "penicillin G" via `Maps to value`, and the default returns only the
+    #'   first of those.
     #' @param include_invalid Whether to return mappings whose relationship or
     #'   target concept is deprecated. Default `NULL` takes the server default,
     #'   which for this endpoint is to *include* them; pass `FALSE` to exclude
@@ -97,6 +118,7 @@ MappingsResource <- R6::R6Class(
     #' @returns A tibble of all mappings for the concept.
     get_all = function(concept_id,
                        target_vocabulary = NULL,
+                       relationship_ids = NULL,
                        include_invalid = NULL,
                        page_size = 100,
                        max_pages = Inf,
@@ -108,6 +130,7 @@ MappingsResource <- R6::R6Class(
         result <- self$get(
           concept_id,
           target_vocabulary = target_vocabulary,
+          relationship_ids = relationship_ids,
           include_invalid = include_invalid,
           page = page,
           page_size = size,
