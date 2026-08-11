@@ -19,8 +19,6 @@
   so a composite concept returns only half its decomposition unless
   `"Maps to value"` is asked for too: "Allergy to penicillin G" maps to
   "Allergy to drug" via `Maps to` and to "penicillin G" via `Maps to value`.
-  The parameter existed on the endpoint but was ignored server-side until
-  2026-08-11, so there was nothing to expose before now.
 
 ## Bug Fixes
 
