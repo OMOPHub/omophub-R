@@ -1,0 +1,32 @@
+NEWS.md
+  h_70ae365dc0c3d1 1-22,27,38,41,44,52
+DESCRIPTION
+  s_675010497a6bc7::t_2988437a40db2a 3
+R/mappings.R
+  s_675010497a6bc7::t_1621e4d10719c4 18-23,28-29,32-33,37-38,41,43-46,60,63-113,187,192-212
+man/MappingsResource.Rd
+  s_675010497a6bc7::t_947d1c187f8faa 7-10,23,50-55,61-62,76-120
+tests/testthat/test-mappings.R
+  s_675010497a6bc7::t_217cabc655efd7 21,53-151
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.6.22",
+  "base_commit_sha": "d5cfcb26cc2fbb6acf62da15999d001f6a1b3175",
+  "prompts": {},
+  "humans": {
+    "h_70ae365dc0c3d1": {
+      "author": "alex-omophub <sdk@omophub.com>"
+    }
+  },
+  "sessions": {
+    "s_675010497a6bc7": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "ac8e644b-8ae2-49d5-94a0-66989382a45d",
+        "model": "claude-opus-5"
+      },
+      "human_author": "alex-omophub <sdk@omophub.com>"
+    }
+  }
+}
