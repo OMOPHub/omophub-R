@@ -57,7 +57,7 @@ result, or use \code{get_all()} to walk every page.
 \if{html}{\out{<div class="r">}}\preformatted{MappingsResource$get(
   concept_id,
   target_vocabulary = NULL,
-  include_invalid = FALSE,
+  include_invalid = NULL,
   page = 1,
   page_size = 100,
   vocab_release = NULL
@@ -71,7 +71,11 @@ result, or use \code{get_all()} to walk every page.
 
 \item{\code{target_vocabulary}}{Filter to a specific target vocabulary (e.g., "ICD10CM").}
 
-\item{\code{include_invalid}}{Include invalid/deprecated mappings. Default \code{FALSE}.}
+\item{\code{include_invalid}}{Whether to return mappings whose relationship or
+target concept is deprecated. Default \code{NULL} takes the server default,
+which for this endpoint is to \emph{include} them; pass \code{FALSE} to exclude
+them. The source concept is never filtered, so a deprecated concept
+still returns what it maps to.}
 
 \item{\code{page}}{Page number. Default 1.}
 
@@ -95,7 +99,7 @@ the result reveals.
 \if{html}{\out{<div class="r">}}\preformatted{MappingsResource$get_all(
   concept_id,
   target_vocabulary = NULL,
-  include_invalid = FALSE,
+  include_invalid = NULL,
   page_size = 100,
   max_pages = Inf,
   progress = TRUE,
@@ -110,7 +114,11 @@ the result reveals.
 
 \item{\code{target_vocabulary}}{Filter to a specific target vocabulary (e.g., "ICD10CM").}
 
-\item{\code{include_invalid}}{Include invalid/deprecated mappings. Default \code{FALSE}.}
+\item{\code{include_invalid}}{Whether to return mappings whose relationship or
+target concept is deprecated. Default \code{NULL} takes the server default,
+which for this endpoint is to \emph{include} them; pass \code{FALSE} to exclude
+them. The source concept is never filtered, so a deprecated concept
+still returns what it maps to.}
 
 \item{\code{page_size}}{Mappings fetched per request. Default 100, maximum 200.}
 

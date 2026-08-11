@@ -20,6 +20,14 @@
   pagination.** `perform_get()` switches its return shape based on whether the
   response carries `meta.pagination`.
 
+* **`include_invalid = FALSE` never reached the server** on
+  `client$mappings$get()` and `get_all()`. The parameter was only sent when
+  `TRUE`, and this endpoint defaults to *including* deprecated mappings, so
+  asking to exclude them did nothing. The default is now `NULL` (take the
+  server default); pass `FALSE` to exclude. Omitting it behaves exactly as
+  before, so only callers who explicitly passed `FALSE` - and were being
+  ignored - see a change.
+
 # omophub 1.8.1
 
 ## Changed

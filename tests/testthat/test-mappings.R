@@ -183,6 +183,65 @@ test_that("mappings$get includes include_invalid option", {
   expect_equal(called_with$query$include_invalid, "true")
 })
 
+test_that("mappings$get treats include_invalid as tri-state, not a flag", {
+  # This endpoint defaults to *including* deprecated mappings, so omitting the
+  # parameter and sending "false" are different requests. FALSE used to be
+  # dropped as falsy, silently returning the rows the caller asked to exclude.
+  base_req <- httr2::request("https://api.omophub.com/v1")
+  resource <- MappingsResource$new(base_req)
+
+  called_with <- NULL
+  local_mocked_bindings(
+    perform_get = function(req, path, query = NULL) {
+      called_with <<- list(query = query)
+      list(mappings = list())
+    }
+  )
+
+  resource$get(201826)
+  expect_null(called_with$query$include_invalid)
+
+  resource$get(201826, include_invalid = FALSE)
+  expect_equal(called_with$query$include_invalid, "false")
+
+  resource$get(201826, include_invalid = TRUE)
+  expect_equal(called_with$query$include_invalid, "true")
+})
+
+test_that("mappings$get_all forwards include_invalid = FALSE", {
+  base_req <- httr2::request("https://api.omophub.com/v1")
+  resource <- MappingsResource$new(base_req)
+
+  called_with <- NULL
+  local_mocked_bindings(
+    perform_get = function(req, path, query = NULL) {
+      called_with <<- list(query = query)
+      structure(
+        list(mappings = list()),
+        pagination = list(
+          page = 1, page_size = 100, total_items = 0,
+          total_pages = 0, has_next = FALSE, has_previous = FALSE
+        )
+      )
+    }
+  )
+
+  resource$get_all(201826, include_invalid = FALSE, progress = FALSE)
+
+  expect_equal(called_with$query$include_invalid, "false")
+})
+
+test_that("mappings$get rejects a non-flag include_invalid", {
+  base_req <- httr2::request("https://api.omophub.com/v1")
+  resource <- MappingsResource$new(base_req)
+
+  local_mocked_bindings(
+    perform_get = function(req, path, query = NULL) list(mappings = list())
+  )
+
+  expect_error(resource$get(201826, include_invalid = "yes"))
+})
+
 test_that("mappings$get includes vocab_release option", {
   base_req <- httr2::request("https://api.omophub.com/v1")
   resource <- MappingsResource$new(base_req)

@@ -24,7 +24,11 @@ MappingsResource <- R6::R6Class(
     #'
     #' @param concept_id The concept ID.
     #' @param target_vocabulary Filter to a specific target vocabulary (e.g., "ICD10CM").
-    #' @param include_invalid Include invalid/deprecated mappings. Default `FALSE`.
+    #' @param include_invalid Whether to return mappings whose relationship or
+    #'   target concept is deprecated. Default `NULL` takes the server default,
+    #'   which for this endpoint is to *include* them; pass `FALSE` to exclude
+    #'   them. The source concept is never filtered, so a deprecated concept
+    #'   still returns what it maps to.
     #' @param page Page number. Default 1.
     #' @param page_size Mappings per page. Default 100, maximum 200.
     #' @param vocab_release Specific vocabulary release version (e.g., "2025.1"). Default `NULL`.
@@ -33,7 +37,7 @@ MappingsResource <- R6::R6Class(
     #'   the `pagination` attribute.
     get = function(concept_id,
                    target_vocabulary = NULL,
-                   include_invalid = FALSE,
+                   include_invalid = NULL,
                    page = 1,
                    page_size = 100,
                    vocab_release = NULL) {
@@ -49,8 +53,13 @@ MappingsResource <- R6::R6Class(
         checkmate::assert_string(target_vocabulary, min.chars = 1)
         params$target_vocabulary <- target_vocabulary
       }
-      if (isTRUE(include_invalid)) {
-        params$include_invalid <- "true"
+      # Tri-state, not a flag. This endpoint defaults to *including* deprecated
+      # mappings, so omitting the parameter and sending "false" are different
+      # requests -- dropping a FALSE would silently return the rows the caller
+      # asked to exclude.
+      if (!is.null(include_invalid)) {
+        checkmate::assert_flag(include_invalid)
+        params$include_invalid <- if (include_invalid) "true" else "false"
       }
       if (!is.null(vocab_release)) {
         checkmate::assert_string(vocab_release, min.chars = 1)
@@ -75,7 +84,11 @@ MappingsResource <- R6::R6Class(
     #'
     #' @param concept_id The concept ID.
     #' @param target_vocabulary Filter to a specific target vocabulary (e.g., "ICD10CM").
-    #' @param include_invalid Include invalid/deprecated mappings. Default `FALSE`.
+    #' @param include_invalid Whether to return mappings whose relationship or
+    #'   target concept is deprecated. Default `NULL` takes the server default,
+    #'   which for this endpoint is to *include* them; pass `FALSE` to exclude
+    #'   them. The source concept is never filtered, so a deprecated concept
+    #'   still returns what it maps to.
     #' @param page_size Mappings fetched per request. Default 100, maximum 200.
     #' @param max_pages Maximum pages to fetch. Default `Inf`.
     #' @param progress Show progress bar. Default `TRUE`.
@@ -84,7 +97,7 @@ MappingsResource <- R6::R6Class(
     #' @returns A tibble of all mappings for the concept.
     get_all = function(concept_id,
                        target_vocabulary = NULL,
-                       include_invalid = FALSE,
+                       include_invalid = NULL,
                        page_size = 100,
                        max_pages = Inf,
                        progress = TRUE,
