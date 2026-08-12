@@ -183,34 +183,8 @@ test_that("mappings$get includes include_invalid option", {
   expect_equal(called_with$query$include_invalid, "true")
 })
 
-test_that("documented parameter order mirrors the signature", {
-  # Roxygen renders @param items in source order, so a block that disagrees
-  # with the signature prints an Arguments list in a different order from the
-  # Usage line. For methods whose positional order IS the public contract,
-  # that is the documentation actively misleading a caller -- and it is how
-  # the 1.9.0 reorder was missed the first time.
-  src <- readLines(test_path("..", "..", "R", "mappings.R"))
-
-  documented_params <- function(method) {
-    sig <- grep(sprintf("^    %s = function\\(", method), src)
-    expect_length(sig, 1)
-    # Walk back over the roxygen block immediately above the signature.
-    i <- sig - 1
-    while (i >= 1 && grepl("^    #'", src[i])) i <- i - 1
-    block <- src[(i + 1):(sig - 1)]
-    tags <- grep("^    #' @param ", block, value = TRUE)
-    sub("^    #' @param ([^ ]+).*$", "\\1", tags)
-  }
-
-  for (method in c("get", "get_all")) {
-    expect_equal(
-      documented_params(method),
-      names(formals(MappingsResource$public_methods[[method]])),
-      info = method
-    )
-  }
-})
-
+# @param-order vs signature is checked for every R6 method in the package
+# by test-roxygen-param-order.R, so there is no mappings-only copy here.
 test_that("mappings$get keeps the 1.8.1 positional contract", {
   # 1.8.1 shipped get(concept_id, target_vocabulary, include_invalid,
   # vocab_release). New arguments must be APPENDED: inserting one shifts every
