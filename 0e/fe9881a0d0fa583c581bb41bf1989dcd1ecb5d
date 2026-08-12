@@ -1,0 +1,21 @@
+tests/testthat/test-mappings.R
+  s_675010497a6bc7::t_7f5dbc471b9b61 186-187
+tests/testthat/test-roxygen-param-order.R
+  s_675010497a6bc7::t_5883125b0ba826 1-71
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.6.22",
+  "base_commit_sha": "0efe9881a0d0fa583c581bb41bf1989dcd1ecb5d",
+  "prompts": {},
+  "sessions": {
+    "s_675010497a6bc7": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "ac8e644b-8ae2-49d5-94a0-66989382a45d",
+        "model": "claude-opus-5"
+      },
+      "human_author": "alex-omophub <sdk@omophub.com>"
+    }
+  }
+}
