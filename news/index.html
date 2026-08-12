@@ -7,7 +7,7 @@
 
     <a class="navbar-brand me-2" href="../index.html">omophub</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">1.8.1</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">1.9.0</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -32,28 +32,42 @@
   <main id="main" class="col-md-9"><div class="page-header">
 
       <h1>Changelog</h1>
-      <small>Source: <a href="https://github.com/omopHub/omophub-R/blob/v1.8.1/NEWS.md" class="external-link"><code>NEWS.md</code></a></small>
+      <small>Source: <a href="https://github.com/omopHub/omophub-R/blob/main/NEWS.md" class="external-link"><code>NEWS.md</code></a></small>
     </div>
 
     <div class="section level2">
-<h2 class="pkg-version" data-toc-text="1.8.1" id="omophub-181">omophub 1.8.1<a class="anchor" aria-label="anchor" href="#omophub-181"></a></h2>
+<h2 class="pkg-version" data-toc-text="1.9.0" id="omophub-190">omophub 1.9.0<a class="anchor" aria-label="anchor" href="#omophub-190"></a></h2>
+<div class="section level3">
+<h3 id="new-features-1-9-0">New Features<a class="anchor" aria-label="anchor" href="#new-features-1-9-0"></a></h3>
+<ul><li><p><strong>Mapping pagination</strong> - <code>client$mappings$get()</code> accepts <code>page</code> and <code>page_size</code>. <code>GET /v1/concepts/{id}/mappings</code> became paginated; <code>page_size</code> defaults to 100, matching the old cap, so an existing call returns exactly the page it returned before. Pagination metadata is attached to the result as the <code>pagination</code> attribute - read it with <code>attr(result, "pagination")</code>.</p></li>
+<li><p><strong><code>client$mappings$get_all()</code></strong> - walks every page and returns one tibble of all mappings for a concept. Prefer it over <code><a href="https://rdrr.io/r/base/get.html" class="external-link">get()</a></code> when assembling a code list; a partial code list is wrong in a way nothing in the result reveals. Takes <code>max_pages</code> and <code>progress</code> like the other <code>*_all()</code> methods.</p></li>
+<li><p><strong><code>relationship_ids</code></strong> on <code>client$mappings$get()</code> and <code>get_all()</code> - a character vector of relationship types. The server defaults to <code>"Maps to"</code>, so a composite concept returns only half its decomposition unless <code>"Maps to value"</code> is asked for too: “Allergy to penicillin G” maps to “Allergy to drug” via <code>Maps to</code> and to “penicillin G” via <code>Maps to value</code>.</p></li>
+</ul></div>
+<div class="section level3">
+<h3 id="bug-fixes-1-9-0">Bug Fixes<a class="anchor" aria-label="anchor" href="#bug-fixes-1-9-0"></a></h3>
+<ul><li><p><strong><code>client$mappings$get()</code> returned a different shape once the API added pagination.</strong> <code><a href="../reference/perform_get.html">perform_get()</a></code> switches its return shape based on whether the response carries <code>meta.pagination</code>.</p></li>
+<li><p><strong><code>include_invalid = FALSE</code> never reached the server</strong> on <code>client$mappings$get()</code> and <code>get_all()</code>. The parameter was only sent when <code>TRUE</code>, and this endpoint defaults to <em>including</em> deprecated mappings, so asking to exclude them did nothing. The default is now <code>NULL</code> (take the server default); pass <code>FALSE</code> to exclude. Omitting it behaves exactly as before, so only callers who explicitly passed <code>FALSE</code> - and were being ignored - see a change.</p></li>
+</ul></div>
+</div>
+    <div class="section level2">
+<h2 class="pkg-version" data-toc-text="1.8.1" id="omophub-181">omophub 1.8.1<a class="anchor" aria-label="anchor" href="#omophub-181"></a></h2><p class="text-muted">CRAN release: 2026-06-01</p>
 <div class="section level3">
 <h3 id="changed-1-8-1">Changed<a class="anchor" aria-label="anchor" href="#changed-1-8-1"></a></h3>
 <ul><li>
-<strong>Canonical endpoint path</strong> — <code>client$search$semantic()</code> and <code>client$search$semantic_all()</code> now call <code>GET /v1/search/semantic</code> instead of <code>GET /v1/concepts/semantic-search</code>. The legacy path remains a permanent server-side alias (emits <code>Deprecation: true</code> + <code>Link: …rel="successor-version"</code> headers), so older installations of this SDK continue to work - no breaking change for callers.</li>
+<strong>Canonical endpoint path</strong> - <code>client$search$semantic()</code> and <code>client$search$semantic_all()</code> now call <code>GET /v1/search/semantic</code> instead of <code>GET /v1/concepts/semantic-search</code>. The legacy path remains a permanent server-side alias (emits <code>Deprecation: true</code> + <code>Link: …rel="successor-version"</code> headers), so older installations of this SDK continue to work - no breaking change for callers.</li>
 </ul></div>
 </div>
     <div class="section level2">
 <h2 class="pkg-version" data-toc-text="1.8.0" id="omophub-180">omophub 1.8.0<a class="anchor" aria-label="anchor" href="#omophub-180"></a></h2><p class="text-muted">CRAN release: 2026-05-25</p>
 <div class="section level3">
 <h3 id="new-features-1-8-0">New Features<a class="anchor" aria-label="anchor" href="#new-features-1-8-0"></a></h3>
-<ul><li><p><strong>FHIR Value-as-Concept</strong> — the <code>resolve_batch(as_tibble = TRUE)</code> tibble now includes <code>value_as_concept_id</code> and <code>value_as_concept_name</code> columns, populated when the resolver decomposes a composite concept via the <code>Maps to value</code> relationship (HL7 FHIR-to-OMOP IG Value-as-Concept pattern — e.g. “Allergy to penicillin” yields a standard “Allergy to drug” plus a value “Penicillin G”).</p></li>
-<li><p><strong><code>on_unmapped</code> for FHIR resolution</strong> — <code>resolve()</code>, <code>resolve_batch()</code>, and <code>resolve_codeable_concept()</code> gained an <code>on_unmapped</code> argument (<code>"error"</code> default / <code>"sentinel"</code>). With <code>"sentinel"</code> the resolver returns a <code>concept_id</code> 0 record instead of a 404 when nothing resolves, so ETL pipelines always get a row (matches the Python SDK).</p></li>
+<ul><li><p><strong>FHIR Value-as-Concept</strong> - the <code>resolve_batch(as_tibble = TRUE)</code> tibble now includes <code>value_as_concept_id</code> and <code>value_as_concept_name</code> columns, populated when the resolver decomposes a composite concept via the <code>Maps to value</code> relationship (HL7 FHIR-to-OMOP IG Value-as-Concept pattern - e.g. “Allergy to penicillin” yields a standard “Allergy to drug” plus a value “Penicillin G”).</p></li>
+<li><p><strong><code>on_unmapped</code> for FHIR resolution</strong> - <code>resolve()</code>, <code>resolve_batch()</code>, and <code>resolve_codeable_concept()</code> gained an <code>on_unmapped</code> argument (<code>"error"</code> default / <code>"sentinel"</code>). With <code>"sentinel"</code> the resolver returns a <code>concept_id</code> 0 record instead of a 404 when nothing resolves, so ETL pipelines always get a row (matches the Python SDK).</p></li>
 </ul></div>
 <div class="section level3">
 <h3 id="behavior-changes-1-8-0">Behavior Changes<a class="anchor" aria-label="anchor" href="#behavior-changes-1-8-0"></a></h3>
 <ul><li>
-<strong>Unmapped rows in the batch tibble</strong> — a coding that resolves to a source concept but has no standard <code>Maps to</code> target now reports <code>status = "unmapped"</code> (with <code>standard_concept_id = 0</code>) instead of <code>"resolved"</code>, matching the OMOP / FHIR-to-OMOP IG convention that an unmapped concept is <code>concept_id 0</code>. Code that filters <code>status == "resolved"</code> will no longer treat these sentinels as successful mappings.</li>
+<strong>Unmapped rows in the batch tibble</strong> - a coding that resolves to a source concept but has no standard <code>Maps to</code> target now reports <code>status = "unmapped"</code> (with <code>standard_concept_id = 0</code>) instead of <code>"resolved"</code>, matching the OMOP / FHIR-to-OMOP IG convention that an unmapped concept is <code>concept_id 0</code>. Code that filters <code>status == "resolved"</code> will no longer treat these sentinels as successful mappings.</li>
 </ul></div>
 </div>
     <div class="section level2">
@@ -217,7 +231,7 @@
 </div>
 
 <div class="pkgdown-footer-right">
-  <p>Site built with <a href="https://pkgdown.r-lib.org/" class="external-link">pkgdown</a> 2.2.0.</p>
+  <p>Site built with <a href="https://pkgdown.r-lib.org/" class="external-link">pkgdown</a> 2.2.1.</p>
 </div>
 
     </footer></div>

@@ -316,19 +316,53 @@ Find how a concept maps to other vocabularies:
 result <- client$mappings$get(201826)
 for (mapping in result$mappings) {
   cat(sprintf("%s: %s\n",
-              mapping$target_vocabulary_id,
+              mapping$relationship_id,
               mapping$target_concept_name))
 }
 ```
 
-Map to specific vocabularies:
+[`get()`](https://rdrr.io/r/base/get.html) returns one page. The
+pagination metadata rides along as an attribute, and `get_all()` walks
+every page — prefer it when you are building a code list:
 
 ``` r
 
-result <- client$mappings$get(
+attr(result, "pagination")$total_items
+
+all_mappings <- client$mappings$get_all(201826, progress = FALSE)
+nrow(all_mappings)
+```
+
+Mind the direction when filtering by vocabulary. `Maps to` always points
+at a *standard* concept, so asking a SNOMED concept for its ICD-10-CM
+mappings returns nothing — an empty list, not an error. The codes that
+roll up into a standard concept are reached with `Mapped from`:
+
+``` r
+
+icd_codes <- client$mappings$get_all(
   201826,
-  target_vocabulary = "ICD10CM"
+  relationship_ids = "Mapped from",
+  target_vocabulary = "ICD10CM",
+  progress = FALSE
 )
+nrow(icd_codes)
+```
+
+Composite concepts decompose across two relationships, and the default
+returns only the first — `Maps to` gives you “Allergy to drug”, while
+`Maps to value` gives you *which* drug, destined for
+`value_as_concept_id`:
+
+``` r
+
+decomposed <- client$mappings$get(
+  4167462,  # Allergy to penicillin G
+  relationship_ids = c("Maps to", "Maps to value")
+)
+for (m in decomposed$mappings) {
+  cat(sprintf("%s: %s\n", m$relationship_id, m$target_concept_name))
+}
 ```
 
 ## Error Handling

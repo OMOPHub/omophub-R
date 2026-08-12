@@ -7,7 +7,7 @@
 
     <a class="navbar-brand me-2" href="../index.html">omophub</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">1.8.1</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">1.9.0</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -32,7 +32,7 @@
   <main id="main" class="col-md-9"><div class="page-header">
 
       <h1>Mappings Resource</h1>
-      <small class="dont-index">Source: <a href="https://github.com/omopHub/omophub-R/blob/v1.8.1/R/mappings.R" class="external-link"><code>R/mappings.R</code></a></small>
+      <small class="dont-index">Source: <a href="https://github.com/omopHub/omophub-R/blob/main/R/mappings.R" class="external-link"><code>R/mappings.R</code></a></small>
       <div class="d-none name"><code>MappingsResource.Rd</code></div>
     </div>
 
@@ -43,7 +43,9 @@
 
     <div class="section level2">
     <h2 id="value">Value<a class="anchor" aria-label="anchor" href="#value"></a></h2>
-    <p>Mappings for the concept.</p>
+    <p>Mappings for the concept, with pagination metadata attached as
+the <code>pagination</code> attribute.</p>
+<p>A tibble of all mappings for the concept.</p>
 <p>Mapping results with summary.</p>
     </div>
     <div class="section level2">
@@ -54,6 +56,7 @@
 
 <ul><li><p><a href="#method-MappingsResource-new"><code>MappingsResource$new()</code></a></p></li>
 <li><p><a href="#method-MappingsResource-get"><code>MappingsResource$get()</code></a></p></li>
+<li><p><a href="#method-MappingsResource-get_all"><code>MappingsResource$get_all()</code></a></p></li>
 <li><p><a href="#method-MappingsResource-map"><code>MappingsResource$map()</code></a></p></li>
 <li><p><a href="#method-MappingsResource-print"><code>MappingsResource$print()</code></a></p></li>
 <li><p><a href="#method-MappingsResource-clone"><code>MappingsResource$clone()</code></a></p></li>
@@ -75,13 +78,20 @@
 
 </div><p></p><hr><a id="method-MappingsResource-get"></a><div class="section">
 <h3 id="method-get-">Method <code><a href="https://rdrr.io/r/base/get.html" class="external-link">get()</a></code><a class="anchor" aria-label="anchor" href="#method-get-"></a></h3>
-<p>Get mappings for a concept.</p><div class="section">
+<p>Get one page of mappings for a concept.</p>
+<p>The endpoint is paginated and a concept can easily have more mappings
+than one page holds, so a full page means "there is probably more",
+not "this is everything". Read the <code>pagination</code> attribute on the
+result, or use <code>get_all()</code> to walk every page.</p><div class="section">
 <h4 id="usage-1">Usage<a class="anchor" aria-label="anchor" href="#usage-1"></a></h4>
 <p></p><div class="r"><div class="sourceCode"><pre><code><span><span class="va">MappingsResource</span><span class="op">$</span><span class="fu">get</span><span class="op">(</span></span>
 <span>  <span class="va">concept_id</span>,</span>
 <span>  target_vocabulary <span class="op">=</span> <span class="cn">NULL</span>,</span>
-<span>  include_invalid <span class="op">=</span> <span class="cn">FALSE</span>,</span>
-<span>  vocab_release <span class="op">=</span> <span class="cn">NULL</span></span>
+<span>  include_invalid <span class="op">=</span> <span class="cn">NULL</span>,</span>
+<span>  vocab_release <span class="op">=</span> <span class="cn">NULL</span>,</span>
+<span>  relationship_ids <span class="op">=</span> <span class="cn">NULL</span>,</span>
+<span>  page <span class="op">=</span> <span class="fl">1</span>,</span>
+<span>  page_size <span class="op">=</span> <span class="fl">100</span></span>
 <span><span class="op">)</span></span></code></pre></div><p></p></div>
 </div>
 
@@ -96,11 +106,90 @@
 
 
 <dt><code>include_invalid</code></dt>
-<dd><p>Include invalid/deprecated mappings. Default <code>FALSE</code>.</p></dd>
+<dd><p>Whether to return mappings whose relationship or
+target concept is deprecated. Default <code>NULL</code> takes the server default,
+which for this endpoint is to <em>include</em> them; pass <code>FALSE</code> to exclude
+them. The source concept is never filtered, so a deprecated concept
+still returns what it maps to.</p></dd>
 
 
 <dt><code>vocab_release</code></dt>
 <dd><p>Specific vocabulary release version (e.g., "2025.1"). Default <code>NULL</code>.</p></dd>
+
+
+<dt><code>relationship_ids</code></dt>
+<dd><p>Character vector of relationship types to return.
+Defaults server-side to <code>"Maps to"</code>. Pass <code>c("Maps to", "Maps to value")</code>
+to also get the Value-as-Concept decomposition of composite concepts -
+"Allergy to penicillin G" maps to "Allergy to drug" via <code>Maps to</code> and to
+"penicillin G" via <code>Maps to value</code>, and the default returns only the
+first of those.</p></dd>
+
+
+<dt><code>page</code></dt>
+<dd><p>Page number. Default 1.</p></dd>
+
+
+<dt><code>page_size</code></dt>
+<dd><p>Mappings per page. Default 100, maximum 200.</p></dd>
+
+
+</dl><p></p></div>
+</div>
+
+</div><p></p><hr><a id="method-MappingsResource-get_all"></a><div class="section">
+<h3 id="method-get-all-">Method <code>get_all()</code><a class="anchor" aria-label="anchor" href="#method-get-all-"></a></h3>
+<p>Get every mapping for a concept, walking all pages.</p>
+<p>Prefer this over <code><a href="https://rdrr.io/r/base/get.html" class="external-link">get()</a></code> when assembling a code list — <code><a href="https://rdrr.io/r/base/get.html" class="external-link">get()</a></code> returns
+a single page, and a partial code list is wrong in a way nothing in
+the result reveals.</p><div class="section">
+<h4 id="usage-2">Usage<a class="anchor" aria-label="anchor" href="#usage-2"></a></h4>
+<p></p><div class="r"><div class="sourceCode"><pre><code><span><span class="va">MappingsResource</span><span class="op">$</span><span class="fu">get_all</span><span class="op">(</span></span>
+<span>  <span class="va">concept_id</span>,</span>
+<span>  target_vocabulary <span class="op">=</span> <span class="cn">NULL</span>,</span>
+<span>  include_invalid <span class="op">=</span> <span class="cn">NULL</span>,</span>
+<span>  vocab_release <span class="op">=</span> <span class="cn">NULL</span>,</span>
+<span>  relationship_ids <span class="op">=</span> <span class="cn">NULL</span>,</span>
+<span>  page_size <span class="op">=</span> <span class="fl">100</span>,</span>
+<span>  max_pages <span class="op">=</span> <span class="cn">Inf</span>,</span>
+<span>  progress <span class="op">=</span> <span class="cn">TRUE</span></span>
+<span><span class="op">)</span></span></code></pre></div><p></p></div>
+</div>
+
+<div class="section">
+<h4 id="arguments-2">Arguments<a class="anchor" aria-label="anchor" href="#arguments-2"></a></h4>
+<p></p><div class="arguments"><dl><dt><code>concept_id</code></dt>
+<dd><p>The concept ID.</p></dd>
+
+
+<dt><code>target_vocabulary</code></dt>
+<dd><p>Filter to a specific target vocabulary (e.g., "ICD10CM").</p></dd>
+
+
+<dt><code>include_invalid</code></dt>
+<dd><p>Whether to return deprecated mappings. Same
+semantics as <code>$get()</code>, including the include-by-default behaviour.</p></dd>
+
+
+<dt><code>vocab_release</code></dt>
+<dd><p>Specific vocabulary release version (e.g., "2025.1"). Default <code>NULL</code>.</p></dd>
+
+
+<dt><code>relationship_ids</code></dt>
+<dd><p>Relationship types to return. Same semantics as
+<code>$get()</code> – see there for the Value-as-Concept case.</p></dd>
+
+
+<dt><code>page_size</code></dt>
+<dd><p>Mappings fetched per request. Default 100, maximum 200.</p></dd>
+
+
+<dt><code>max_pages</code></dt>
+<dd><p>Maximum pages to fetch. Default <code>Inf</code>.</p></dd>
+
+
+<dt><code>progress</code></dt>
+<dd><p>Show progress bar. Default <code>TRUE</code>.</p></dd>
 
 
 </dl><p></p></div>
@@ -109,7 +198,7 @@
 </div><p></p><hr><a id="method-MappingsResource-map"></a><div class="section">
 <h3 id="method-map-">Method <code><a href="https://purrr.tidyverse.org/reference/map.html" class="external-link">map()</a></code><a class="anchor" aria-label="anchor" href="#method-map-"></a></h3>
 <p>Map concepts to a target vocabulary.</p><div class="section">
-<h4 id="usage-2">Usage<a class="anchor" aria-label="anchor" href="#usage-2"></a></h4>
+<h4 id="usage-3">Usage<a class="anchor" aria-label="anchor" href="#usage-3"></a></h4>
 <p></p><div class="r"><div class="sourceCode"><pre><code><span><span class="va">MappingsResource</span><span class="op">$</span><span class="fu">map</span><span class="op">(</span></span>
 <span>  <span class="va">target_vocabulary</span>,</span>
 <span>  source_concepts <span class="op">=</span> <span class="cn">NULL</span>,</span>
@@ -121,7 +210,7 @@
 </div>
 
 <div class="section">
-<h4 id="arguments-2">Arguments<a class="anchor" aria-label="anchor" href="#arguments-2"></a></h4>
+<h4 id="arguments-3">Arguments<a class="anchor" aria-label="anchor" href="#arguments-3"></a></h4>
 <p></p><div class="arguments"><dl><dt><code>target_vocabulary</code></dt>
 <dd><p>Target vocabulary ID (e.g., "ICD10CM", "SNOMED", "RxNorm").</p></dd>
 
@@ -153,7 +242,7 @@ with <code>vocabulary_id</code> and <code>concept_code</code>. Use this OR sourc
 </div><p></p><hr><a id="method-MappingsResource-print"></a><div class="section">
 <h3 id="method-print-">Method <code><a href="https://rdrr.io/r/base/print.html" class="external-link">print()</a></code><a class="anchor" aria-label="anchor" href="#method-print-"></a></h3>
 <p>Print resource information.</p><div class="section">
-<h4 id="usage-3">Usage<a class="anchor" aria-label="anchor" href="#usage-3"></a></h4>
+<h4 id="usage-4">Usage<a class="anchor" aria-label="anchor" href="#usage-4"></a></h4>
 <p></p><div class="r"><div class="sourceCode"><pre><code><span><span class="va">MappingsResource</span><span class="op">$</span><span class="fu">print</span><span class="op">(</span><span class="op">)</span></span></code></pre></div><p></p></div>
 </div>
 
@@ -161,12 +250,12 @@ with <code>vocabulary_id</code> and <code>concept_code</code>. Use this OR sourc
 </div><p></p><hr><a id="method-MappingsResource-clone"></a><div class="section">
 <h3 id="method-clone-">Method <code>clone()</code><a class="anchor" aria-label="anchor" href="#method-clone-"></a></h3>
 <p>The objects of this class are cloneable with this method.</p><div class="section">
-<h4 id="usage-4">Usage<a class="anchor" aria-label="anchor" href="#usage-4"></a></h4>
+<h4 id="usage-5">Usage<a class="anchor" aria-label="anchor" href="#usage-5"></a></h4>
 <p></p><div class="r"><div class="sourceCode"><pre><code><span><span class="va">MappingsResource</span><span class="op">$</span><span class="fu">clone</span><span class="op">(</span>deep <span class="op">=</span> <span class="cn">FALSE</span><span class="op">)</span></span></code></pre></div><p></p></div>
 </div>
 
 <div class="section">
-<h4 id="arguments-3">Arguments<a class="anchor" aria-label="anchor" href="#arguments-3"></a></h4>
+<h4 id="arguments-4">Arguments<a class="anchor" aria-label="anchor" href="#arguments-4"></a></h4>
 <p></p><div class="arguments"><dl><dt><code>deep</code></dt>
 <dd><p>Whether to make a deep clone.</p></dd>
 
@@ -187,7 +276,7 @@ with <code>vocabulary_id</code> and <code>concept_code</code>. Use this OR sourc
 </div>
 
 <div class="pkgdown-footer-right">
-  <p>Site built with <a href="https://pkgdown.r-lib.org/" class="external-link">pkgdown</a> 2.2.0.</p>
+  <p>Site built with <a href="https://pkgdown.r-lib.org/" class="external-link">pkgdown</a> 2.2.1.</p>
 </div>
 
     </footer></div>

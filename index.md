@@ -87,8 +87,10 @@ results$data
 # Get concept by vocabulary code
 snomed_concept <- client$concepts$get_by_code("SNOMED", "44054006")
 
-# Map to another vocabulary
-mappings <- client$mappings$get(201826, target_vocabulary = "ICD10CM")
+# Map to another vocabulary. `Maps to` points at *standard* concepts, so
+# SNOMED -> ICD10CM returns nothing; look the code up and map it instead.
+icd <- client$concepts$get_by_code("ICD10CM", "E11.9")
+mappings <- client$mappings$get(icd$concept_id, target_vocabulary = "SNOMED")
 
 # Navigate hierarchy
 ancestors <- client$hierarchy$ancestors(201826, max_levels = 3)
@@ -448,7 +450,7 @@ concepts_df %>%
 | `concepts` | Concept lookup and batch operations | [`get()`](https://rdrr.io/r/base/get.html), `get_by_code()`, `batch()`, `suggest()` |
 | `search` | Full-text and semantic search | `basic()`, `advanced()`, `semantic()`, `similar()`, `bulk_basic()`, `bulk_semantic()` |
 | `hierarchy` | Navigate concept relationships | `ancestors()`, `descendants()` |
-| `mappings` | Cross-vocabulary mappings | [`get()`](https://rdrr.io/r/base/get.html), [`map()`](https://purrr.tidyverse.org/reference/map.html) |
+| `mappings` | Cross-vocabulary mappings | [`get()`](https://rdrr.io/r/base/get.html), `get_all()`, [`map()`](https://purrr.tidyverse.org/reference/map.html) |
 | `vocabularies` | Vocabulary metadata | [`list()`](https://rdrr.io/r/base/list.html), [`get()`](https://rdrr.io/r/base/get.html), `stats()` |
 | `domains` | Domain information | [`list()`](https://rdrr.io/r/base/list.html), [`get()`](https://rdrr.io/r/base/get.html), `concepts()` |
 | `fhir` | FHIR-to-OMOP resolution | `resolve()`, `resolve_batch()`, `resolve_codeable_concept()` |
