@@ -1,0 +1,21 @@
+.github/workflows/R-CMD-check.yaml
+  s_675010497a6bc7::t_bf1e6f9631b398 41,60-73
+tests/testthat/test-roxygen-param-order.R
+  s_675010497a6bc7::t_1044eca77cd0f0 35-44,46-47
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.6.22",
+  "base_commit_sha": "16bd98f4120e3e90606527be84c075776b06dd8d",
+  "prompts": {},
+  "sessions": {
+    "s_675010497a6bc7": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "ac8e644b-8ae2-49d5-94a0-66989382a45d",
+        "model": "claude-opus-5"
+      },
+      "human_author": "alex-omophub <sdk@omophub.com>"
+    }
+  }
+}
