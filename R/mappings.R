@@ -24,20 +24,20 @@ MappingsResource <- R6::R6Class(
     #'
     #' @param concept_id The concept ID.
     #' @param target_vocabulary Filter to a specific target vocabulary (e.g., "ICD10CM").
+    #' @param include_invalid Whether to return mappings whose relationship or
+    #'   target concept is deprecated. Default `NULL` takes the server default,
+    #'   which for this endpoint is to *include* them; pass `FALSE` to exclude
+    #'   them. The source concept is never filtered, so a deprecated concept
+    #'   still returns what it maps to.
+    #' @param vocab_release Specific vocabulary release version (e.g., "2025.1"). Default `NULL`.
     #' @param relationship_ids Character vector of relationship types to return.
     #'   Defaults server-side to `"Maps to"`. Pass `c("Maps to", "Maps to value")`
     #'   to also get the Value-as-Concept decomposition of composite concepts -
     #'   "Allergy to penicillin G" maps to "Allergy to drug" via `Maps to` and to
     #'   "penicillin G" via `Maps to value`, and the default returns only the
     #'   first of those.
-    #' @param include_invalid Whether to return mappings whose relationship or
-    #'   target concept is deprecated. Default `NULL` takes the server default,
-    #'   which for this endpoint is to *include* them; pass `FALSE` to exclude
-    #'   them. The source concept is never filtered, so a deprecated concept
-    #'   still returns what it maps to.
     #' @param page Page number. Default 1.
     #' @param page_size Mappings per page. Default 100, maximum 200.
-    #' @param vocab_release Specific vocabulary release version (e.g., "2025.1"). Default `NULL`.
     #'
     #' @returns Mappings for the concept, with pagination metadata attached as
     #'   the `pagination` attribute.
@@ -99,14 +99,14 @@ MappingsResource <- R6::R6Class(
     #'
     #' @param concept_id The concept ID.
     #' @param target_vocabulary Filter to a specific target vocabulary (e.g., "ICD10CM").
-    #' @param relationship_ids Relationship types to return. Same semantics as
-    #'   `$get()` -- see there for the Value-as-Concept case.
     #' @param include_invalid Whether to return deprecated mappings. Same
     #'   semantics as `$get()`, including the include-by-default behaviour.
+    #' @param vocab_release Specific vocabulary release version (e.g., "2025.1"). Default `NULL`.
+    #' @param relationship_ids Relationship types to return. Same semantics as
+    #'   `$get()` -- see there for the Value-as-Concept case.
     #' @param page_size Mappings fetched per request. Default 100, maximum 200.
     #' @param max_pages Maximum pages to fetch. Default `Inf`.
     #' @param progress Show progress bar. Default `TRUE`.
-    #' @param vocab_release Specific vocabulary release version (e.g., "2025.1"). Default `NULL`.
     #'
     #' @returns A tibble of all mappings for the concept.
     get_all = function(concept_id,
