@@ -32,10 +32,19 @@ documented_params <- function(src, sig) {
 }
 
 test_that("every documented R6 method lists @param in signature order", {
-  files <- list.files(
-    file.path(test_path("..", ".."), "R"),
-    pattern = "[.]R$", full.names = TRUE
+  # This reads the package SOURCE, which only exists in a source tree. Under
+  # `R CMD check` and `covr` the tests run against an INSTALLED copy, whose R/
+  # holds omophub.rdb rather than any .R file -- so the scan would find zero
+  # files and, without this skip, fail the check for reasons unrelated to the
+  # code. `.github/workflows/R-CMD-check.yaml` runs the guard against the
+  # checkout in a separate step so it still gates every PR.
+  r_dir <- file.path(test_path("..", ".."), "R")
+  skip_if_not(
+    dir.exists(r_dir) && length(list.files(r_dir, pattern = "[.]R$")) > 0,
+    "package source not available (installed-package check)"
   )
+
+  files <- list.files(r_dir, pattern = "[.]R$", full.names = TRUE)
   expect_gt(length(files), 0)
 
   generators_seen <- 0
