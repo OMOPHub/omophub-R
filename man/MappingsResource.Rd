@@ -57,11 +57,11 @@ result, or use \code{get_all()} to walk every page.
 \if{html}{\out{<div class="r">}}\preformatted{MappingsResource$get(
   concept_id,
   target_vocabulary = NULL,
-  relationship_ids = NULL,
   include_invalid = NULL,
+  vocab_release = NULL,
+  relationship_ids = NULL,
   page = 1,
-  page_size = 100,
-  vocab_release = NULL
+  page_size = 100
 )}\if{html}{\out{</div>}}
 }
 
@@ -72,6 +72,14 @@ result, or use \code{get_all()} to walk every page.
 
 \item{\code{target_vocabulary}}{Filter to a specific target vocabulary (e.g., "ICD10CM").}
 
+\item{\code{include_invalid}}{Whether to return mappings whose relationship or
+target concept is deprecated. Default \code{NULL} takes the server default,
+which for this endpoint is to \emph{include} them; pass \code{FALSE} to exclude
+them. The source concept is never filtered, so a deprecated concept
+still returns what it maps to.}
+
+\item{\code{vocab_release}}{Specific vocabulary release version (e.g., "2025.1"). Default \code{NULL}.}
+
 \item{\code{relationship_ids}}{Character vector of relationship types to return.
 Defaults server-side to \code{"Maps to"}. Pass \code{c("Maps to", "Maps to value")}
 to also get the Value-as-Concept decomposition of composite concepts -
@@ -79,17 +87,9 @@ to also get the Value-as-Concept decomposition of composite concepts -
 "penicillin G" via \verb{Maps to value}, and the default returns only the
 first of those.}
 
-\item{\code{include_invalid}}{Whether to return mappings whose relationship or
-target concept is deprecated. Default \code{NULL} takes the server default,
-which for this endpoint is to \emph{include} them; pass \code{FALSE} to exclude
-them. The source concept is never filtered, so a deprecated concept
-still returns what it maps to.}
-
 \item{\code{page}}{Page number. Default 1.}
 
 \item{\code{page_size}}{Mappings per page. Default 100, maximum 200.}
-
-\item{\code{vocab_release}}{Specific vocabulary release version (e.g., "2025.1"). Default \code{NULL}.}
 }
 \if{html}{\out{</div>}}
 }
@@ -107,12 +107,12 @@ the result reveals.
 \if{html}{\out{<div class="r">}}\preformatted{MappingsResource$get_all(
   concept_id,
   target_vocabulary = NULL,
-  relationship_ids = NULL,
   include_invalid = NULL,
+  vocab_release = NULL,
+  relationship_ids = NULL,
   page_size = 100,
   max_pages = Inf,
-  progress = TRUE,
-  vocab_release = NULL
+  progress = TRUE
 )}\if{html}{\out{</div>}}
 }
 
@@ -123,26 +123,19 @@ the result reveals.
 
 \item{\code{target_vocabulary}}{Filter to a specific target vocabulary (e.g., "ICD10CM").}
 
-\item{\code{relationship_ids}}{Character vector of relationship types to return.
-Defaults server-side to \code{"Maps to"}. Pass \code{c("Maps to", "Maps to value")}
-to also get the Value-as-Concept decomposition of composite concepts -
-"Allergy to penicillin G" maps to "Allergy to drug" via \verb{Maps to} and to
-"penicillin G" via \verb{Maps to value}, and the default returns only the
-first of those.}
+\item{\code{include_invalid}}{Whether to return deprecated mappings. Same
+semantics as \verb{$get()}, including the include-by-default behaviour.}
 
-\item{\code{include_invalid}}{Whether to return mappings whose relationship or
-target concept is deprecated. Default \code{NULL} takes the server default,
-which for this endpoint is to \emph{include} them; pass \code{FALSE} to exclude
-them. The source concept is never filtered, so a deprecated concept
-still returns what it maps to.}
+\item{\code{vocab_release}}{Specific vocabulary release version (e.g., "2025.1"). Default \code{NULL}.}
+
+\item{\code{relationship_ids}}{Relationship types to return. Same semantics as
+\verb{$get()} -- see there for the Value-as-Concept case.}
 
 \item{\code{page_size}}{Mappings fetched per request. Default 100, maximum 200.}
 
 \item{\code{max_pages}}{Maximum pages to fetch. Default \code{Inf}.}
 
 \item{\code{progress}}{Show progress bar. Default \code{TRUE}.}
-
-\item{\code{vocab_release}}{Specific vocabulary release version (e.g., "2025.1"). Default \code{NULL}.}
 }
 \if{html}{\out{</div>}}
 }

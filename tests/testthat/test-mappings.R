@@ -183,6 +183,38 @@ test_that("mappings$get includes include_invalid option", {
   expect_equal(called_with$query$include_invalid, "true")
 })
 
+test_that("mappings$get keeps the 1.8.1 positional contract", {
+  # 1.8.1 shipped get(concept_id, target_vocabulary, include_invalid,
+  # vocab_release). New arguments must be APPENDED: inserting one shifts every
+  # positional caller onto the wrong parameter, and because the new arguments
+  # validate their types, the symptom is a validation error rather than a
+  # wrong result.
+  formal_names <- names(formals(MappingsResource$public_methods$get))
+  expect_equal(
+    formal_names[1:4],
+    c("concept_id", "target_vocabulary", "include_invalid", "vocab_release")
+  )
+
+  base_req <- httr2::request("https://api.omophub.com/v1")
+  resource <- MappingsResource$new(base_req)
+
+  called_with <- NULL
+  local_mocked_bindings(
+    perform_get = function(req, path, query = NULL) {
+      called_with <<- list(query = query)
+      list(mappings = list())
+    }
+  )
+
+  # The exact positional call a 1.8.1 user could have written.
+  resource$get(201826, "ICD10CM", FALSE, "2025.1")
+
+  expect_equal(called_with$query$target_vocabulary, "ICD10CM")
+  expect_equal(called_with$query$include_invalid, "false")
+  expect_equal(called_with$query$vocab_release, "2025.1")
+  expect_null(called_with$query$relationship_ids)
+})
+
 test_that("mappings$get comma-joins relationship_ids", {
   # Value-as-Concept is unreachable without this: the server defaults to
   # "Maps to" alone, so a composite concept returns only half its

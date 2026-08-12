@@ -43,11 +43,11 @@ MappingsResource <- R6::R6Class(
     #'   the `pagination` attribute.
     get = function(concept_id,
                    target_vocabulary = NULL,
-                   relationship_ids = NULL,
                    include_invalid = NULL,
+                   vocab_release = NULL,
+                   relationship_ids = NULL,
                    page = 1,
-                   page_size = 100,
-                   vocab_release = NULL) {
+                   page_size = 100) {
       concept_id <- validate_concept_id(concept_id)
       pag <- validate_pagination(page, page_size, max_page_size = 200)
 
@@ -99,17 +99,10 @@ MappingsResource <- R6::R6Class(
     #'
     #' @param concept_id The concept ID.
     #' @param target_vocabulary Filter to a specific target vocabulary (e.g., "ICD10CM").
-    #' @param relationship_ids Character vector of relationship types to return.
-    #'   Defaults server-side to `"Maps to"`. Pass `c("Maps to", "Maps to value")`
-    #'   to also get the Value-as-Concept decomposition of composite concepts -
-    #'   "Allergy to penicillin G" maps to "Allergy to drug" via `Maps to` and to
-    #'   "penicillin G" via `Maps to value`, and the default returns only the
-    #'   first of those.
-    #' @param include_invalid Whether to return mappings whose relationship or
-    #'   target concept is deprecated. Default `NULL` takes the server default,
-    #'   which for this endpoint is to *include* them; pass `FALSE` to exclude
-    #'   them. The source concept is never filtered, so a deprecated concept
-    #'   still returns what it maps to.
+    #' @param relationship_ids Relationship types to return. Same semantics as
+    #'   `$get()` -- see there for the Value-as-Concept case.
+    #' @param include_invalid Whether to return deprecated mappings. Same
+    #'   semantics as `$get()`, including the include-by-default behaviour.
     #' @param page_size Mappings fetched per request. Default 100, maximum 200.
     #' @param max_pages Maximum pages to fetch. Default `Inf`.
     #' @param progress Show progress bar. Default `TRUE`.
@@ -118,12 +111,12 @@ MappingsResource <- R6::R6Class(
     #' @returns A tibble of all mappings for the concept.
     get_all = function(concept_id,
                        target_vocabulary = NULL,
-                       relationship_ids = NULL,
                        include_invalid = NULL,
+                       vocab_release = NULL,
+                       relationship_ids = NULL,
                        page_size = 100,
                        max_pages = Inf,
-                       progress = TRUE,
-                       vocab_release = NULL) {
+                       progress = TRUE) {
       concept_id <- validate_concept_id(concept_id)
 
       fetch_fn <- function(page, size) {
