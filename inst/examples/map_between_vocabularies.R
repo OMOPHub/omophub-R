@@ -34,75 +34,122 @@ DIABETES_CONCEPT_ID <- 201826
 cat("1. Getting mappings for a SNOMED concept\n")
 cat("-----------------------------------------\n")
 
-# Get all mappings for Type 2 diabetes
+# One page of mappings for Type 2 diabetes. `get()` is NOT the whole set --
+# read attr(mappings, "pagination") or use get_all(), shown in section 3.
 mappings <- client$mappings$get(DIABETES_CONCEPT_ID)
+pag <- attr(mappings, "pagination")
 
 cat(sprintf("Mappings for concept %d (Type 2 diabetes mellitus):\n", DIABETES_CONCEPT_ID))
-mapping_list <- mappings$mappings %||% mappings$data %||% mappings
-for (m in mapping_list) {
-  target <- m$target_concept %||% m
-  cat(sprintf("  -> [%s] %s (%s)\n",
-              target$concept_code %||% m$target_concept_code %||% "?",
-              target$concept_name %||% m$target_concept_name %||% "Unknown",
-              target$vocabulary_id %||% m$target_vocabulary_id %||% "?"))
+if (!is.null(pag)) {
+  cat(sprintf("  page %s of %s, %s in total\n",
+              pag$page, pag$total_pages, pag$total_items))
+}
+for (m in mappings$mappings) {
+  # This endpoint projects each row down to source/target id + name,
+  # relationship_id and confidence. Vocabulary id and concept code are not
+  # included -- resolve them with client$concepts$get(target_concept_id),
+  # as section 2 does. (client$mappings$map() does return them.)
+  cat(sprintf("  %s: %s %s\n",
+              m$relationship_id, m$target_concept_id, m$target_concept_name))
 }
 cat("\n")
 
 # ============================================================================
-# Get Mappings to Specific Vocabulary
+# Mapping to a Specific Vocabulary -- Mind the Direction
 # ============================================================================
 
-cat("2. Mapping to ICD-10-CM only\n")
-cat("----------------------------\n")
+cat("2. Which ICD-10-CM codes correspond to this concept\n")
+cat("---------------------------------------------------\n")
 
-# Get only ICD-10-CM mappings
-icd_mappings <- client$mappings$get(
+# `Maps to` always points at a *standard* concept, and ICD-10-CM is
+# non-standard, so filtering the default relationship to ICD10CM matches
+# nothing -- an empty list, not an error. The codes that roll up INTO a
+# standard concept are reached with `Mapped from`.
+empty <- client$mappings$get(
   DIABETES_CONCEPT_ID,
   target_vocabulary = "ICD10CM"
 )
+cat(sprintf("  'Maps to' + ICD10CM:     %d rows (as expected)\n",
+            length(empty$mappings)))
 
-cat("ICD-10-CM mappings for Type 2 diabetes:\n")
-mapping_list <- icd_mappings$mappings %||% icd_mappings$data %||% icd_mappings
-for (m in mapping_list) {
-  target <- m$target_concept %||% m
-  cat(sprintf("  %s - %s\n",
-              target$concept_code %||% m$target_concept_code %||% "?",
-              target$concept_name %||% m$target_concept_name %||% "Unknown"))
+icd_mappings <- client$mappings$get_all(
+  DIABETES_CONCEPT_ID,
+  relationship_ids = "Mapped from",
+  target_vocabulary = "ICD10CM",
+  progress = FALSE
+)
+cat(sprintf("  'Mapped from' + ICD10CM: %d rows\n", nrow(icd_mappings)))
+
+# The mapping row has the target's id and name but not its code, so resolve
+# the first few. One request each -- fine for five rows, not for all 74.
+for (i in seq_len(min(5, nrow(icd_mappings)))) {
+  target <- client$concepts$get(icd_mappings$target_concept_id[i])
+  cat(sprintf("    <- [%s] %s %s\n",
+              target$vocabulary_id, target$concept_code, target$concept_name))
 }
 cat("\n")
 
 # ============================================================================
-# Get Mappings Including Invalid/Deprecated
+# Get Every Mapping, Across All Pages
 # ============================================================================
 
-cat("3. Mappings including invalid concepts\n")
-cat("--------------------------------------\n")
+cat("3. Every mapping, not just the first page\n")
+cat("------------------------------------------\n")
 
-# Include invalid/deprecated mappings
-all_mappings <- client$mappings$get(
-  DIABETES_CONCEPT_ID,
-  include_invalid = TRUE
+# Copy this one when building a code list: a partial code list is wrong in a
+# way nothing in the result reveals.
+all_mappings <- client$mappings$get_all(DIABETES_CONCEPT_ID, progress = FALSE)
+cat(sprintf("Retrieved %d mappings in total\n\n", nrow(all_mappings)))
+
+# ============================================================================
+# Value-as-Concept: Composite Concepts Decompose Across Two Relationships
+# ============================================================================
+
+cat("4. Value-as-Concept\n")
+cat("-------------------\n")
+
+# The default returns "Maps to" only, so you learn the patient is allergic to
+# *a drug* but not *which* drug.
+PENICILLIN_ALLERGY_ID <- 4167462
+decomposed <- client$mappings$get(
+  PENICILLIN_ALLERGY_ID,
+  relationship_ids = c("Maps to", "Maps to value")
 )
 
-cat("All mappings (including invalid):\n")
-mapping_list <- all_mappings$mappings %||% all_mappings$data %||% all_mappings
-for (m in mapping_list) {
-  target <- m$target_concept %||% m
-  invalid_status <- target$invalid_reason %||% m$invalid_reason %||% ""
-  status_str <- if (nzchar(invalid_status)) sprintf(" [%s]", invalid_status) else ""
-
-  cat(sprintf("  [%s] %s%s\n",
-              target$vocabulary_id %||% m$target_vocabulary_id %||% "?",
-              target$concept_name %||% m$target_concept_name %||% "Unknown",
-              status_str))
+for (m in decomposed$mappings) {
+  # "Maps to" -> the OMOP concept column; "Maps to value" -> value_as_concept_id
+  column <- if (identical(m$relationship_id, "Maps to value")) {
+    "value_as_concept_id"
+  } else {
+    "concept_id"
+  }
+  cat(sprintf("  %s: %s -> %s\n",
+              m$relationship_id, m$target_concept_name, column))
 }
 cat("\n")
+
+# ============================================================================
+# Excluding Invalid/Deprecated Mappings
+# ============================================================================
+
+cat("5. Dropping deprecated mappings\n")
+cat("-------------------------------\n")
+
+# Deprecated mappings are returned BY DEFAULT on this endpoint. FALSE is the
+# meaningful direction; omitting the argument keeps them.
+valid_only <- client$mappings$get_all(
+  DIABETES_CONCEPT_ID,
+  include_invalid = FALSE,
+  progress = FALSE
+)
+cat(sprintf("  default (includes deprecated): %d\n", nrow(all_mappings)))
+cat(sprintf("  include_invalid = FALSE:       %d\n\n", nrow(valid_only)))
 
 # ============================================================================
 # Batch Mapping Multiple Concepts
 # ============================================================================
 
-cat("4. Batch mapping multiple concepts\n")
+cat("6. Batch mapping multiple concepts\n")
 cat("----------------------------------\n")
 
 # Map multiple SNOMED concepts to ICD-10-CM
@@ -145,7 +192,7 @@ cat("\n")
 # Lookup Concept by Vocabulary Code
 # ============================================================================
 
-cat("5. Looking up concepts by code\n")
+cat("7. Looking up concepts by code\n")
 cat("------------------------------\n")
 
 # Look up ICD-10-CM code E11 (Type 2 diabetes mellitus)
@@ -171,7 +218,7 @@ cat("\n")
 # Mapping with Specific Vocabulary Release
 # ============================================================================
 
-cat("6. Mapping with specific vocabulary release\n")
+cat("8. Mapping with specific vocabulary release\n")
 cat("-------------------------------------------\n")
 
 # Get mappings from a specific vocabulary release version
@@ -182,8 +229,7 @@ versioned_mappings <- client$mappings$get(
 )
 
 cat("Mappings from vocabulary release 2025.1:\n")
-mapping_list <- versioned_mappings$mappings %||% versioned_mappings$data %||% versioned_mappings
-cat(sprintf("  Found %d mappings\n", length(mapping_list)))
+cat(sprintf("  Found %d mappings\n", length(versioned_mappings$mappings)))
 cat("\n")
 
 # ============================================================================

@@ -1,8 +1,44 @@
+# omophub 1.9.0
+
+## New Features
+
+* **Mapping pagination** - `client$mappings$get()` accepts `page` and
+  `page_size`. `GET /v1/concepts/{id}/mappings` became paginated; 
+  `page_size` defaults to 100,
+  matching the old cap, so an existing call returns exactly the page it
+  returned before. Pagination metadata is attached to the result as the
+  `pagination` attribute - read it with `attr(result, "pagination")`.
+
+* **`client$mappings$get_all()`** - walks every page and returns one tibble of
+  all mappings for a concept. Prefer it over `get()` when assembling a code
+  list; a partial code list is wrong in a way nothing in the result reveals.
+  Takes `max_pages` and `progress` like the other `*_all()` methods.
+
+* **`relationship_ids`** on `client$mappings$get()` and `get_all()` - a
+  character vector of relationship types. The server defaults to `"Maps to"`,
+  so a composite concept returns only half its decomposition unless
+  `"Maps to value"` is asked for too: "Allergy to penicillin G" maps to
+  "Allergy to drug" via `Maps to` and to "penicillin G" via `Maps to value`.
+
+## Bug Fixes
+
+* **`client$mappings$get()` returned a different shape once the API added
+  pagination.** `perform_get()` switches its return shape based on whether the
+  response carries `meta.pagination`.
+
+* **`include_invalid = FALSE` never reached the server** on
+  `client$mappings$get()` and `get_all()`. The parameter was only sent when
+  `TRUE`, and this endpoint defaults to *including* deprecated mappings, so
+  asking to exclude them did nothing. The default is now `NULL` (take the
+  server default); pass `FALSE` to exclude. Omitting it behaves exactly as
+  before, so only callers who explicitly passed `FALSE` - and were being
+  ignored - see a change.
+
 # omophub 1.8.1
 
 ## Changed
 
-* **Canonical endpoint path** — `client$search$semantic()` and
+* **Canonical endpoint path** - `client$search$semantic()` and
   `client$search$semantic_all()` now call `GET /v1/search/semantic` instead of
   `GET /v1/concepts/semantic-search`. The legacy path remains a permanent
   server-side alias (emits `Deprecation: true` + `Link: …rel="successor-version"`
@@ -13,13 +49,13 @@
 
 ## New Features
 
-* **FHIR Value-as-Concept** — the `resolve_batch(as_tibble = TRUE)` tibble now
+* **FHIR Value-as-Concept** - the `resolve_batch(as_tibble = TRUE)` tibble now
   includes `value_as_concept_id` and `value_as_concept_name` columns, populated
   when the resolver decomposes a composite concept via the `Maps to value`
-  relationship (HL7 FHIR-to-OMOP IG Value-as-Concept pattern — e.g. "Allergy to
+  relationship (HL7 FHIR-to-OMOP IG Value-as-Concept pattern - e.g. "Allergy to
   penicillin" yields a standard "Allergy to drug" plus a value "Penicillin G").
 
-* **`on_unmapped` for FHIR resolution** — `resolve()`, `resolve_batch()`, and
+* **`on_unmapped` for FHIR resolution** - `resolve()`, `resolve_batch()`, and
   `resolve_codeable_concept()` gained an `on_unmapped` argument (`"error"`
   default / `"sentinel"`). With `"sentinel"` the resolver returns a
   `concept_id` 0 record instead of a 404 when nothing resolves, so ETL
@@ -27,7 +63,7 @@
 
 ## Behavior Changes
 
-* **Unmapped rows in the batch tibble** — a coding that resolves to a source
+* **Unmapped rows in the batch tibble** - a coding that resolves to a source
   concept but has no standard `Maps to` target now reports `status = "unmapped"`
   (with `standard_concept_id = 0`) instead of `"resolved"`, matching the OMOP /
   FHIR-to-OMOP IG convention that an unmapped concept is `concept_id 0`. Code
