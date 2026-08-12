@@ -1,0 +1,21 @@
+R/mappings.R
+  s_675010497a6bc7::t_251cc94f2f9dba 27-32,104-106
+tests/testthat/test-mappings.R
+  s_675010497a6bc7::t_bfa7c1e8e06d32 186-213
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.6.22",
+  "base_commit_sha": "79e335696441dd9ea0baa5f32419977715f6d594",
+  "prompts": {},
+  "sessions": {
+    "s_675010497a6bc7": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "ac8e644b-8ae2-49d5-94a0-66989382a45d",
+        "model": "claude-opus-5"
+      },
+      "human_author": "alex-omophub <sdk@omophub.com>"
+    }
+  }
+}
