@@ -844,12 +844,12 @@ test_that("search$similar requires one non-missing page value", {
 test_that("search$similar keeps the 1.9.0 positional contract", {
   formal_names <- names(formals(SearchResource$public_methods$similar))
   expect_equal(
-    formal_names[1:12],
+    formal_names,
     c(
       "concept_id", "concept_name", "query", "algorithm",
       "similarity_threshold", "page_size", "vocabulary_ids", "domain_ids",
       "standard_concept", "include_invalid", "include_scores",
-      "include_explanations"
+      "include_explanations", "page", "concept_class_ids", "exclude_self"
     )
   )
 })
