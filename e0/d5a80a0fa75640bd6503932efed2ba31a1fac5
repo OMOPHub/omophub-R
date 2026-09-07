@@ -1,0 +1,25 @@
+R/search.R
+  s_0fd210701b7f1e::t_83c698b8bcf958 437-438,462-463,475
+tests/testthat/test-request-pagination.R
+  s_0fd210701b7f1e::t_57e0fcea4b37a1 69-79
+tests/testthat/test-search.R
+  s_0fd210701b7f1e::t_57e0fcea4b37a1 830-856
+man/SearchResource.Rd
+  s_0fd210701b7f1e::t_92d4a4c43d91bb 402-403,441-444
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.7.2",
+  "base_commit_sha": "e0d5a80a0fa75640bd6503932efed2ba31a1fac5",
+  "prompts": {},
+  "sessions": {
+    "s_0fd210701b7f1e": {
+      "agent_id": {
+        "tool": "codex",
+        "id": "01a07885-99a7-7062-b3c0-03e7f1077c3d",
+        "model": "gpt-5.6-sol"
+      },
+      "human_author": "alex-omophub <sdk@omophub.com>"
+    }
+  }
+}
