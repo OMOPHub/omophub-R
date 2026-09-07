@@ -392,15 +392,15 @@ Must provide exactly one of: concept_id, concept_name, or query.
   query = NULL,
   algorithm = "semantic",
   similarity_threshold = 0.7,
-  page = 1,
   page_size = 20,
   vocabulary_ids = NULL,
   domain_ids = NULL,
-  concept_class_ids = NULL,
   standard_concept = NULL,
   include_invalid = NULL,
   include_scores = NULL,
   include_explanations = NULL,
+  page = 1,
+  concept_class_ids = NULL,
   exclude_self = NULL
 )}\if{html}{\out{</div>}}
 }
@@ -419,15 +419,11 @@ Must provide exactly one of: concept_id, concept_name, or query.
 \item{\code{similarity_threshold}}{Minimum similarity (0.0-1.0). Default 0.7.
 \code{0} is a valid value and is honoured.}
 
-\item{\code{page}}{Page of the ranked candidate pool (1-based). Default 1.}
-
 \item{\code{page_size}}{Results per page (max 1000). Default 20.}
 
 \item{\code{vocabulary_ids}}{Filter by vocabulary IDs.}
 
 \item{\code{domain_ids}}{Filter by domain IDs.}
-
-\item{\code{concept_class_ids}}{Filter by concept class IDs.}
 
 \item{\code{standard_concept}}{Filter by standard concept flag ('S', 'C', or 'N').
 'N' selects non-standard concepts, which OMOP stores as a null column.}
@@ -441,6 +437,10 @@ two rather than ignoring the filter.}
 (default TRUE). When FALSE the field is absent.}
 
 \item{\code{include_explanations}}{Include an \code{explanation} on each concept.}
+
+\item{\code{page}}{Page of the ranked candidate pool (1-based). Default 1.}
+
+\item{\code{concept_class_ids}}{Filter by concept class IDs.}
 
 \item{\code{exclude_self}}{Exclude the reference concept from its own results
 (default TRUE).}

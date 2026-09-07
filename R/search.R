@@ -422,11 +422,9 @@ SearchResource <- R6::R6Class(
     #' @param algorithm One of 'semantic' (default), 'lexical', or 'hybrid'.
     #' @param similarity_threshold Minimum similarity (0.0-1.0). Default 0.7.
     #'   `0` is a valid value and is honoured.
-    #' @param page Page of the ranked candidate pool (1-based). Default 1.
     #' @param page_size Results per page (max 1000). Default 20.
     #' @param vocabulary_ids Filter by vocabulary IDs.
     #' @param domain_ids Filter by domain IDs.
-    #' @param concept_class_ids Filter by concept class IDs.
     #' @param standard_concept Filter by standard concept flag ('S', 'C', or 'N').
     #'   'N' selects non-standard concepts, which OMOP stores as a null column.
     #' @param include_invalid Include invalid/deprecated concepts. Defaults to
@@ -436,6 +434,8 @@ SearchResource <- R6::R6Class(
     #' @param include_scores Include `similarity_score` on each concept
     #'   (default TRUE). When FALSE the field is absent.
     #' @param include_explanations Include an `explanation` on each concept.
+    #' @param page Page of the ranked candidate pool (1-based). Default 1.
+    #' @param concept_class_ids Filter by concept class IDs.
     #' @param exclude_self Exclude the reference concept from its own results
     #'   (default TRUE).
     #'
@@ -452,15 +452,15 @@ SearchResource <- R6::R6Class(
                        query = NULL,
                        algorithm = "semantic",
                        similarity_threshold = 0.7,
-                       page = 1,
                        page_size = 20,
                        vocabulary_ids = NULL,
                        domain_ids = NULL,
-                       concept_class_ids = NULL,
                        standard_concept = NULL,
                        include_invalid = NULL,
                        include_scores = NULL,
                        include_explanations = NULL,
+                       page = 1,
+                       concept_class_ids = NULL,
                        exclude_self = NULL) {
       # Validate exactly one of concept_id, concept_name, or query provided
       provided <- sum(!is.null(concept_id), !is.null(concept_name), !is.null(query))
@@ -472,7 +472,7 @@ SearchResource <- R6::R6Class(
 
       checkmate::assert_choice(algorithm, c("semantic", "lexical", "hybrid"))
       checkmate::assert_number(similarity_threshold, lower = 0, upper = 1)
-      checkmate::assert_integerish(page, lower = 1)
+      checkmate::assert_integerish(page, lower = 1, len = 1, any.missing = FALSE)
       checkmate::assert_integerish(page_size, lower = 1, upper = 1000)
       if (!is.null(concept_id)) {
         checkmate::assert_integerish(concept_id, len = 1, any.missing = FALSE)

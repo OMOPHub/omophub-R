@@ -66,11 +66,17 @@ test_that("perform_post adds no pagination element when meta carries none", {
 })
 
 test_that("search$similar exposes pagination end to end", {
-  httr2::local_mocked_responses(list(json_response(list(
-    success = TRUE,
-    data = list(similar_concepts = list(), search_metadata = list()),
-    meta = list(pagination = list(page = 3, has_next = FALSE))
-  ))))
+  httr2::local_mocked_responses(function(req) {
+    expect_equal(req$body$data$page, 3)
+    json_response(list(
+      success = TRUE,
+      data = list(similar_concepts = list(), search_metadata = list()),
+      meta = list(pagination = list(
+        page = req$body$data$page,
+        has_next = FALSE
+      ))
+    ))
+  })
 
   resource <- SearchResource$new(httr2::request("https://api.omophub.com/v1"))
   result <- resource$similar(concept_id = 201826, page = 3)

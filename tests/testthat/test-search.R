@@ -827,6 +827,33 @@ test_that("search$similar validates similarity_threshold range", {
   expect_error(resource$similar(concept_id = 123, similarity_threshold = -0.1))
 })
 
+test_that("search$similar requires one non-missing page value", {
+  base_req <- httr2::request("https://api.omophub.com/v1")
+  resource <- SearchResource$new(base_req)
+
+  expect_error(
+    resource$similar(concept_id = 123, page = c(1, 2)),
+    "length 1"
+  )
+  expect_error(
+    resource$similar(concept_id = 123, page = NA_integer_),
+    "missing"
+  )
+})
+
+test_that("search$similar keeps the 1.9.0 positional contract", {
+  formal_names <- names(formals(SearchResource$public_methods$similar))
+  expect_equal(
+    formal_names[1:12],
+    c(
+      "concept_id", "concept_name", "query", "algorithm",
+      "similarity_threshold", "page_size", "vocabulary_ids", "domain_ids",
+      "standard_concept", "include_invalid", "include_scores",
+      "include_explanations"
+    )
+  )
+})
+
 test_that("search$similar validates standard_concept choices", {
   base_req <- httr2::request("https://api.omophub.com/v1")
   resource <- SearchResource$new(base_req)
