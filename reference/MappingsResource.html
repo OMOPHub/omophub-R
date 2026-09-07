@@ -7,7 +7,7 @@
 
     <a class="navbar-brand me-2" href="../index.html">omophub</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">1.9.0</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">1.9.1</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -32,7 +32,7 @@
   <main id="main" class="col-md-9"><div class="page-header">
 
       <h1>Mappings Resource</h1>
-      <small class="dont-index">Source: <a href="https://github.com/omopHub/omophub-R/blob/v1.9.0/R/mappings.R" class="external-link"><code>R/mappings.R</code></a></small>
+      <small class="dont-index">Source: <a href="https://github.com/omopHub/omophub-R/blob/main/R/mappings.R" class="external-link"><code>R/mappings.R</code></a></small>
       <div class="d-none name"><code>MappingsResource.Rd</code></div>
     </div>
 
@@ -46,7 +46,8 @@
     <p>Mappings for the concept, with pagination metadata attached as
 the <code>pagination</code> attribute.</p>
 <p>A tibble of all mappings for the concept.</p>
-<p>Mapping results with summary.</p>
+<p>Mapping results with <code>mappings</code>, per-input <code>unmapped_sources</code>,
+and a <code>summary</code> of requested, mapped, and unmapped sources.</p>
     </div>
     <div class="section level2">
     <h2 id="methods">Methods<a class="anchor" aria-label="anchor" href="#methods"></a></h2>
@@ -229,7 +230,8 @@ with <code>vocabulary_id</code> and <code>concept_code</code>. Use this OR sourc
 
 
 <dt><code>include_invalid</code></dt>
-<dd><p>Include invalid mappings. Default <code>FALSE</code>.</p></dd>
+<dd><p>Include invalid mappings. Default <code>FALSE</code>; the
+value is always sent explicitly.</p></dd>
 
 
 <dt><code>vocab_release</code></dt>

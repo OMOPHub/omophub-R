@@ -7,7 +7,7 @@
 
     <a class="navbar-brand me-2" href="../index.html">omophub</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">1.9.0</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">1.9.1</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -32,11 +32,31 @@
   <main id="main" class="col-md-9"><div class="page-header">
 
       <h1>Changelog</h1>
-      <small>Source: <a href="https://github.com/omopHub/omophub-R/blob/v1.9.0/NEWS.md" class="external-link"><code>NEWS.md</code></a></small>
+      <small>Source: <a href="https://github.com/omopHub/omophub-R/blob/main/NEWS.md" class="external-link"><code>NEWS.md</code></a></small>
     </div>
 
     <div class="section level2">
-<h2 class="pkg-version" data-toc-text="1.9.0" id="omophub-190">omophub 1.9.0<a class="anchor" aria-label="anchor" href="#omophub-190"></a></h2>
+<h2 class="pkg-version" data-toc-text="1.9.1" id="omophub-191">omophub 1.9.1<a class="anchor" aria-label="anchor" href="#omophub-191"></a></h2>
+<div class="section level3">
+<h3 id="new-features-1-9-1">New Features<a class="anchor" aria-label="anchor" href="#new-features-1-9-1"></a></h3>
+<ul><li>Similarity search now supports pagination and the API’s complete filter and response metadata, including <code>source_concept</code> and lower-bound totals.</li>
+</ul></div>
+<div class="section level3">
+<h3 id="changed-1-9-1">Changed<a class="anchor" aria-label="anchor" href="#changed-1-9-1"></a></h3>
+<ul><li>Autocomplete now uses <code>domain_ids</code> and <code>page_size</code>, while retaining warned compatibility aliases for <code>domains</code> and <code>max_suggestions</code>. Similarity search now uses the API’s <code>semantic</code> default algorithm.</li>
+</ul></div>
+<div class="section level3">
+<h3 id="bug-fixes-1-9-1">Bug Fixes<a class="anchor" aria-label="anchor" href="#bug-fixes-1-9-1"></a></h3>
+<ul><li><p><strong><code>include_invalid = FALSE</code> never reached the server</strong> on <code>client$mappings$map()</code>. The method now sends its documented default explicitly. Mapping documentation also describes <code>unmapped_sources</code>, which reports every input that was not mapped and why.</p></li>
+<li><p><strong>Autocomplete documentation and tests used an incomplete response shape.</strong> They now document and exercise all seven fields returned for each suggestion.</p></li>
+</ul></div>
+<div class="section level3">
+<h3 id="maintenance-1-9-1">Maintenance<a class="anchor" aria-label="anchor" href="#maintenance-1-9-1"></a></h3>
+<ul><li>Declared the test-only <code>jsonlite</code> dependency and regenerated package manuals so their signatures match the current source.</li>
+</ul></div>
+</div>
+    <div class="section level2">
+<h2 class="pkg-version" data-toc-text="1.9.0" id="omophub-190">omophub 1.9.0<a class="anchor" aria-label="anchor" href="#omophub-190"></a></h2><p class="text-muted">CRAN release: 2026-08-19</p>
 <div class="section level3">
 <h3 id="new-features-1-9-0">New Features<a class="anchor" aria-label="anchor" href="#new-features-1-9-0"></a></h3>
 <ul><li><p><strong>Mapping pagination</strong> - <code>client$mappings$get()</code> accepts <code>page</code> and <code>page_size</code>. <code>GET /v1/concepts/{id}/mappings</code> became paginated; <code>page_size</code> defaults to 100, matching the old cap, so an existing call returns exactly the page it returned before. Pagination metadata is attached to the result as the <code>pagination</code> attribute - read it with <code>attr(result, "pagination")</code>.</p></li>

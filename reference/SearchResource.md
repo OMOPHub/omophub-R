@@ -10,7 +10,9 @@ A tibble of all matching concepts.
 
 Search results with facets and metadata.
 
-Autocomplete suggestions.
+A list containing `query` and `suggestions`. Each suggestion is a flat
+list with `suggestion`, `concept_id`, `concept_code`, `vocabulary_id`,
+`domain_id`, `concept_class_id`, and `standard_concept`.
 
 List with results and pagination metadata.
 
@@ -22,12 +24,15 @@ List with `results` (per-search), `total_searches`,
 List with `results` (per-search), `total_searches`, `completed_count`,
 `failed_count`, `total_duration`.
 
-List with similar_concepts and search_metadata.
+List with similar_concepts, search_metadata, a `pagination` element
+carrying the response envelope's pagination, and, when the search
+started from a concept_id, source_concept.
 
 ## Note
 
-When algorithm='semantic', only single vocabulary/domain filter
-supported.
+Every algorithm ranks a bounded candidate pool, so the totals can be
+lower bounds - `search_metadata$totals_are_lower_bound` says when. Page
+while `has_next` is TRUE rather than comparing page to total_pages.
 
 ## Methods
 
@@ -268,8 +273,10 @@ Get autocomplete suggestions.
     SearchResource$autocomplete(
       query,
       vocabulary_ids = NULL,
+      domain_ids = NULL,
+      page_size = 10,
       domains = NULL,
-      max_suggestions = 10
+      max_suggestions = NULL
     )
 
 #### Arguments
@@ -282,13 +289,22 @@ Get autocomplete suggestions.
 
   Filter by vocabulary IDs.
 
+- `domain_ids`:
+
+  Filter by domain IDs.
+
+- `page_size`:
+
+  Maximum suggestions (1-20). Default 10.
+
 - `domains`:
 
-  Filter by domains.
+  Deprecated alias for `domain_ids`.
 
 - `max_suggestions`:
 
-  Maximum suggestions. Default 10.
+  Deprecated alias for `page_size`. Ignored, with a warning, when
+  `page_size` is also supplied.
 
 ------------------------------------------------------------------------
 
@@ -476,7 +492,7 @@ Must provide exactly one of: concept_id, concept_name, or query.
       concept_id = NULL,
       concept_name = NULL,
       query = NULL,
-      algorithm = "hybrid",
+      algorithm = "semantic",
       similarity_threshold = 0.7,
       page_size = 20,
       vocabulary_ids = NULL,
@@ -484,7 +500,10 @@ Must provide exactly one of: concept_id, concept_name, or query.
       standard_concept = NULL,
       include_invalid = NULL,
       include_scores = NULL,
-      include_explanations = NULL
+      include_explanations = NULL,
+      page = 1,
+      concept_class_ids = NULL,
+      exclude_self = NULL
     )
 
 #### Arguments
@@ -503,15 +522,16 @@ Must provide exactly one of: concept_id, concept_name, or query.
 
 - `algorithm`:
 
-  One of 'semantic', 'lexical', or 'hybrid' (default).
+  One of 'semantic' (default), 'lexical', or 'hybrid'.
 
 - `similarity_threshold`:
 
-  Minimum similarity (0.0-1.0). Default 0.7.
+  Minimum similarity (0.0-1.0). Default 0.7. `0` is a valid value and is
+  honoured.
 
 - `page_size`:
 
-  Max results (max 1000). Default 20.
+  Results per page (max 1000). Default 20.
 
 - `vocabulary_ids`:
 
@@ -523,19 +543,36 @@ Must provide exactly one of: concept_id, concept_name, or query.
 
 - `standard_concept`:
 
-  Filter by standard concept flag ('S', 'C', or 'N').
+  Filter by standard concept flag ('S', 'C', or 'N'). 'N' selects
+  non-standard concepts, which OMOP stores as a null column.
 
 - `include_invalid`:
 
-  Include invalid/deprecated concepts.
+  Include invalid/deprecated concepts. Defaults to FALSE, and supported
+  only with algorithm='lexical' - the embedding index holds valid
+  concepts only, so the API returns 400 for the other two rather than
+  ignoring the filter.
 
 - `include_scores`:
 
-  Include detailed similarity scores.
+  Include `similarity_score` on each concept (default TRUE). When FALSE
+  the field is absent.
 
 - `include_explanations`:
 
-  Include similarity explanations.
+  Include an `explanation` on each concept.
+
+- `page`:
+
+  Page of the ranked candidate pool (1-based). Default 1.
+
+- `concept_class_ids`:
+
+  Filter by concept class IDs.
+
+- `exclude_self`:
+
+  Exclude the reference concept from its own results (default TRUE).
 
 ------------------------------------------------------------------------
 

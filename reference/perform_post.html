@@ -7,7 +7,7 @@
 
     <a class="navbar-brand me-2" href="../index.html">omophub</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">1.9.0</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">1.9.1</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -32,7 +32,7 @@
   <main id="main" class="col-md-9"><div class="page-header">
 
       <h1>Perform POST Request</h1>
-      <small class="dont-index">Source: <a href="https://github.com/omopHub/omophub-R/blob/v1.9.0/R/request.R" class="external-link"><code>R/request.R</code></a></small>
+      <small class="dont-index">Source: <a href="https://github.com/omopHub/omophub-R/blob/main/R/request.R" class="external-link"><code>R/request.R</code></a></small>
       <div class="d-none name"><code>perform_post.Rd</code></div>
     </div>
 
@@ -42,7 +42,13 @@
 
     <div class="section level2">
     <h2 id="ref-usage">Usage<a class="anchor" aria-label="anchor" href="#ref-usage"></a></h2>
-    <div class="sourceCode"><pre class="sourceCode r"><code><span><span class="fu">perform_post</span><span class="op">(</span><span class="va">base_req</span>, <span class="va">endpoint</span>, body <span class="op">=</span> <span class="cn">NULL</span>, query <span class="op">=</span> <span class="cn">NULL</span><span class="op">)</span></span></code></pre></div>
+    <div class="sourceCode"><pre class="sourceCode r"><code><span><span class="fu">perform_post</span><span class="op">(</span></span>
+<span>  <span class="va">base_req</span>,</span>
+<span>  <span class="va">endpoint</span>,</span>
+<span>  body <span class="op">=</span> <span class="cn">NULL</span>,</span>
+<span>  query <span class="op">=</span> <span class="cn">NULL</span>,</span>
+<span>  preserve_pagination <span class="op">=</span> <span class="cn">FALSE</span></span>
+<span><span class="op">)</span></span></code></pre></div>
     </div>
 
     <div class="section level2">
@@ -63,6 +69,16 @@
 
 <dt id="arg-query">query<a class="anchor" aria-label="anchor" href="#arg-query"></a></dt>
 <dd><p>Named list of query parameters.</p></dd>
+
+
+<dt id="arg-preserve-pagination">preserve_pagination<a class="anchor" aria-label="anchor" href="#arg-preserve-pagination"></a></dt>
+<dd><p>If <code>TRUE</code>, copy <code>meta$pagination</code> from the
+response envelope onto the returned list as a <code>pagination</code> element.
+Paginated POST endpoints carry their pagination in <code>meta</code> while the results
+sit in <code>data</code>, so unwrapping to <code>data</code> alone leaves the caller with a
+<code>page</code> argument and no way to know whether another page exists. Added as an
+element rather than changing the return shape, so existing accessors keep
+working.</p></dd>
 
 </dl></div>
     <div class="section level2">

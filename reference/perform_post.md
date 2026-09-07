@@ -5,7 +5,13 @@ Perform POST Request
 ## Usage
 
 ``` r
-perform_post(base_req, endpoint, body = NULL, query = NULL)
+perform_post(
+  base_req,
+  endpoint,
+  body = NULL,
+  query = NULL,
+  preserve_pagination = FALSE
+)
 ```
 
 ## Arguments
@@ -25,6 +31,16 @@ perform_post(base_req, endpoint, body = NULL, query = NULL)
 - query:
 
   Named list of query parameters.
+
+- preserve_pagination:
+
+  If `TRUE`, copy `meta$pagination` from the response envelope onto the
+  returned list as a `pagination` element. Paginated POST endpoints
+  carry their pagination in `meta` while the results sit in `data`, so
+  unwrapping to `data` alone leaves the caller with a `page` argument
+  and no way to know whether another page exists. Added as an element
+  rather than changing the return shape, so existing accessors keep
+  working.
 
 ## Value
 

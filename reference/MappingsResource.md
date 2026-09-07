@@ -9,7 +9,8 @@ Mappings for the concept, with pagination metadata attached as the
 
 A tibble of all mappings for the concept.
 
-Mapping results with summary.
+Mapping results with `mappings`, per-input `unmapped_sources`, and a
+`summary` of requested, mapped, and unmapped sources.
 
 ## Methods
 
@@ -204,7 +205,8 @@ Map concepts to a target vocabulary.
 
 - `include_invalid`:
 
-  Include invalid mappings. Default `FALSE`.
+  Include invalid mappings. Default `FALSE`; the value is always sent
+  explicitly.
 
 - `vocab_release`:
 
