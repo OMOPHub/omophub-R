@@ -1,0 +1,28 @@
+NEWS.md
+  h_70ae365dc0c3d1 1
+DESCRIPTION
+  h_70ae365dc0c3d1 3
+tests/testthat/test-search.R
+  s_0fd210701b7f1e::t_019f439eb70eb8 847,852
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.7.2",
+  "base_commit_sha": "4520bff316e578510e236ab361febc4ca0b7e5bb",
+  "prompts": {},
+  "humans": {
+    "h_70ae365dc0c3d1": {
+      "author": "alex-omophub <sdk@omophub.com>"
+    }
+  },
+  "sessions": {
+    "s_0fd210701b7f1e": {
+      "agent_id": {
+        "tool": "codex",
+        "id": "01a07885-99a7-7062-b3c0-03e7f1077c3d",
+        "model": "gpt-5.6-sol"
+      },
+      "human_author": "alex-omophub <sdk@omophub.com>"
+    }
+  }
+}
