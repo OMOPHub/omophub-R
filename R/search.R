@@ -205,7 +205,10 @@ SearchResource <- R6::R6Class(
     #' @param max_suggestions Deprecated alias for `page_size`. Ignored, with a
     #'   warning, when `page_size` is also supplied.
     #'
-    #' @returns Autocomplete suggestions.
+    #' @returns A list containing `query` and `suggestions`. Each suggestion is
+    #'   a flat list with `suggestion`, `concept_id`, `concept_code`,
+    #'   `vocabulary_id`, `domain_id`, `concept_class_id`, and
+    #'   `standard_concept`.
     autocomplete = function(query,
                             vocabulary_ids = NULL,
                             domain_ids = NULL,

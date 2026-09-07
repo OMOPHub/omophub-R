@@ -4,7 +4,13 @@
 \alias{perform_post}
 \title{Perform POST Request}
 \usage{
-perform_post(base_req, endpoint, body = NULL, query = NULL)
+perform_post(
+  base_req,
+  endpoint,
+  body = NULL,
+  query = NULL,
+  preserve_pagination = FALSE
+)
 }
 \arguments{
 \item{base_req}{Base request object.}
@@ -14,6 +20,14 @@ perform_post(base_req, endpoint, body = NULL, query = NULL)
 \item{body}{Named list for JSON body.}
 
 \item{query}{Named list of query parameters.}
+
+\item{preserve_pagination}{If \code{TRUE}, copy \code{meta$pagination} from the
+response envelope onto the returned list as a \code{pagination} element.
+Paginated POST endpoints carry their pagination in \code{meta} while the results
+sit in \code{data}, so unwrapping to \code{data} alone leaves the caller with a
+\code{page} argument and no way to know whether another page exists. Added as an
+element rather than changing the return shape, so existing accessors keep
+working.}
 }
 \value{
 Parsed JSON response (unwrapped from \code{data} field if present).

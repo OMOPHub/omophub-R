@@ -385,6 +385,7 @@ test_that("mappings$map calls correct endpoint with body", {
   expect_equal(called_with$path, "concepts/map")
   expect_equal(called_with$body$source_concepts, c(201826L, 12345L))
   expect_equal(called_with$body$target_vocabulary, "ICD10CM")
+  expect_false(called_with$body$include_invalid)
 })
 
 test_that("mappings$map includes optional parameters", {

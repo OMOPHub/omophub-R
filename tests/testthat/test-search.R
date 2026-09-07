@@ -345,18 +345,36 @@ test_that("search$autocomplete calls correct endpoint", {
   resource <- SearchResource$new(base_req)
 
   called_with <- NULL
+  fixture <- list(
+    suggestion = "Type 2 diabetes mellitus",
+    concept_id = 201826L,
+    concept_code = "44054006",
+    vocabulary_id = "SNOMED",
+    domain_id = "Condition",
+    concept_class_id = "Clinical Finding",
+    standard_concept = "S"
+  )
   local_mocked_bindings(
     perform_get = function(req, path, query = NULL) {
       called_with <<- list(path = path, query = query)
-      list(suggestions = list())
+      list(query = "diab", suggestions = list(fixture))
     }
   )
 
-  resource$autocomplete("diab", page_size = 5)
+  result <- resource$autocomplete("diab", page_size = 5)
 
   expect_equal(called_with$path, "search/suggest")
   expect_equal(called_with$query$query, "diab")
   expect_equal(called_with$query$page_size, 5L)
+  expect_equal(result$query, "diab")
+  expect_equal(
+    names(result$suggestions[[1]]),
+    c(
+      "suggestion", "concept_id", "concept_code", "vocabulary_id",
+      "domain_id", "concept_class_id", "standard_concept"
+    )
+  )
+  expect_equal(result$suggestions[[1]], fixture)
 })
 
 test_that("search$autocomplete includes filters", {

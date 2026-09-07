@@ -10,7 +10,10 @@ A tibble of all matching concepts.
 
 Search results with facets and metadata.
 
-Autocomplete suggestions.
+A list containing \code{query} and \code{suggestions}. Each suggestion is
+a flat list with \code{suggestion}, \code{concept_id}, \code{concept_code},
+\code{vocabulary_id}, \code{domain_id}, \code{concept_class_id}, and
+\code{standard_concept}.
 
 List with results and pagination metadata.
 
@@ -22,8 +25,9 @@ List with \code{results} (per-search), \code{total_searches},
 List with \code{results} (per-search), \code{total_searches},
 \code{completed_count}, \code{failed_count}, \code{total_duration}.
 
-List with similar_concepts, search_metadata and, when the search
-started from a concept_id, source_concept.
+List with similar_concepts, search_metadata, a \code{pagination}
+element carrying the response envelope's pagination, and, when the
+search started from a concept_id, source_concept.
 }
 \description{
 R6 class providing access to search operations.

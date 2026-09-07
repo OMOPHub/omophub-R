@@ -1,3 +1,31 @@
+# omophub 1.19.1
+
+## New Features
+
+* Similarity search now supports pagination and the API's complete filter and
+  response metadata, including `source_concept` and lower-bound totals.
+
+## Changed
+
+* Autocomplete now uses `domain_ids` and `page_size`, while retaining warned
+  compatibility aliases for `domains` and `max_suggestions`. Similarity search
+  now uses the API's `semantic` default algorithm.
+
+## Bug Fixes
+
+* **`include_invalid = FALSE` never reached the server** on
+  `client$mappings$map()`. The method now sends its documented default
+  explicitly. Mapping documentation also describes `unmapped_sources`, which
+  reports every input that was not mapped and why.
+
+* **Autocomplete documentation and tests used an incomplete response shape.**
+  They now document and exercise all seven fields returned for each suggestion.
+
+## Maintenance
+
+* Declared the test-only `jsonlite` dependency and regenerated package manuals
+  so their signatures match the current source.
+
 # omophub 1.9.0
 
 ## New Features

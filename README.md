@@ -328,6 +328,20 @@ validate_and_map <- function(source_vocab, source_code) {
 standard_id <- validate_and_map("ICD10CM", "E11.9")
 ```
 
+Map several native codes in one request with `client$mappings$map()`. Inputs
+that do not produce a mapping are preserved in `unmapped_sources` with a
+`source_not_found` or `no_mapping_found` reason.
+
+```r
+result <- client$mappings$map(
+  target_vocabulary = "SNOMED",
+  source_codes = list(list(vocabulary_id = "ICD10CM", concept_code = "E11.9"))
+)
+
+result$summary
+result$unmapped_sources
+```
+
 ### Data Quality Checks
 
 Verify codes exist and are valid:
