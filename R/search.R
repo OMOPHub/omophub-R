@@ -199,27 +199,51 @@ SearchResource <- R6::R6Class(
     #'
     #' @param query Partial query string.
     #' @param vocabulary_ids Filter by vocabulary IDs.
-    #' @param domains Filter by domains.
-    #' @param max_suggestions Maximum suggestions. Default 10.
+    #' @param domain_ids Filter by domain IDs.
+    #' @param page_size Maximum suggestions (1-20). Default 10.
+    #' @param domains Deprecated alias for `domain_ids`.
+    #' @param max_suggestions Deprecated alias for `page_size`. Ignored, with a
+    #'   warning, when `page_size` is also supplied.
     #'
-    #' @returns Autocomplete suggestions.
+    #' @returns A list containing `query` and `suggestions`. Each suggestion is
+    #'   a flat list with `suggestion`, `concept_id`, `concept_code`,
+    #'   `vocabulary_id`, `domain_id`, `concept_class_id`, and
+    #'   `standard_concept`.
     autocomplete = function(query,
                             vocabulary_ids = NULL,
+                            domain_ids = NULL,
+                            page_size = 10,
                             domains = NULL,
-                            max_suggestions = 10) {
+                            max_suggestions = NULL) {
       checkmate::assert_string(query, min.chars = 1)
-      checkmate::assert_integerish(max_suggestions, lower = 1, len = 1, any.missing = FALSE)
+      # The canonical argument wins, matching how `domain_ids` beats `domains`
+      # below and how the Python SDK resolves the same pair. This used to
+      # overwrite page_size unconditionally, so a caller passing both got the
+      # deprecated value and no indication that the one they named was ignored.
+      if (!is.null(max_suggestions)) {
+        if (missing(page_size)) {
+          page_size <- max_suggestions
+        } else {
+          warning(
+            "Both `page_size` and the deprecated `max_suggestions` were given; ",
+            "using `page_size`.",
+            call. = FALSE
+          )
+        }
+      }
+      checkmate::assert_integerish(page_size, lower = 1, upper = 20, len = 1, any.missing = FALSE)
 
       params <- list(
         query = query,
-        max_suggestions = as.integer(max_suggestions)
+        page_size = as.integer(page_size)
       )
 
       if (!is.null(vocabulary_ids)) {
         params$vocabulary_ids <- join_params(vocabulary_ids)
       }
-      if (!is.null(domains)) {
-        params$domains <- join_params(domains)
+      selected_domains <- domain_ids %||% domains
+      if (!is.null(selected_domains)) {
+        params$domain_ids <- join_params(selected_domains)
       }
 
       perform_get(private$.base_req, "search/suggest", query = params)
@@ -395,23 +419,38 @@ SearchResource <- R6::R6Class(
     #' @param concept_id Concept ID to find similar concepts for.
     #' @param concept_name Concept name to find similar concepts for.
     #' @param query Natural language query for semantic similarity.
-    #' @param algorithm One of 'semantic', 'lexical', or 'hybrid' (default).
+    #' @param algorithm One of 'semantic' (default), 'lexical', or 'hybrid'.
     #' @param similarity_threshold Minimum similarity (0.0-1.0). Default 0.7.
-    #' @param page_size Max results (max 1000). Default 20.
+    #'   `0` is a valid value and is honoured.
+    #' @param page_size Results per page (max 1000). Default 20.
     #' @param vocabulary_ids Filter by vocabulary IDs.
     #' @param domain_ids Filter by domain IDs.
     #' @param standard_concept Filter by standard concept flag ('S', 'C', or 'N').
-    #' @param include_invalid Include invalid/deprecated concepts.
-    #' @param include_scores Include detailed similarity scores.
-    #' @param include_explanations Include similarity explanations.
+    #'   'N' selects non-standard concepts, which OMOP stores as a null column.
+    #' @param include_invalid Include invalid/deprecated concepts. Defaults to
+    #'   FALSE, and supported only with algorithm='lexical' - the embedding
+    #'   index holds valid concepts only, so the API returns 400 for the other
+    #'   two rather than ignoring the filter.
+    #' @param include_scores Include `similarity_score` on each concept
+    #'   (default TRUE). When FALSE the field is absent.
+    #' @param include_explanations Include an `explanation` on each concept.
+    #' @param page Page of the ranked candidate pool (1-based). Default 1.
+    #' @param concept_class_ids Filter by concept class IDs.
+    #' @param exclude_self Exclude the reference concept from its own results
+    #'   (default TRUE).
     #'
-    #' @returns List with similar_concepts and search_metadata.
+    #' @returns List with similar_concepts, search_metadata, a `pagination`
+    #'   element carrying the response envelope's pagination, and, when the
+    #'   search started from a concept_id, source_concept.
     #'
-    #' @note When algorithm='semantic', only single vocabulary/domain filter supported.
+    #' @note Every algorithm ranks a bounded candidate pool, so the totals can
+    #'   be lower bounds - `search_metadata$totals_are_lower_bound` says when.
+    #'   Page while `has_next` is TRUE rather than comparing page to
+    #'   total_pages.
     similar = function(concept_id = NULL,
                        concept_name = NULL,
                        query = NULL,
-                       algorithm = "hybrid",
+                       algorithm = "semantic",
                        similarity_threshold = 0.7,
                        page_size = 20,
                        vocabulary_ids = NULL,
@@ -419,7 +458,10 @@ SearchResource <- R6::R6Class(
                        standard_concept = NULL,
                        include_invalid = NULL,
                        include_scores = NULL,
-                       include_explanations = NULL) {
+                       include_explanations = NULL,
+                       page = 1,
+                       concept_class_ids = NULL,
+                       exclude_self = NULL) {
       # Validate exactly one of concept_id, concept_name, or query provided
       provided <- sum(!is.null(concept_id), !is.null(concept_name), !is.null(query))
       if (provided != 1) {
@@ -430,6 +472,7 @@ SearchResource <- R6::R6Class(
 
       checkmate::assert_choice(algorithm, c("semantic", "lexical", "hybrid"))
       checkmate::assert_number(similarity_threshold, lower = 0, upper = 1)
+      checkmate::assert_integerish(page, lower = 1, len = 1, any.missing = FALSE)
       checkmate::assert_integerish(page_size, lower = 1, upper = 1000)
       if (!is.null(concept_id)) {
         checkmate::assert_integerish(concept_id, len = 1, any.missing = FALSE)
@@ -449,6 +492,9 @@ SearchResource <- R6::R6Class(
       if (!is.null(query)) {
         body$query <- query
       }
+      if (page != 1) {
+        body$page <- as.integer(page)
+      }
       if (page_size != 20) {
         body$page_size <- as.integer(page_size)
       }
@@ -457,6 +503,9 @@ SearchResource <- R6::R6Class(
       }
       if (!is.null(domain_ids)) {
         body$domain_ids <- as.list(domain_ids)
+      }
+      if (!is.null(concept_class_ids)) {
+        body$concept_class_ids <- as.list(concept_class_ids)
       }
       if (!is.null(standard_concept)) {
         checkmate::assert_choice(standard_concept, c("S", "C", "N"))
@@ -471,8 +520,14 @@ SearchResource <- R6::R6Class(
       if (!is.null(include_explanations)) {
         body$include_explanations <- include_explanations
       }
+      if (!is.null(exclude_self)) {
+        body$exclude_self <- exclude_self
+      }
 
-      perform_post(private$.base_req, "search/similar", body = body)
+      perform_post(
+        private$.base_req, "search/similar",
+        body = body, preserve_pagination = TRUE
+      )
     },
 
     #' @description

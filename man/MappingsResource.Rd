@@ -9,7 +9,8 @@ the \code{pagination} attribute.
 
 A tibble of all mappings for the concept.
 
-Mapping results with summary.
+Mapping results with \code{mappings}, per-input \code{unmapped_sources},
+and a \code{summary} of requested, mapped, and unmapped sources.
 }
 \description{
 R6 class providing access to mapping operations.
@@ -168,7 +169,8 @@ with \code{vocabulary_id} and \code{concept_code}. Use this OR source_concepts, 
 
 \item{\code{mapping_type}}{Mapping type filter (direct, equivalent, broader, narrower).}
 
-\item{\code{include_invalid}}{Include invalid mappings. Default \code{FALSE}.}
+\item{\code{include_invalid}}{Include invalid mappings. Default \code{FALSE}; the
+value is always sent explicitly.}
 
 \item{\code{vocab_release}}{Specific vocabulary release version (e.g., "2025.1"). Default \code{NULL}.}
 }

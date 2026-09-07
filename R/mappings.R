@@ -151,10 +151,12 @@ MappingsResource <- R6::R6Class(
     #' @param source_codes List of vocabulary/code pairs to map. Each element should be a list
     #'   with `vocabulary_id` and `concept_code`. Use this OR source_concepts, not both.
     #' @param mapping_type Mapping type filter (direct, equivalent, broader, narrower).
-    #' @param include_invalid Include invalid mappings. Default `FALSE`.
+    #' @param include_invalid Include invalid mappings. Default `FALSE`; the
+    #'   value is always sent explicitly.
     #' @param vocab_release Specific vocabulary release version (e.g., "2025.1"). Default `NULL`.
     #'
-    #' @returns Mapping results with summary.
+    #' @returns Mapping results with `mappings`, per-input `unmapped_sources`,
+    #'   and a `summary` of requested, mapped, and unmapped sources.
     map = function(target_vocabulary,
                    source_concepts = NULL,
                    source_codes = NULL,
@@ -197,9 +199,8 @@ MappingsResource <- R6::R6Class(
       if (!is.null(mapping_type)) {
         body$mapping_type <- mapping_type
       }
-      if (isTRUE(include_invalid)) {
-        body$include_invalid <- TRUE
-      }
+      checkmate::assert_flag(include_invalid)
+      body$include_invalid <- include_invalid
 
       query <- list()
       if (!is.null(vocab_release)) {
