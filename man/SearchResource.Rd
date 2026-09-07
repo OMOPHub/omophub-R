@@ -22,13 +22,17 @@ List with \code{results} (per-search), \code{total_searches},
 List with \code{results} (per-search), \code{total_searches},
 \code{completed_count}, \code{failed_count}, \code{total_duration}.
 
-List with similar_concepts and search_metadata.
+List with similar_concepts, search_metadata and, when the search
+started from a concept_id, source_concept.
 }
 \description{
 R6 class providing access to search operations.
 }
 \note{
-When algorithm='semantic', only single vocabulary/domain filter supported.
+Every algorithm ranks a bounded candidate pool, so the totals can
+be lower bounds - \code{search_metadata$totals_are_lower_bound} says when.
+Page while \code{has_next} is TRUE rather than comparing page to
+total_pages.
 }
 \keyword{internal}
 \section{Methods}{
@@ -209,8 +213,10 @@ Get autocomplete suggestions.
 \if{html}{\out{<div class="r">}}\preformatted{SearchResource$autocomplete(
   query,
   vocabulary_ids = NULL,
+  domain_ids = NULL,
+  page_size = 10,
   domains = NULL,
-  max_suggestions = 10
+  max_suggestions = NULL
 )}\if{html}{\out{</div>}}
 }
 
@@ -221,9 +227,14 @@ Get autocomplete suggestions.
 
 \item{\code{vocabulary_ids}}{Filter by vocabulary IDs.}
 
-\item{\code{domains}}{Filter by domains.}
+\item{\code{domain_ids}}{Filter by domain IDs.}
 
-\item{\code{max_suggestions}}{Maximum suggestions. Default 10.}
+\item{\code{page_size}}{Maximum suggestions (1-20). Default 10.}
+
+\item{\code{domains}}{Deprecated alias for \code{domain_ids}.}
+
+\item{\code{max_suggestions}}{Deprecated alias for \code{page_size}. Ignored, with a
+warning, when \code{page_size} is also supplied.}
 }
 \if{html}{\out{</div>}}
 }
@@ -375,15 +386,18 @@ Must provide exactly one of: concept_id, concept_name, or query.
   concept_id = NULL,
   concept_name = NULL,
   query = NULL,
-  algorithm = "hybrid",
+  algorithm = "semantic",
   similarity_threshold = 0.7,
+  page = 1,
   page_size = 20,
   vocabulary_ids = NULL,
   domain_ids = NULL,
+  concept_class_ids = NULL,
   standard_concept = NULL,
   include_invalid = NULL,
   include_scores = NULL,
-  include_explanations = NULL
+  include_explanations = NULL,
+  exclude_self = NULL
 )}\if{html}{\out{</div>}}
 }
 
@@ -396,23 +410,36 @@ Must provide exactly one of: concept_id, concept_name, or query.
 
 \item{\code{query}}{Natural language query for semantic similarity.}
 
-\item{\code{algorithm}}{One of 'semantic', 'lexical', or 'hybrid' (default).}
+\item{\code{algorithm}}{One of 'semantic' (default), 'lexical', or 'hybrid'.}
 
-\item{\code{similarity_threshold}}{Minimum similarity (0.0-1.0). Default 0.7.}
+\item{\code{similarity_threshold}}{Minimum similarity (0.0-1.0). Default 0.7.
+\code{0} is a valid value and is honoured.}
 
-\item{\code{page_size}}{Max results (max 1000). Default 20.}
+\item{\code{page}}{Page of the ranked candidate pool (1-based). Default 1.}
+
+\item{\code{page_size}}{Results per page (max 1000). Default 20.}
 
 \item{\code{vocabulary_ids}}{Filter by vocabulary IDs.}
 
 \item{\code{domain_ids}}{Filter by domain IDs.}
 
-\item{\code{standard_concept}}{Filter by standard concept flag ('S', 'C', or 'N').}
+\item{\code{concept_class_ids}}{Filter by concept class IDs.}
 
-\item{\code{include_invalid}}{Include invalid/deprecated concepts.}
+\item{\code{standard_concept}}{Filter by standard concept flag ('S', 'C', or 'N').
+'N' selects non-standard concepts, which OMOP stores as a null column.}
 
-\item{\code{include_scores}}{Include detailed similarity scores.}
+\item{\code{include_invalid}}{Include invalid/deprecated concepts. Defaults to
+FALSE, and supported only with algorithm='lexical' - the embedding
+index holds valid concepts only, so the API returns 400 for the other
+two rather than ignoring the filter.}
 
-\item{\code{include_explanations}}{Include similarity explanations.}
+\item{\code{include_scores}}{Include \code{similarity_score} on each concept
+(default TRUE). When FALSE the field is absent.}
+
+\item{\code{include_explanations}}{Include an \code{explanation} on each concept.}
+
+\item{\code{exclude_self}}{Exclude the reference concept from its own results
+(default TRUE).}
 }
 \if{html}{\out{</div>}}
 }

@@ -98,7 +98,7 @@ test_that("autocomplete works", {
 
   result <- client$search$autocomplete(
     "diab",
-    max_suggestions = 10
+    page_size = 10
   )
 
   suggestions <- extract_data(result, "suggestions")
@@ -126,8 +126,8 @@ test_that("autocomplete with filters works", {
   result <- client$search$autocomplete(
     "hyper",
     vocabulary_ids = "SNOMED",
-    domains = "Condition",
-    max_suggestions = 5
+    domain_ids = "Condition",
+    page_size = 5
   )
 
   suggestions <- extract_data(result, "suggestions")

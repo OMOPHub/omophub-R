@@ -92,10 +92,18 @@ perform_get <- function(base_req, endpoint, query = NULL) {
 #' @param endpoint API endpoint path.
 #' @param body Named list for JSON body.
 #' @param query Named list of query parameters.
+#' @param preserve_pagination If `TRUE`, copy `meta$pagination` from the
+#'   response envelope onto the returned list as a `pagination` element.
+#'   Paginated POST endpoints carry their pagination in `meta` while the results
+#'   sit in `data`, so unwrapping to `data` alone leaves the caller with a
+#'   `page` argument and no way to know whether another page exists. Added as an
+#'   element rather than changing the return shape, so existing accessors keep
+#'   working.
 #'
 #' @returns Parsed JSON response (unwrapped from `data` field if present).
 #' @keywords internal
-perform_post <- function(base_req, endpoint, body = NULL, query = NULL) {
+perform_post <- function(base_req, endpoint, body = NULL, query = NULL,
+                         preserve_pagination = FALSE) {
   req <- base_req |>
     httr2::req_url_path_append(endpoint) |>
     httr2::req_method("POST")
@@ -119,6 +127,16 @@ perform_post <- function(base_req, endpoint, body = NULL, query = NULL) {
 
   # Unwrap data field if present (matching Python SDK behavior)
   if (is.list(resp_body) && "data" %in% names(resp_body)) {
+    if (isTRUE(preserve_pagination)) {
+      pagination <- resp_body$meta$pagination
+      if (!is.null(pagination)) {
+        data <- resp_body$data
+        if (is.list(data)) {
+          data$pagination <- pagination
+          return(data)
+        }
+      }
+    }
     return(resp_body$data)
   }
   resp_body

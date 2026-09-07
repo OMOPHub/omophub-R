@@ -254,7 +254,7 @@ test_that("search$advanced calls correct endpoint with body", {
 
   called_with <- NULL
   local_mocked_bindings(
-    perform_post = function(req, path, body = NULL) {
+    perform_post = function(req, path, body = NULL, ...) {
       called_with <<- list(path = path, body = body)
       list(results = list(), facets = list())
     }
@@ -272,7 +272,7 @@ test_that("search$advanced includes filters", {
 
   called_with <- NULL
   local_mocked_bindings(
-    perform_post = function(req, path, body = NULL) {
+    perform_post = function(req, path, body = NULL, ...) {
       called_with <<- list(body = body)
       list(results = list())
     }
@@ -300,7 +300,7 @@ test_that("search$advanced includes pagination params", {
 
   called_with <- NULL
   local_mocked_bindings(
-    perform_post = function(req, path, body = NULL) {
+    perform_post = function(req, path, body = NULL, ...) {
       called_with <<- list(body = body)
       list(results = list())
     }
@@ -318,7 +318,7 @@ test_that("search$advanced omits default page_size", {
 
   called_with <- NULL
   local_mocked_bindings(
-    perform_post = function(req, path, body = NULL) {
+    perform_post = function(req, path, body = NULL, ...) {
       called_with <<- list(body = body)
       list(results = list())
     }
@@ -352,11 +352,11 @@ test_that("search$autocomplete calls correct endpoint", {
     }
   )
 
-  resource$autocomplete("diab", max_suggestions = 5)
+  resource$autocomplete("diab", page_size = 5)
 
   expect_equal(called_with$path, "search/suggest")
   expect_equal(called_with$query$query, "diab")
-  expect_equal(called_with$query$max_suggestions, 5L)
+  expect_equal(called_with$query$page_size, 5L)
 })
 
 test_that("search$autocomplete includes filters", {
@@ -374,11 +374,59 @@ test_that("search$autocomplete includes filters", {
   resource$autocomplete(
     "diab",
     vocabulary_ids = c("SNOMED"),
-    domains = c("Condition", "Drug")
+    domain_ids = c("Condition", "Drug")
   )
 
   expect_equal(called_with$query$vocabulary_ids, "SNOMED")
-  expect_equal(called_with$query$domains, "Condition,Drug")
+  expect_equal(called_with$query$domain_ids, "Condition,Drug")
+  expect_null(called_with$query$domains)
+})
+
+test_that("search$autocomplete maps deprecated aliases to canonical parameters", {
+  base_req <- httr2::request("https://api.omophub.com/v1")
+  resource <- SearchResource$new(base_req)
+
+  called_with <- NULL
+  local_mocked_bindings(
+    perform_get = function(req, path, query = NULL) {
+      called_with <<- list(query = query)
+      list(suggestions = list())
+    }
+  )
+
+  resource$autocomplete(
+    "diab",
+    domains = c("Condition"),
+    max_suggestions = 5
+  )
+
+  expect_equal(called_with$query$domain_ids, "Condition")
+  expect_equal(called_with$query$page_size, 5L)
+  expect_null(called_with$query$domains)
+  expect_null(called_with$query$max_suggestions)
+})
+
+test_that("search$autocomplete prefers page_size over max_suggestions", {
+  # The deprecated alias used to overwrite page_size unconditionally, so a
+  # caller who passed both got the value they were migrating away from and no
+  # indication that the argument they named had been ignored.
+  base_req <- httr2::request("https://api.omophub.com/v1")
+  resource <- SearchResource$new(base_req)
+
+  called_with <- NULL
+  local_mocked_bindings(
+    perform_get = function(req, path, query = NULL) {
+      called_with <<- list(query = query)
+      list(suggestions = list())
+    }
+  )
+
+  expect_warning(
+    resource$autocomplete("diab", page_size = 3, max_suggestions = 5),
+    "using `page_size`"
+  )
+
+  expect_equal(called_with$query$page_size, 3L)
 })
 
 # ==============================================================================
@@ -602,7 +650,7 @@ test_that("search$similar by concept_id calls correct endpoint", {
 
   called_with <- NULL
   local_mocked_bindings(
-    perform_post = function(req, path, body = NULL) {
+    perform_post = function(req, path, body = NULL, ...) {
       called_with <<- list(path = path, body = body)
       list(similar_concepts = list(), search_metadata = list())
     }
@@ -612,7 +660,10 @@ test_that("search$similar by concept_id calls correct endpoint", {
 
   expect_equal(called_with$path, "search/similar")
   expect_equal(called_with$body$concept_id, 4329847L)
-  expect_equal(called_with$body$algorithm, "hybrid")
+  # The API's documented default. The SDK used to send "hybrid", so a caller
+  # who omitted `algorithm` got a different algorithm depending on which
+  # client they used.
+  expect_equal(called_with$body$algorithm, "semantic")
   expect_equal(called_with$body$similarity_threshold, 0.7)
 })
 
@@ -622,7 +673,7 @@ test_that("search$similar by concept_name works", {
 
   called_with <- NULL
   local_mocked_bindings(
-    perform_post = function(req, path, body = NULL) {
+    perform_post = function(req, path, body = NULL, ...) {
       called_with <<- list(body = body)
       list(similar_concepts = list(), search_metadata = list())
     }
@@ -639,7 +690,7 @@ test_that("search$similar by query works", {
 
   called_with <- NULL
   local_mocked_bindings(
-    perform_post = function(req, path, body = NULL) {
+    perform_post = function(req, path, body = NULL, ...) {
       called_with <<- list(body = body)
       list(similar_concepts = list(), search_metadata = list())
     }
@@ -656,7 +707,7 @@ test_that("search$similar includes algorithm option", {
 
   called_with <- NULL
   local_mocked_bindings(
-    perform_post = function(req, path, body = NULL) {
+    perform_post = function(req, path, body = NULL, ...) {
       called_with <<- list(body = body)
       list(similar_concepts = list(), search_metadata = list())
     }
@@ -673,7 +724,7 @@ test_that("search$similar includes similarity_threshold", {
 
   called_with <- NULL
   local_mocked_bindings(
-    perform_post = function(req, path, body = NULL) {
+    perform_post = function(req, path, body = NULL, ...) {
       called_with <<- list(body = body)
       list(similar_concepts = list(), search_metadata = list())
     }
@@ -690,7 +741,7 @@ test_that("search$similar includes vocabulary_ids as list", {
 
   called_with <- NULL
   local_mocked_bindings(
-    perform_post = function(req, path, body = NULL) {
+    perform_post = function(req, path, body = NULL, ...) {
       called_with <<- list(body = body)
       list(similar_concepts = list(), search_metadata = list())
     }
@@ -708,7 +759,7 @@ test_that("search$similar includes domain_ids as list", {
 
   called_with <- NULL
   local_mocked_bindings(
-    perform_post = function(req, path, body = NULL) {
+    perform_post = function(req, path, body = NULL, ...) {
       called_with <<- list(body = body)
       list(similar_concepts = list(), search_metadata = list())
     }
@@ -725,7 +776,7 @@ test_that("search$similar includes boolean options", {
 
   called_with <- NULL
   local_mocked_bindings(
-    perform_post = function(req, path, body = NULL) {
+    perform_post = function(req, path, body = NULL, ...) {
       called_with <<- list(body = body)
       list(similar_concepts = list(), search_metadata = list())
     }
@@ -771,7 +822,7 @@ test_that("search$similar omits default page_size", {
 
   called_with <- NULL
   local_mocked_bindings(
-    perform_post = function(req, path, body = NULL) {
+    perform_post = function(req, path, body = NULL, ...) {
       called_with <<- list(body = body)
       list(similar_concepts = list(), search_metadata = list())
     }
@@ -788,7 +839,7 @@ test_that("search$similar includes non-default page_size", {
 
   called_with <- NULL
   local_mocked_bindings(
-    perform_post = function(req, path, body = NULL) {
+    perform_post = function(req, path, body = NULL, ...) {
       called_with <<- list(body = body)
       list(similar_concepts = list(), search_metadata = list())
     }
@@ -830,7 +881,7 @@ test_that("search$similar accepts standard_concept N", {
 
   called_with <- NULL
   local_mocked_bindings(
-    perform_post = function(req, path, body = NULL) {
+    perform_post = function(req, path, body = NULL, ...) {
       called_with <<- list(body = body)
       list(similar_concepts = list(), search_metadata = list())
     }
@@ -934,7 +985,7 @@ test_that("search$bulk_basic calls correct endpoint", {
 
   called_with <- NULL
   local_mocked_bindings(
-    perform_post = function(req, path, body = NULL) {
+    perform_post = function(req, path, body = NULL, ...) {
       called_with <<- list(path = path, body = body)
       list(results = list(), total_searches = 0, completed_searches = 0, failed_searches = 0)
     }
@@ -957,7 +1008,7 @@ test_that("search$bulk_basic passes defaults", {
 
   called_with <- NULL
   local_mocked_bindings(
-    perform_post = function(req, path, body = NULL) {
+    perform_post = function(req, path, body = NULL, ...) {
       called_with <<- list(path = path, body = body)
       list(results = list(), total_searches = 1, completed_searches = 1, failed_searches = 0)
     }
@@ -991,7 +1042,7 @@ test_that("search$bulk_semantic calls correct endpoint", {
 
   called_with <- NULL
   local_mocked_bindings(
-    perform_post = function(req, path, body = NULL) {
+    perform_post = function(req, path, body = NULL, ...) {
       called_with <<- list(path = path, body = body)
       list(results = list(), total_searches = 0, completed_count = 0, failed_count = 0)
     }
@@ -1012,7 +1063,7 @@ test_that("search$bulk_semantic passes defaults", {
 
   called_with <- NULL
   local_mocked_bindings(
-    perform_post = function(req, path, body = NULL) {
+    perform_post = function(req, path, body = NULL, ...) {
       called_with <<- list(path = path, body = body)
       list(results = list(), total_searches = 1, completed_count = 1, failed_count = 0)
     }

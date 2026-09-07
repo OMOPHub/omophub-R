@@ -107,6 +107,7 @@ results <- client$search$semantic(
 all_results <- client$search$semantic_all("chronic kidney disease", page_size = 50)
 
 # Find concepts similar to a reference concept
+# `algorithm` defaults to "semantic"; "lexical" and "hybrid" are also available.
 similar <- client$search$similar(concept_id = 201826, algorithm = "hybrid")
 for (s in similar$similar_concepts) {
   cat(sprintf("%s (score: %.2f)\n", s$concept_name, s$similarity_score))
