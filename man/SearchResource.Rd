@@ -10,10 +10,8 @@ A tibble of all matching concepts.
 
 Search results with facets and metadata.
 
-A list containing \code{query} and \code{suggestions}. Each suggestion is
-a flat list with \code{suggestion}, \code{concept_id}, \code{concept_code},
-\code{vocabulary_id}, \code{domain_id}, \code{concept_class_id}, and
-\code{standard_concept}.
+A list containing \code{query}, \code{suggestions}, and \code{page_size}. Each
+compact suggestion contains \code{suggestion}, \code{type}, and \code{count}.
 
 List with results and pagination metadata.
 
@@ -99,7 +97,7 @@ Basic concept search.
 \subsection{Arguments}{
 \if{html}{\out{<div class="arguments">}}
 \describe{
-\item{\code{query}}{Search query string.}
+\item{\code{query}}{Search query string (3-500 characters).}
 
 \item{\code{vocabulary_ids}}{Filter by vocabulary IDs.}
 

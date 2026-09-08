@@ -1,3 +1,13 @@
+# omophub 1.10.0
+
+## Changed
+
+* Autocomplete now calls the canonical `/search/autocomplete` endpoint and
+  returns its compact `suggestion`, `type`, and `count` fields. `domain_ids`,
+  `page_size`, and the warned compatibility aliases remain supported.
+* Basic search now validates the API's required 3-500 character query contract
+  before sending a request.
+
 # omophub 1.9.1
 
 ## New Features

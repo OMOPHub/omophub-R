@@ -29,7 +29,27 @@ test_that("search$basic validates query", {
   base_req <- httr2::request("https://api.omophub.com/v1")
   resource <- SearchResource$new(base_req)
 
-  expect_error(resource$basic(""))  # Empty query
+  expect_error(resource$basic(""))
+  expect_error(resource$basic("MI"))
+  expect_error(resource$basic(strrep("a", 501)))
+})
+
+test_that("search$basic accepts query length boundaries", {
+  base_req <- httr2::request("https://api.omophub.com/v1")
+  resource <- SearchResource$new(base_req)
+
+  queries <- character()
+  local_mocked_bindings(
+    perform_get = function(req, path, query = NULL) {
+      queries <<- c(queries, query$query)
+      list(data = list(), meta = list())
+    }
+  )
+
+  resource$basic("abc")
+  resource$basic(strrep("a", 500))
+
+  expect_equal(nchar(queries), c(3L, 500L))
 })
 
 test_that("search$basic calls correct endpoint", {
@@ -347,32 +367,25 @@ test_that("search$autocomplete calls correct endpoint", {
   called_with <- NULL
   fixture <- list(
     suggestion = "Type 2 diabetes mellitus",
-    concept_id = 201826L,
-    concept_code = "44054006",
-    vocabulary_id = "SNOMED",
-    domain_id = "Condition",
-    concept_class_id = "Clinical Finding",
-    standard_concept = "S"
+    type = "concept_name",
+    count = 1L
   )
   local_mocked_bindings(
     perform_get = function(req, path, query = NULL) {
       called_with <<- list(path = path, query = query)
-      list(query = "diab", suggestions = list(fixture))
+      list(query = "diab", suggestions = list(fixture), page_size = 5L)
     }
   )
 
   result <- resource$autocomplete("diab", page_size = 5)
 
-  expect_equal(called_with$path, "search/suggest")
+  expect_equal(called_with$path, "search/autocomplete")
   expect_equal(called_with$query$query, "diab")
   expect_equal(called_with$query$page_size, 5L)
   expect_equal(result$query, "diab")
   expect_equal(
     names(result$suggestions[[1]]),
-    c(
-      "suggestion", "concept_id", "concept_code", "vocabulary_id",
-      "domain_id", "concept_class_id", "standard_concept"
-    )
+    c("suggestion", "type", "count")
   )
   expect_equal(result$suggestions[[1]], fixture)
 })
