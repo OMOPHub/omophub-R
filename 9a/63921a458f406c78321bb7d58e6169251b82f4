@@ -1,0 +1,57 @@
+R/request.R
+  s_4577c27db22f0a::t_9d1f195ac54aab 42-62,85,146
+vignettes/getting-started.Rmd
+  s_4577c27db22f0a::t_92f1f56c37c0ad 366-369,372
+inst/examples/error_handling.R
+  s_4577c27db22f0a::t_d8a2e29801dd87 6-10,12-15,48,91,102,104,107,132,172,175,179,252,255-256,260,262-264,266
+R/utils.R
+  s_4577c27db22f0a::t_a1e6e7dd776ebb 34-77,83-89,92-171,173-200,203,206,208
+  s_4577c27db22f0a::t_06f709412bafad 172
+README.md
+  s_4577c27db22f0a::t_92f1f56c37c0ad 350-351,358,443-457,462-466,468,473-478,482
+  s_0ec18c62d9cfb2::t_4164c4ae25d420 483
+man/perform_request.Rd
+  s_4577c27db22f0a::t_ddec5be06b81da 1-25
+NEWS.md
+  s_4577c27db22f0a::t_92f1f56c37c0ad 3-16
+man/parse_error_body.Rd
+  s_4577c27db22f0a::t_ddec5be06b81da 1-22
+tests/testthat/test-request-errors.R
+  s_4577c27db22f0a::t_ae032085cca9a0 1-206
+man/abort_connection_error.Rd
+  s_4577c27db22f0a::t_ddec5be06b81da 1-19
+man/abort_http_error.Rd
+  s_4577c27db22f0a::t_ddec5be06b81da 1-36
+man/abort_api_error.Rd
+  s_4577c27db22f0a::t_ddec5be06b81da 7-18,27-38
+  s_4577c27db22f0a::t_8f943e21916e78 39
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.7.4",
+  "base_commit_sha": "9a63921a458f406c78321bb7d58e6169251b82f4",
+  "prompts": {},
+  "humans": {
+    "h_ab4fdc3d784201": {
+      "author": "alex-omophub <alex@omophub.com>"
+    }
+  },
+  "sessions": {
+    "s_0ec18c62d9cfb2": {
+      "agent_id": {
+        "tool": "codex",
+        "id": "01a0a1ab-e2a1-7fc1-b68e-79bfd0bf7577",
+        "model": "gpt-5.6-sol"
+      },
+      "human_author": "alex-omophub <alex@omophub.com>"
+    },
+    "s_4577c27db22f0a": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "656603ef-2811-49d1-89ac-fe26f64f89a2",
+        "model": "claude-opus-5"
+      },
+      "human_author": "alex-omophub <alex@omophub.com>"
+    }
+  }
+}
