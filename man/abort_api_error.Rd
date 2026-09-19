@@ -4,7 +4,18 @@
 \alias{abort_api_error}
 \title{Abort with OMOPHub API Error}
 \usage{
-abort_api_error(status, message, endpoint, call = rlang::caller_env())
+abort_api_error(
+  status,
+  message,
+  endpoint,
+  error_code = NULL,
+  details = NULL,
+  request_id = NULL,
+  class = NULL,
+  hint = NULL,
+  ...,
+  call = rlang::caller_env()
+)
 }
 \arguments{
 \item{status}{HTTP status code.}
@@ -12,6 +23,19 @@ abort_api_error(status, message, endpoint, call = rlang::caller_env())
 \item{message}{Error message.}
 
 \item{endpoint}{API endpoint that failed.}
+
+\item{error_code}{The server's \code{error.code}, if any.}
+
+\item{details}{The server's \code{error.details}, if any.}
+
+\item{request_id}{The request ID, if any.}
+
+\item{class}{Additional condition classes, most specific first. They are
+placed ahead of \code{omophub_api_error}.}
+
+\item{hint}{Optional extra \code{i} bullet for the message.}
+
+\item{...}{Additional fields stored on the condition.}
 
 \item{call}{The calling environment.}
 }

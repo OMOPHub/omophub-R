@@ -1,5 +1,19 @@
 # omophub 1.10.0
 
+## Bug Fixes
+
+* HTTP failures now raise the documented OMOPHub condition classes instead of
+  only httr2's generic ones (#137): 400 → `omophub_validation_error`, 401 or
+  `invalid_api_key` / `missing_api_key` → `omophub_auth_error`, 403 →
+  `omophub_forbidden_error` (new; kept distinct from invalid credentials),
+  404 → `omophub_not_found`, 429 → `omophub_rate_limit_error`, 5xx →
+  `omophub_server_error`, other statuses → `omophub_api_error`. Network
+  failures raise `omophub_connection_error`. API conditions carry
+  `status_code`, `error_code`, `details`, `request_id`, `endpoint`, and (for
+  429) `retry_after`. The httr2 classes (`httr2_http_404`, `httr2_http`,
+  `httr2_failure`, ...) and `e$resp` are preserved, so existing handlers keep
+  working.
+
 ## Changed
 
 * Autocomplete now calls the canonical `/search/autocomplete` endpoint and
