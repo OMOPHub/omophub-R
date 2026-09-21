@@ -94,7 +94,8 @@ ConceptsResource <- R6::R6Class(
           "/",
           utils::URLencode(concept_code, reserved = TRUE)
         ),
-        query = if (length(query) > 0) query else NULL
+        query = if (length(query) > 0) query else NULL,
+        endpoint_encoded = TRUE
       )
     },
 

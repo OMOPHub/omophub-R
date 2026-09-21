@@ -108,7 +108,7 @@ test_that("concepts$get_by_code calls correct endpoint", {
 
   called_with <- NULL
   local_mocked_bindings(
-    perform_get = function(req, path, query = NULL) {
+    perform_get = function(req, path, query = NULL, endpoint_encoded = FALSE) {
       called_with <<- list(path = path)
       mock_concept()
     }
@@ -123,17 +123,22 @@ test_that("concepts$get_by_code URL-encodes path segments", {
   base_req <- httr2::request("https://api.omophub.com/v1")
   resource <- ConceptsResource$new(base_req)
 
-  called_with <- NULL
-  local_mocked_bindings(
-    perform_get = function(req, path, query = NULL) {
-      called_with <<- list(path = path)
-      mock_concept()
-    }
-  )
+  request_url <- NULL
+  httr2::local_mocked_responses(function(req) {
+    request_url <<- req$url
+    httr2::response(
+      status_code = 200,
+      headers = list(`content-type` = "application/json"),
+      body = charToRaw(jsonlite::toJSON(mock_concept(), auto_unbox = TRUE))
+    )
+  })
 
   resource$get_by_code("ICDO3", "8032/3")
 
-  expect_equal(called_with$path, "concepts/by-code/ICDO3/8032%2F3")
+  expect_equal(
+    request_url,
+    "https://api.omophub.com/v1/concepts/by-code/ICDO3/8032%2F3"
+  )
 })
 
 test_that("concepts$get_by_code passes include_hierarchy and vocab_release", {
@@ -142,7 +147,7 @@ test_that("concepts$get_by_code passes include_hierarchy and vocab_release", {
 
   called_with <- NULL
   local_mocked_bindings(
-    perform_get = function(req, path, query = NULL) {
+    perform_get = function(req, path, query = NULL, endpoint_encoded = FALSE) {
       called_with <<- list(query = query)
       mock_concept()
     }
