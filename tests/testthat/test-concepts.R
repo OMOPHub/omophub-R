@@ -119,6 +119,23 @@ test_that("concepts$get_by_code calls correct endpoint", {
   expect_equal(called_with$path, "concepts/by-code/SNOMED/44054006")
 })
 
+test_that("concepts$get_by_code URL-encodes path segments", {
+  base_req <- httr2::request("https://api.omophub.com/v1")
+  resource <- ConceptsResource$new(base_req)
+
+  called_with <- NULL
+  local_mocked_bindings(
+    perform_get = function(req, path, query = NULL) {
+      called_with <<- list(path = path)
+      mock_concept()
+    }
+  )
+
+  resource$get_by_code("ICDO3", "8032/3")
+
+  expect_equal(called_with$path, "concepts/by-code/ICDO3/8032%2F3")
+})
+
 test_that("concepts$get_by_code passes include_hierarchy and vocab_release", {
   base_req <- httr2::request("https://api.omophub.com/v1")
   resource <- ConceptsResource$new(base_req)

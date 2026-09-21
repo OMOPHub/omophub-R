@@ -88,7 +88,12 @@ ConceptsResource <- R6::R6Class(
 
       perform_get(
         private$.base_req,
-        paste0("concepts/by-code/", vocabulary_id, "/", concept_code),
+        paste0(
+          "concepts/by-code/",
+          utils::URLencode(vocabulary_id, reserved = TRUE),
+          "/",
+          utils::URLencode(concept_code, reserved = TRUE)
+        ),
         query = if (length(query) > 0) query else NULL
       )
     },
