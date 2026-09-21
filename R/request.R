@@ -44,14 +44,22 @@ build_request <- function(base_url, api_key, timeout = 30, max_retries = 3,
 #' @param base_req Base request object.
 #' @param endpoint API endpoint path.
 #' @param query Named list of query parameters.
+#' @param endpoint_encoded Whether `endpoint` is already percent-encoded.
 #'
 #' @returns Parsed JSON response. For paginated endpoints, returns a list with
 #'   `data` (the results) and `meta` (pagination info). For single-item endpoints,
 #'   returns the unwrapped data directly.
 #' @keywords internal
-perform_get <- function(base_req, endpoint, query = NULL) {
-  req <- base_req |>
-    httr2::req_url_path_append(endpoint)
+perform_get <- function(base_req, endpoint, query = NULL,
+                        endpoint_encoded = FALSE) {
+  if (isTRUE(endpoint_encoded)) {
+    url <- httr2::url_parse(base_req$url)
+    url$path <- I(paste0(sub("/$", "", url$path), "/", endpoint))
+    req <- httr2::req_url(base_req, httr2::url_build(url))
+  } else {
+    req <- base_req |>
+      httr2::req_url_path_append(endpoint)
+  }
 
   # Add query parameters, removing NULLs
   if (!is.null(query)) {

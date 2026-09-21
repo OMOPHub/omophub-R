@@ -4,7 +4,7 @@
 \alias{perform_get}
 \title{Perform GET Request}
 \usage{
-perform_get(base_req, endpoint, query = NULL)
+perform_get(base_req, endpoint, query = NULL, endpoint_encoded = FALSE)
 }
 \arguments{
 \item{base_req}{Base request object.}
@@ -12,6 +12,8 @@ perform_get(base_req, endpoint, query = NULL)
 \item{endpoint}{API endpoint path.}
 
 \item{query}{Named list of query parameters.}
+
+\item{endpoint_encoded}{Whether \code{endpoint} is already percent-encoded.}
 }
 \value{
 Parsed JSON response. For paginated endpoints, returns a list with
