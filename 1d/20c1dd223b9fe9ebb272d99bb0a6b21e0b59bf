@@ -1,0 +1,35 @@
+DESCRIPTION
+  s_07dfca4c433651::t_7c6f90d68ae9b4 32
+NEWS.md
+  s_07dfca4c433651::t_d16e39f7164484 5-8
+R/concepts.R
+  s_07dfca4c433651::t_67f4cb89c6a62c 304-306,310,314,318
+tests/testthat/test-concepts.R
+  s_07dfca4c433651::t_88f7052322ad7d 434,464-466
+tests/testthat/test-recommendation-json.R
+  s_5bfc46f7a17d97::t_f97a5bed4a0c98 1-76
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.7.5",
+  "base_commit_sha": "1d20c1dd223b9fe9ebb272d99bb0a6b21e0b59bf",
+  "prompts": {},
+  "sessions": {
+    "s_07dfca4c433651": {
+      "agent_id": {
+        "tool": "codex",
+        "id": "01a145cc-79eb-7521-b60f-4def9e4f2397",
+        "model": "gpt-6.1-sol"
+      },
+      "human_author": "alex-omophub <alex@omophub.com>"
+    },
+    "s_5bfc46f7a17d97": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "01a145cc-79eb-7521-b60f-4def9e4f2397",
+        "model": "unknown"
+      },
+      "human_author": "alex-omophub <alex@omophub.com>"
+    }
+  }
+}
