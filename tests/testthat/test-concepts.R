@@ -431,7 +431,7 @@ test_that("concepts$recommended calls correct endpoint with body", {
   resource$recommended(c(201826L, 4329847L))
 
   expect_equal(called_with$path, "concepts/recommended")
-  expect_equal(called_with$body$concept_ids, c(201826L, 4329847L))
+  expect_equal(called_with$body$concept_ids, list(201826L, 4329847L))
   expect_true(called_with$body$standard_only)
   expect_false(called_with$body$include_invalid)
   expect_equal(called_with$body$page, 1L)
@@ -461,9 +461,9 @@ test_that("concepts$recommended passes all optional filters", {
     page_size = 50L
   )
 
-  expect_equal(called_with$body$relationship_types, c("Has finding", "Associated finding"))
-  expect_equal(called_with$body$vocabulary_ids, c("SNOMED", "LOINC"))
-  expect_equal(called_with$body$domain_ids, c("Condition"))
+  expect_equal(called_with$body$relationship_types, list("Has finding", "Associated finding"))
+  expect_equal(called_with$body$vocabulary_ids, list("SNOMED", "LOINC"))
+  expect_equal(called_with$body$domain_ids, list("Condition"))
   expect_false(called_with$body$standard_only)
   expect_true(called_with$body$include_invalid)
   expect_equal(called_with$body$page, 2L)

@@ -301,19 +301,21 @@ ConceptsResource <- R6::R6Class(
       checkmate::assert_integerish(page, len = 1, lower = 1)
       checkmate::assert_integerish(page_size, len = 1, lower = 1, upper = 1000)
 
-      body <- list(concept_ids = as.integer(concept_ids))
+      # Lists retain JSON array shape when httr2 auto-unboxes scalar values.
+      # Drop input names so named vectors do not become JSON objects.
+      body <- list(concept_ids = unname(as.list(as.integer(concept_ids))))
 
       if (!is.null(relationship_types)) {
         checkmate::assert_character(relationship_types, max.len = 20)
-        body$relationship_types <- as.character(relationship_types)
+        body$relationship_types <- unname(as.list(as.character(relationship_types)))
       }
       if (!is.null(vocabulary_ids)) {
         checkmate::assert_character(vocabulary_ids, max.len = 50)
-        body$vocabulary_ids <- as.character(vocabulary_ids)
+        body$vocabulary_ids <- unname(as.list(as.character(vocabulary_ids)))
       }
       if (!is.null(domain_ids)) {
         checkmate::assert_character(domain_ids, max.len = 50)
-        body$domain_ids <- as.character(domain_ids)
+        body$domain_ids <- unname(as.list(as.character(domain_ids)))
       }
 
       body$standard_only <- isTRUE(standard_only)

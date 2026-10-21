@@ -2,6 +2,10 @@
 
 ## Bug Fixes
 
+* Recommendations now preserve JSON arrays for single source concepts and
+  single-item relationship, vocabulary, and domain filters. Named vectors also
+  remain arrays. Boolean flags and pagination values retain their scalar types.
+
 * HTTP failures now raise the documented OMOPHub condition classes instead of
   only httr2's generic ones (#137): 400 → `omophub_validation_error`, 401 or
   `invalid_api_key` / `missing_api_key` → `omophub_auth_error`, 403 →
