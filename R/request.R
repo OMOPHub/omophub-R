@@ -65,14 +65,18 @@ perform_request <- function(req, endpoint, call = rlang::caller_env()) {
 #' @param base_req Base request object.
 #' @param endpoint API endpoint path.
 #' @param query Named list of query parameters.
+#' @param endpoint_encoded Whether `endpoint` is already percent-encoded.
 #'
 #' @returns Parsed JSON response. For paginated endpoints, returns a list with
 #'   `data` (the results) and `meta` (pagination info). For single-item endpoints,
 #'   returns the unwrapped data directly.
 #' @keywords internal
-perform_get <- function(base_req, endpoint, query = NULL) {
-  req <- base_req |>
-    httr2::req_url_path_append(endpoint)
+perform_get <- function(base_req, endpoint, query = NULL,
+                        endpoint_encoded = FALSE) {
+  req <- base_req
+  if (!isTRUE(endpoint_encoded)) {
+    req <- httr2::req_url_path_append(req, endpoint)
+  }
 
   # Add query parameters, removing NULLs
   if (!is.null(query)) {
@@ -80,6 +84,14 @@ perform_get <- function(base_req, endpoint, query = NULL) {
     if (length(query) > 0) {
       req <- httr2::req_url_query(req, !!!query)
     }
+  }
+
+  if (isTRUE(endpoint_encoded)) {
+    # Query updates parse and rebuild the URL, decoding escaped path separators.
+    # Append the already-encoded endpoint only after all query updates are done.
+    url <- httr2::url_parse(req$url)
+    url$path <- I(paste0(sub("/$", "", url$path), "/", endpoint))
+    req <- httr2::req_url(req, httr2::url_build(url))
   }
 
   resp <- perform_request(req, endpoint, call = rlang::caller_env())
