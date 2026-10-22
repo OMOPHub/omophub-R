@@ -1,5 +1,6 @@
 # HTTP failures must surface as the documented omophub_* condition classes
 # (see abort_http_error()), not only as httr2's generic httr2_http_* ones.
+skip_if_not_installed("jsonlite")
 
 error_response <- function(status, code = NULL, message = "Something went wrong",
                            details = NULL, request_id = "req-123",
@@ -203,4 +204,25 @@ test_that("resource methods surface the mapped class to callers", {
   client <- OMOPHubClient$new(api_key = "oh_test", max_retries = 1)
 
   expect_error(client$concepts$get(201826), class = "omophub_auth_error")
+})
+
+test_that("empty error messages fall back to status without masking HTTP errors", {
+  for (message_json in c("[]", "{}")) {
+    resp <- httr2::response(
+      status_code = 503L,
+      headers = list(`content-type` = "application/json"),
+      body = charToRaw(paste0(
+        '{"error":{"code":"service_unavailable","message":', message_json,
+        '},"meta":{"request_id":"empty-message"}}'
+      ))
+    )
+    err <- capture_get_error(resp)
+
+    expect_s3_class(err, "omophub_server_error")
+    expect_s3_class(err, "httr2_http_503")
+    expect_match(conditionMessage(err), "HTTP 503 error", fixed = TRUE)
+    expect_identical(err$error_code, "service_unavailable")
+    expect_identical(err$request_id, "empty-message")
+    expect_identical(err$resp, resp)
+  }
 })

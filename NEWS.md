@@ -8,7 +8,8 @@
 
 * Recommendations now preserve JSON arrays for single source concepts and
   single-item relationship, vocabulary, and domain filters. Named vectors also
-  remain arrays. Boolean flags and pagination values retain their scalar types.
+  remain arrays. Filters reject missing strings before sending. Boolean flags
+  and pagination values retain their scalar types.
 
 * `get_by_code()` percent-encodes vocabulary IDs and concept codes as individual
   path segments, including literal percent sequences and slashes such as ICD-O
@@ -25,7 +26,8 @@
   `status_code`, `error_code`, `details`, `request_id`, `endpoint`, and (for
   429) `retry_after`. The httr2 classes (`httr2_http_404`, `httr2_http`,
   `httr2_failure`, ...) and `e$resp` are preserved, so existing handlers keep
-  working.
+  working. Empty error-message arrays or objects fall back to the HTTP status
+  without masking the original failure.
 
 ## Changed
 

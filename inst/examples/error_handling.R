@@ -11,7 +11,7 @@
 #' - Input validation errors raised before the HTTP call (empty query,
 #'   invalid concept ID, bad pagination) also use `omophub_validation_error`.
 #' - Network failures raise `omophub_connection_error`.
-#' - The httr2 classes (`httr2_http_404`, ...) are kept on every condition, so
+#' - Translated HTTP and network conditions retain their httr2 classes, so
 #'   older handlers written against them still work.
 #' - Any error you don't specifically handle falls through to the base
 #'   `error` handler.

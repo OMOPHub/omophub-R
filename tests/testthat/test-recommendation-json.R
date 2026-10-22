@@ -74,3 +74,18 @@ test_that("named input vectors stay arrays and omitted filters stay absent", {
   expect_false("relationship_types" %in% names(body))
   expect_false("domain_ids" %in% names(body))
 })
+
+test_that("recommendation filters reject missing strings before sending", {
+  resource <- ConceptsResource$new(httr2::request("https://api.omophub.test/v1"))
+  local_mocked_bindings(
+    perform_post = function(...) stop("request should not be sent"),
+    .package = "omophub"
+  )
+
+  for (filter in c("relationship_types", "vocabulary_ids", "domain_ids")) {
+    for (value in list(NA_character_, c("valid", NA_character_))) {
+      args <- c(list(concept_ids = 317009L), setNames(list(value), filter))
+      expect_error(do.call(resource$recommended, args), filter, class = "simpleError")
+    }
+  }
+})

@@ -58,6 +58,11 @@ parse_error_body <- function(resp) {
     (if (is.list(body)) body$message %||% body$detail) %||%
     paste("HTTP", status, "error")
 
+  message <- as.character(message)
+  if (length(message) == 0L) {
+    message <- paste("HTTP", status, "error")
+  }
+
   request_id <- httr2::resp_header(resp, "x-request-id")
   if (is.null(request_id) && is.list(body) && is.list(body$meta)) {
     request_id <- body$meta$request_id
@@ -68,7 +73,7 @@ parse_error_body <- function(resp) {
   }
 
   list(
-    message = as.character(message)[[1]],
+    message = message[[1]],
     error_code = error$code,
     details = error$details,
     request_id = request_id

@@ -313,15 +313,21 @@ ConceptsResource <- R6::R6Class(
       body <- list(concept_ids = unname(as.list(as.integer(concept_ids))))
 
       if (!is.null(relationship_types)) {
-        checkmate::assert_character(relationship_types, max.len = 20)
+        checkmate::assert_character(
+          relationship_types, max.len = 20, any.missing = FALSE
+        )
         body$relationship_types <- unname(as.list(as.character(relationship_types)))
       }
       if (!is.null(vocabulary_ids)) {
-        checkmate::assert_character(vocabulary_ids, max.len = 50)
+        checkmate::assert_character(
+          vocabulary_ids, max.len = 50, any.missing = FALSE
+        )
         body$vocabulary_ids <- unname(as.list(as.character(vocabulary_ids)))
       }
       if (!is.null(domain_ids)) {
-        checkmate::assert_character(domain_ids, max.len = 50)
+        checkmate::assert_character(
+          domain_ids, max.len = 50, any.missing = FALSE
+        )
         body$domain_ids <- unname(as.list(as.character(domain_ids)))
       }
 
