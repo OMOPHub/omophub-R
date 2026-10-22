@@ -2,6 +2,14 @@
 
 ## Bug Fixes
 
+* Batch concept requests preserve JSON arrays for single concept IDs and
+  vocabulary filters, including named input vectors. Vocabulary filters must
+  contain non-missing strings; invalid filter types are rejected before sending.
+
+* Recommendations now preserve JSON arrays for single source concepts and
+  single-item relationship, vocabulary, and domain filters. Named vectors also
+  remain arrays. Boolean flags and pagination values retain their scalar types.
+
 * `get_by_code()` percent-encodes vocabulary IDs and concept codes as individual
   path segments, including literal percent sequences and slashes such as ICD-O
   `8032/3`, with or without hierarchy, synonym, relationship, or vocabulary-release
