@@ -1,0 +1,65 @@
+.github/workflows/R-CMD-check.yaml
+  s_01a48dc551d115::t_cdd1c09a90f0bd 22-25,101-104
+.github/workflows/test-coverage.yaml
+  s_01a48dc551d115::t_fac10a209f946a 15-17
+DESCRIPTION
+  s_01a48dc551d115::t_84d7589bac9835 3
+NEWS.md
+  s_6d3a9daaf62832::t_6a93f4d38b16a4 1-29
+R/concepts.R
+  s_6d3a9daaf62832::t_b0c0efcc7f23d9 93,95
+R/request.R
+  s_6d3a9daaf62832::t_db809e25039b48 42-62,97,158
+R/search.R
+  s_01a48dc551d115::t_fae563bd6fef6f 20,48,208-209,247
+R/utils.R
+  s_01a48dc551d115::t_8207236f97b4d0 34-77,83-89,92-200,203,206,208
+README.md
+  s_01a48dc551d115::t_47752a10309e2e 350-351,358,443-457,462-466,468,473-478,482-483
+inst/examples/error_handling.R
+  s_01a48dc551d115::t_464c80d203ee09 6-10,12-15,48,91,102,104,107,132,172,175,179,252,255-256,260,262-264,266
+man/SearchResource.Rd
+  s_01a48dc551d115::t_5eccda237b53ca 13-14,100
+man/abort_api_error.Rd
+  s_01a48dc551d115::t_51eb5aa498734d 7-18,27-39
+man/abort_connection_error.Rd
+  s_01a48dc551d115::t_d43685bd178949 1-19
+man/abort_http_error.Rd
+  s_01a48dc551d115::t_0a52123c4d7c8e 1-36
+man/parse_error_body.Rd
+  s_01a48dc551d115::t_faa99a9bc4ca96 1-22
+man/perform_request.Rd
+  s_01a48dc551d115::t_1528662ef035ac 1-25
+tests/testthat/test-concepts.R
+  s_6d3a9daaf62832::t_8a599354ea1263 532-552
+tests/testthat/test-request-errors.R
+  s_01a48dc551d115::t_157c49729cb108 1-206
+tests/testthat/test-search.R
+  s_01a48dc551d115::t_52665d37891679 32-52,370-371,376,382,388
+vignettes/getting-started.Rmd
+  s_01a48dc551d115::t_5aafa86619411d 366-369,372
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.7.5",
+  "base_commit_sha": "b718fbd88dca1628bb47bf96bea4d2528b428e68",
+  "prompts": {},
+  "sessions": {
+    "s_01a48dc551d115": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "01a16038-b441-7c21-be6c-6253c947f491",
+        "model": "unknown"
+      },
+      "human_author": "alex-omophub <alex@omophub.com>"
+    },
+    "s_6d3a9daaf62832": {
+      "agent_id": {
+        "tool": "codex",
+        "id": "01a16038-b441-7c21-be6c-6253c947f491",
+        "model": "gpt-6.1-sol"
+      },
+      "human_author": "alex-omophub <alex@omophub.com>"
+    }
+  }
+}
