@@ -491,3 +491,41 @@ test_that("concepts$recommended passes all optional filters", {
   expect_equal(called_with$body$page, 2L)
   expect_equal(called_with$body$page_size, 50L)
 })
+
+test_that("concepts$get_by_code preserves encoded slashes with query options", {
+  base_req <- httr2::request("https://api.omophub.com/v1")
+  resource <- ConceptsResource$new(base_req)
+  request_url <- NULL
+  httr2::local_mocked_responses(function(req) {
+    request_url <<- req$url
+    httr2::response(
+      status_code = 200,
+      headers = list(`content-type` = "application/json"),
+      body = charToRaw(jsonlite::toJSON(mock_concept(), auto_unbox = TRUE))
+    )
+  })
+
+  resource$get_by_code("ICDO3", "8032/3", include_hierarchy = TRUE)
+  expect_identical(
+    request_url,
+    "https://api.omophub.com/v1/concepts/by-code/ICDO3/8032%2F3?include_hierarchy=true"
+  )
+
+  resource$get_by_code(
+    "ICDO3", "8032/3",
+    include_relationships = TRUE,
+    include_synonyms = TRUE,
+    include_hierarchy = TRUE,
+    vocab_release = "2025.1"
+  )
+  expect_identical(
+    strsplit(request_url, "?", fixed = TRUE)[[1]][1],
+    "https://api.omophub.com/v1/concepts/by-code/ICDO3/8032%2F3"
+  )
+  expect_equal(httr2::url_parse(request_url)$query, list(
+    include_relationships = "true",
+    include_synonyms = "true",
+    include_hierarchy = "true",
+    vocab_release = "2025.1"
+  ))
+})

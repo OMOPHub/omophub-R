@@ -52,13 +52,9 @@ build_request <- function(base_url, api_key, timeout = 30, max_retries = 3,
 #' @keywords internal
 perform_get <- function(base_req, endpoint, query = NULL,
                         endpoint_encoded = FALSE) {
-  if (isTRUE(endpoint_encoded)) {
-    url <- httr2::url_parse(base_req$url)
-    url$path <- I(paste0(sub("/$", "", url$path), "/", endpoint))
-    req <- httr2::req_url(base_req, httr2::url_build(url))
-  } else {
-    req <- base_req |>
-      httr2::req_url_path_append(endpoint)
+  req <- base_req
+  if (!isTRUE(endpoint_encoded)) {
+    req <- httr2::req_url_path_append(req, endpoint)
   }
 
   # Add query parameters, removing NULLs
@@ -67,6 +63,14 @@ perform_get <- function(base_req, endpoint, query = NULL,
     if (length(query) > 0) {
       req <- httr2::req_url_query(req, !!!query)
     }
+  }
+
+  if (isTRUE(endpoint_encoded)) {
+    # Query updates parse and rebuild the URL, decoding escaped path separators.
+    # Append the already-encoded endpoint only after all query updates are done.
+    url <- httr2::url_parse(req$url)
+    url$path <- I(paste0(sub("/$", "", url$path), "/", endpoint))
+    req <- httr2::req_url(req, httr2::url_build(url))
   }
 
   resp <- httr2::req_perform(req)

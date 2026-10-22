@@ -13,6 +13,9 @@
 
 ## Bug Fixes
 
+* Concept-code lookups preserve escaped slashes when hierarchy, synonym,
+  relationship, or vocabulary-release query options are provided.
+
 * **`include_invalid = FALSE` never reached the server** on
   `client$mappings$map()`. The method now sends its documented default
   explicitly. Mapping documentation also describes `unmapped_sources`, which
