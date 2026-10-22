@@ -2,6 +2,9 @@
 
 ## Bug Fixes
 
+* Batch concept requests preserve JSON arrays for single concept IDs and
+  vocabulary filters, including named input vectors.
+
 * Recommendations now preserve JSON arrays for single source concepts and
   single-item relationship, vocabulary, and domain filters. Named vectors also
   remain arrays. Boolean flags and pagination values retain their scalar types.

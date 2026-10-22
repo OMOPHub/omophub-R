@@ -167,7 +167,7 @@ test_that("concepts$batch calls correct endpoint with body", {
   resource$batch(c(201826, 12345))
 
   expect_equal(called_with$path, "concepts/batch")
-  expect_equal(called_with$body$concept_ids, c(201826L, 12345L))
+  expect_equal(called_with$body$concept_ids, list(201826L, 12345L))
 })
 
 test_that("concepts$batch includes optional parameters", {
@@ -194,7 +194,7 @@ test_that("concepts$batch includes optional parameters", {
   expect_true(called_with$body$include_relationships)
   expect_true(called_with$body$include_synonyms)
   expect_true(called_with$body$include_mappings)
-  expect_equal(called_with$body$vocabulary_filter, c("SNOMED", "ICD10CM"))
+  expect_equal(called_with$body$vocabulary_filter, list("SNOMED", "ICD10CM"))
   expect_true(called_with$body$standard_only)
 })
 

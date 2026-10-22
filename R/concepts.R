@@ -112,7 +112,7 @@ ConceptsResource <- R6::R6Class(
                      standard_only = TRUE) {
       checkmate::assert_integerish(concept_ids, min.len = 1, max.len = 100)
 
-      body <- list(concept_ids = as.integer(concept_ids))
+      body <- list(concept_ids = unname(as.list(as.integer(concept_ids))))
 
       if (isTRUE(include_relationships)) {
         body$include_relationships <- TRUE
@@ -124,7 +124,7 @@ ConceptsResource <- R6::R6Class(
         body$include_mappings <- TRUE
       }
       if (!is.null(vocabulary_filter)) {
-        body$vocabulary_filter <- as.character(vocabulary_filter)
+        body$vocabulary_filter <- unname(as.list(as.character(vocabulary_filter)))
       }
       if (isTRUE(standard_only)) {
         body$standard_only <- TRUE
