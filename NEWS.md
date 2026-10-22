@@ -10,6 +10,11 @@
   single-item relationship, vocabulary, and domain filters. Named vectors also
   remain arrays. Boolean flags and pagination values retain their scalar types.
 
+* `get_by_code()` percent-encodes vocabulary IDs and concept codes as individual
+  path segments, including literal percent sequences and slashes such as ICD-O
+  `8032/3`, with or without hierarchy, synonym, relationship, or vocabulary-release
+  query options.
+
 * HTTP failures now raise the documented OMOPHub condition classes instead of
   only httr2's generic ones (#137): 400 → `omophub_validation_error`, 401 or
   `invalid_api_key` / `missing_api_key` → `omophub_auth_error`, 403 →

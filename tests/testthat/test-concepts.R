@@ -108,7 +108,7 @@ test_that("concepts$get_by_code calls correct endpoint", {
 
   called_with <- NULL
   local_mocked_bindings(
-    perform_get = function(req, path, query = NULL) {
+    perform_get = function(req, path, query = NULL, endpoint_encoded = FALSE) {
       called_with <<- list(path = path)
       mock_concept()
     }
@@ -119,13 +119,35 @@ test_that("concepts$get_by_code calls correct endpoint", {
   expect_equal(called_with$path, "concepts/by-code/SNOMED/44054006")
 })
 
+test_that("concepts$get_by_code URL-encodes path segments", {
+  base_req <- httr2::request("https://api.omophub.com/v1")
+  resource <- ConceptsResource$new(base_req)
+
+  request_url <- NULL
+  httr2::local_mocked_responses(function(req) {
+    request_url <<- req$url
+    httr2::response(
+      status_code = 200,
+      headers = list(`content-type` = "application/json"),
+      body = charToRaw(jsonlite::toJSON(mock_concept(), auto_unbox = TRUE))
+    )
+  })
+
+  resource$get_by_code("ICDO3", "8032/3")
+
+  expect_equal(
+    request_url,
+    "https://api.omophub.com/v1/concepts/by-code/ICDO3/8032%2F3"
+  )
+})
+
 test_that("concepts$get_by_code passes include_hierarchy and vocab_release", {
   base_req <- httr2::request("https://api.omophub.com/v1")
   resource <- ConceptsResource$new(base_req)
 
   called_with <- NULL
   local_mocked_bindings(
-    perform_get = function(req, path, query = NULL) {
+    perform_get = function(req, path, query = NULL, endpoint_encoded = FALSE) {
       called_with <<- list(query = query)
       mock_concept()
     }
@@ -468,4 +490,63 @@ test_that("concepts$recommended passes all optional filters", {
   expect_true(called_with$body$include_invalid)
   expect_equal(called_with$body$page, 2L)
   expect_equal(called_with$body$page_size, 50L)
+})
+
+test_that("concepts$get_by_code preserves encoded slashes with query options", {
+  base_req <- httr2::request("https://api.omophub.com/v1")
+  resource <- ConceptsResource$new(base_req)
+  request_url <- NULL
+  httr2::local_mocked_responses(function(req) {
+    request_url <<- req$url
+    httr2::response(
+      status_code = 200,
+      headers = list(`content-type` = "application/json"),
+      body = charToRaw(jsonlite::toJSON(mock_concept(), auto_unbox = TRUE))
+    )
+  })
+
+  resource$get_by_code("ICDO3", "8032/3", include_hierarchy = TRUE)
+  expect_identical(
+    request_url,
+    "https://api.omophub.com/v1/concepts/by-code/ICDO3/8032%2F3?include_hierarchy=true"
+  )
+
+  resource$get_by_code(
+    "ICDO3", "8032/3",
+    include_relationships = TRUE,
+    include_synonyms = TRUE,
+    include_hierarchy = TRUE,
+    vocab_release = "2025.1"
+  )
+  expect_identical(
+    strsplit(request_url, "?", fixed = TRUE)[[1]][1],
+    "https://api.omophub.com/v1/concepts/by-code/ICDO3/8032%2F3"
+  )
+  expect_equal(httr2::url_parse(request_url)$query, list(
+    include_relationships = "true",
+    include_synonyms = "true",
+    include_hierarchy = "true",
+    vocab_release = "2025.1"
+  ))
+})
+
+test_that("concepts$get_by_code treats percent sequences as literal segment input", {
+  resource <- ConceptsResource$new(httr2::request("https://api.omophub.com/v1"))
+  request_url <- NULL
+  httr2::local_mocked_responses(function(req) {
+    request_url <<- req$url
+    httr2::response(
+      status_code = 200,
+      headers = list(`content-type` = "application/json"),
+      body = charToRaw(jsonlite::toJSON(mock_concept(), auto_unbox = TRUE))
+    )
+  })
+
+  for (include_hierarchy in c(FALSE, TRUE)) {
+    resource$get_by_code("V%20B/1", "A%20B/1", include_hierarchy = include_hierarchy)
+    expect_identical(
+      strsplit(request_url, "?", fixed = TRUE)[[1]][1],
+      "https://api.omophub.com/v1/concepts/by-code/V%2520B%2F1/A%2520B%2F1"
+    )
+  }
 })
