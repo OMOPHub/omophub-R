@@ -1,0 +1,23 @@
+NEWS.md
+  s_01a48dc551d115::t_f6d3f790c0b112 6-7
+R/concepts.R
+  s_01a48dc551d115::t_76803bad8719bf 127-128
+tests/testthat/test-batch-json.R
+  s_01a48dc551d115::t_e323bacb4a2419 64-77
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.7.5",
+  "base_commit_sha": "57afd8d2532ed389f55bde388abd0ee29dd7f8a8",
+  "prompts": {},
+  "sessions": {
+    "s_01a48dc551d115": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "01a16038-b441-7c21-be6c-6253c947f491",
+        "model": "unknown"
+      },
+      "human_author": "alex-omophub <alex@omophub.com>"
+    }
+  }
+}
