@@ -1,3 +1,42 @@
+# omophub 1.10.0
+
+## Bug Fixes
+
+* Batch concept requests preserve JSON arrays for single concept IDs and
+  vocabulary filters, including named input vectors. Vocabulary filters must
+  contain non-missing strings; invalid filter types are rejected before sending.
+
+* Recommendations now preserve JSON arrays for single source concepts and
+  single-item relationship, vocabulary, and domain filters. Named vectors also
+  remain arrays. Filters reject missing strings before sending. Boolean flags
+  and pagination values retain their scalar types.
+
+* `get_by_code()` percent-encodes vocabulary IDs and concept codes as individual
+  path segments, including literal percent sequences and slashes such as ICD-O
+  `8032/3`, with or without hierarchy, synonym, relationship, or vocabulary-release
+  query options.
+
+* HTTP failures now raise the documented OMOPHub condition classes instead of
+  only httr2's generic ones (#137): 400 → `omophub_validation_error`, 401 or
+  `invalid_api_key` / `missing_api_key` → `omophub_auth_error`, 403 →
+  `omophub_forbidden_error` (new; kept distinct from invalid credentials),
+  404 → `omophub_not_found`, 429 → `omophub_rate_limit_error`, 5xx →
+  `omophub_server_error`, other statuses → `omophub_api_error`. Network
+  failures raise `omophub_connection_error`. API conditions carry
+  `status_code`, `error_code`, `details`, `request_id`, `endpoint`, and (for
+  429) `retry_after`. The httr2 classes (`httr2_http_404`, `httr2_http`,
+  `httr2_failure`, ...) and `e$resp` are preserved, so existing handlers keep
+  working. Empty error-message arrays or objects fall back to the HTTP status
+  without masking the original failure.
+
+## Changed
+
+* Autocomplete now calls the canonical `/search/autocomplete` endpoint and
+  returns its compact `suggestion`, `type`, and `count` fields. `domain_ids`,
+  `page_size`, and the warned compatibility aliases remain supported.
+* Basic search now validates the API's required 3-500 character query contract
+  before sending a request.
+
 # omophub 1.9.1
 
 ## New Features

@@ -347,15 +347,15 @@ result$unmapped_sources
 Verify codes exist and are valid:
 
 ```r
-# Check if condition codes are valid. HTTP 404 responses come through
-# as httr2's `httr2_http_404` condition class.
+# Check if condition codes are valid. HTTP 404 responses are raised as
+# `omophub_not_found`.
 condition_codes <- c("E11.9", "I10", "J44.9")
 
 for (code in condition_codes) {
   tryCatch({
     concept <- client$concepts$get_by_code("ICD10CM", code)
     message(sprintf("OK %s: %s", code, concept$concept_name))
-  }, httr2_http_404 = function(e) {
+  }, omophub_not_found = function(e) {
     message(sprintf("ERROR %s: Invalid code!", code))
   })
 }
@@ -440,29 +440,46 @@ client <- OMOPHubClient$new(
 
 ## Error Handling
 
-HTTP errors are raised as [httr2 condition classes](https://httr2.r-lib.org/reference/req_error.html) (`httr2_http_404`, `httr2_http_401`, `httr2_http_429`, `httr2_http_403`, etc.). Pre-request input-validation errors use the SDK's `omophub_validation_error` class.
+Failures are raised as classed R conditions. Catch the most specific class you care about:
+
+| Condition | Raised for |
+|-----------|------------|
+| `omophub_validation_error` | HTTP 400, or invalid input caught before the request |
+| `omophub_auth_error` | HTTP 401 (`invalid_api_key`, `missing_api_key`) |
+| `omophub_forbidden_error` | HTTP 403 - valid key, but not permitted (e.g. restricted vocabulary) |
+| `omophub_not_found` | HTTP 404 |
+| `omophub_rate_limit_error` | HTTP 429, after the SDK's automatic retries |
+| `omophub_server_error` | HTTP 5xx |
+| `omophub_api_error` | Any HTTP error (parent of all of the above except pre-request validation) |
+| `omophub_connection_error` | Network failure or timeout |
+| `omophub_error` | Every SDK error |
+
+API errors carry `status_code`, `error_code` (the server's `error.code`), `details`, `request_id`, `endpoint`, and for 429 `retry_after`.
 
 ```r
 tryCatch({
   result <- client$concepts$get(999999999)
-}, httr2_http_404 = function(e) {
-  message("Concept not found: ", conditionMessage(e)[[1]])
-}, httr2_http_401 = function(e) {
-  message("Unauthorized - check your API key")
-}, httr2_http_403 = function(e) {
+}, omophub_not_found = function(e) {
+  message("Concept not found: ", conditionMessage(e))
+}, omophub_auth_error = function(e) {
+  message("Unauthorized - check your API key (", e$error_code, ")")
+}, omophub_forbidden_error = function(e) {
   message("Forbidden - API key lacks permission or vocabulary restricted")
-}, httr2_http_429 = function(e) {
+}, omophub_rate_limit_error = function(e) {
   # The SDK already auto-retries 429 via httr2::req_retry() with
   # exponential backoff; handle here only for custom logging.
   message("Rate limited (", e$retry_after %||% "?", "s)")
-}, httr2_http = function(e) {
-  # Generic HTTP error fallback (any 4xx/5xx not caught above)
-  message("HTTP error: ", conditionMessage(e)[[1]])
 }, omophub_validation_error = function(e) {
-  # Pre-request validation (bad concept_id type, empty query, etc.)
-  message("Validation error: ", conditionMessage(e)[[1]])
+  # HTTP 400 from the server, or pre-request validation
+  # (bad concept_id type, empty query, etc.)
+  message("Validation error: ", conditionMessage(e))
+}, omophub_api_error = function(e) {
+  # Any other HTTP error; quote e$request_id when contacting support
+  message("API error ", e$status_code, " [", e$request_id, "]")
 })
 ```
+
+The conditions also keep httr2's own classes (`httr2_http_404`, `httr2_http`, `httr2_failure`) and the raw response in `e$resp`, so handlers written against httr2 continue to work.
 
 See [`inst/examples/error_handling.R`](inst/examples/error_handling.R) for the full set of patterns including graceful degradation and batch error collection.
 
@@ -530,7 +547,3 @@ devtools::check()
 ## License
 
 MIT License - see [LICENSE](LICENSE) for details.
-
----
-
-*Built for the OHDSI community*

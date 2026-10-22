@@ -88,8 +88,14 @@ ConceptsResource <- R6::R6Class(
 
       perform_get(
         private$.base_req,
-        paste0("concepts/by-code/", vocabulary_id, "/", concept_code),
-        query = if (length(query) > 0) query else NULL
+        paste0(
+          "concepts/by-code/",
+          utils::URLencode(vocabulary_id, reserved = TRUE, repeated = TRUE),
+          "/",
+          utils::URLencode(concept_code, reserved = TRUE, repeated = TRUE)
+        ),
+        query = if (length(query) > 0) query else NULL,
+        endpoint_encoded = TRUE
       )
     },
 
@@ -112,7 +118,7 @@ ConceptsResource <- R6::R6Class(
                      standard_only = TRUE) {
       checkmate::assert_integerish(concept_ids, min.len = 1, max.len = 100)
 
-      body <- list(concept_ids = as.integer(concept_ids))
+      body <- list(concept_ids = unname(as.list(as.integer(concept_ids))))
 
       if (isTRUE(include_relationships)) {
         body$include_relationships <- TRUE
@@ -124,7 +130,8 @@ ConceptsResource <- R6::R6Class(
         body$include_mappings <- TRUE
       }
       if (!is.null(vocabulary_filter)) {
-        body$vocabulary_filter <- as.character(vocabulary_filter)
+        checkmate::assert_character(vocabulary_filter, any.missing = FALSE)
+        body$vocabulary_filter <- unname(as.list(vocabulary_filter))
       }
       if (isTRUE(standard_only)) {
         body$standard_only <- TRUE
@@ -301,19 +308,27 @@ ConceptsResource <- R6::R6Class(
       checkmate::assert_integerish(page, len = 1, lower = 1)
       checkmate::assert_integerish(page_size, len = 1, lower = 1, upper = 1000)
 
-      body <- list(concept_ids = as.integer(concept_ids))
+      # Lists retain JSON array shape when httr2 auto-unboxes scalar values.
+      # Drop input names so named vectors do not become JSON objects.
+      body <- list(concept_ids = unname(as.list(as.integer(concept_ids))))
 
       if (!is.null(relationship_types)) {
-        checkmate::assert_character(relationship_types, max.len = 20)
-        body$relationship_types <- as.character(relationship_types)
+        checkmate::assert_character(
+          relationship_types, max.len = 20, any.missing = FALSE
+        )
+        body$relationship_types <- unname(as.list(as.character(relationship_types)))
       }
       if (!is.null(vocabulary_ids)) {
-        checkmate::assert_character(vocabulary_ids, max.len = 50)
-        body$vocabulary_ids <- as.character(vocabulary_ids)
+        checkmate::assert_character(
+          vocabulary_ids, max.len = 50, any.missing = FALSE
+        )
+        body$vocabulary_ids <- unname(as.list(as.character(vocabulary_ids)))
       }
       if (!is.null(domain_ids)) {
-        checkmate::assert_character(domain_ids, max.len = 50)
-        body$domain_ids <- as.character(domain_ids)
+        checkmate::assert_character(
+          domain_ids, max.len = 50, any.missing = FALSE
+        )
+        body$domain_ids <- unname(as.list(as.character(domain_ids)))
       }
 
       body$standard_only <- isTRUE(standard_only)
