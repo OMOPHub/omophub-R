@@ -529,3 +529,24 @@ test_that("concepts$get_by_code preserves encoded slashes with query options", {
     vocab_release = "2025.1"
   ))
 })
+
+test_that("concepts$get_by_code treats percent sequences as literal segment input", {
+  resource <- ConceptsResource$new(httr2::request("https://api.omophub.com/v1"))
+  request_url <- NULL
+  httr2::local_mocked_responses(function(req) {
+    request_url <<- req$url
+    httr2::response(
+      status_code = 200,
+      headers = list(`content-type` = "application/json"),
+      body = charToRaw(jsonlite::toJSON(mock_concept(), auto_unbox = TRUE))
+    )
+  })
+
+  for (include_hierarchy in c(FALSE, TRUE)) {
+    resource$get_by_code("V%20B/1", "A%20B/1", include_hierarchy = include_hierarchy)
+    expect_identical(
+      strsplit(request_url, "?", fixed = TRUE)[[1]][1],
+      "https://api.omophub.com/v1/concepts/by-code/V%2520B%2F1/A%2520B%2F1"
+    )
+  }
+})

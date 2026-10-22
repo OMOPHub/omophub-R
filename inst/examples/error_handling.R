@@ -3,12 +3,16 @@
 #'
 #' Demonstrates error handling strategies for the omophub R SDK:
 #'
-#' - HTTP errors (404 Not Found, 401 Unauthorized, 429 Rate Limited) are
-#'   raised as httr2 conditions (`httr2_http_404`, `httr2_http_401`,
-#'   `httr2_http_429`). Catch them with their specific classes.
+#' - HTTP errors are raised as OMOPHub conditions: `omophub_validation_error`
+#'   (400), `omophub_auth_error` (401), `omophub_forbidden_error` (403),
+#'   `omophub_not_found` (404), `omophub_rate_limit_error` (429) and
+#'   `omophub_server_error` (5xx), all inheriting from `omophub_api_error`.
+#'   They carry `status_code`, `error_code`, `details` and `request_id`.
 #' - Input validation errors raised before the HTTP call (empty query,
-#'   invalid concept ID, bad pagination) use the `omophub_validation_error`
-#'   class from the SDK's `abort_validation()` helper.
+#'   invalid concept ID, bad pagination) also use `omophub_validation_error`.
+#' - Network failures raise `omophub_connection_error`.
+#' - The httr2 classes (`httr2_http_404`, ...) are kept on every condition, so
+#'   older handlers written against them still work.
 #' - Any error you don't specifically handle falls through to the base
 #'   `error` handler.
 #'
@@ -41,7 +45,7 @@ tryCatch(
     concept <- client$concepts$get(999999999)  # Non-existent ID
     cat("Concept found:", concept$concept_name, "\n")
   },
-  httr2_http_404 = function(e) {
+  omophub_not_found = function(e) {
     cat("  Not found (404)\n")
     cat("  Message:", conditionMessage(e), "\n")
   },
@@ -84,7 +88,7 @@ tryCatch(
 cat("\n")
 
 # ============================================================================
-# 3. Authentication errors (401 / 403)
+# 3. Authentication (401) vs. authorization (403) errors
 # ============================================================================
 
 cat("3. Handling authentication errors (401 / 403)\n")
@@ -95,11 +99,12 @@ tryCatch(
     bad_client <- OMOPHubClient$new(api_key = "oh_invalid_key_12345")
     concept <- bad_client$concepts$get(201826)
   },
-  httr2_http_401 = function(e) {
+  omophub_auth_error = function(e) {
     cat("  Unauthorized (401): invalid API key\n")
+    cat("  Error code:", e$error_code, "\n")
     cat("  Message:", conditionMessage(e)[[1]], "\n")
   },
-  httr2_http_403 = function(e) {
+  omophub_forbidden_error = function(e) {
     cat("  Forbidden (403): API key lacks permission\n")
     cat("  Message:", conditionMessage(e)[[1]], "\n")
   },
@@ -124,7 +129,7 @@ fetch_with_retry <- function(client, concept_id, max_retries = 3) {
   for (attempt in seq_len(max_retries)) {
     result <- tryCatch(
       list(ok = TRUE, value = client$concepts$get(concept_id)),
-      httr2_http_429 = function(e) {
+      omophub_rate_limit_error = function(e) {
         retry_after <- e$retry_after %||% 5L
         cat(sprintf(
           "  Rate limited. Retry after %ds (attempt %d/%d)\n",
@@ -164,14 +169,14 @@ cat("-----------------------\n")
 safe_get_concept <- function(client, concept_id) {
   tryCatch(
     list(ok = TRUE, value = client$concepts$get(concept_id), reason = NA_character_),
-    httr2_http_404 = function(e) {
+    omophub_not_found = function(e) {
       list(ok = FALSE, value = NULL, reason = "not found")
     },
-    httr2_http = function(e) {
+    omophub_api_error = function(e) {
       list(
         ok = FALSE,
         value = NULL,
-        reason = sprintf("HTTP error: %s", conditionMessage(e)[[1]])
+        reason = sprintf("HTTP %s error: %s", e$status_code, e$error_code %||% "unknown")
       )
     },
     error = function(e) {
@@ -244,19 +249,21 @@ if (batch_result$error_count > 0) {
 cat("\n")
 
 # ============================================================================
-# 7. Extracting error details from httr2 conditions
+# 7. Extracting error details
 # ============================================================================
 
-cat("7. Extracting error details from httr2 conditions\n")
-cat("-------------------------------------------------\n")
+cat("7. Extracting error details\n")
+cat("---------------------------\n")
 
 tryCatch(
   client$concepts$get(999999999),
-  httr2_http = function(e) {
+  omophub_api_error = function(e) {
     cat("  Class chain:", paste(head(class(e), 3), collapse = " -> "), "\n")
-    cat("  Message:    ", conditionMessage(e)[[1]], "\n")
+    cat("  Status:     ", e$status_code, "\n")
+    cat("  Error code: ", e$error_code %||% "(none)", "\n")
+    cat("  Request ID: ", e$request_id %||% "(none)", "\n")
 
-    # httr2 attaches the response object for deeper inspection
+    # The raw httr2 response is attached for deeper inspection
     if (!is.null(e$resp)) {
       cat("  HTTP status:", httr2::resp_status(e$resp), "\n")
       url <- httr2::resp_url(e$resp)

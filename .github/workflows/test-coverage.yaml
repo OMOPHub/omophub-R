@@ -12,9 +12,11 @@ jobs:
     if: github.event_name == 'push'
     runs-on: ubuntu-latest
     timeout-minutes: 20
+    # No OMOPHUB_API_KEY: live integration tests run only in
+    # integration-tests.yaml, so parallel workflows don't share one key's
+    # rate-limit bucket. Coverage here comes from the mocked unit tests.
     env:
       GITHUB_PAT: ${{ secrets.GITHUB_TOKEN }}
-      OMOPHUB_API_KEY: ${{ secrets.OMOPHUB_API_KEY }}
 
     steps:
       - uses: actions/checkout@v6

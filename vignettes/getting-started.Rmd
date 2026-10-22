@@ -363,10 +363,13 @@ tryCatch(
     concept <- client$concepts$get(999999999)
   },
   omophub_not_found = function(e) {
-    message("Concept not found: ", e$message)
+    message("Concept not found: ", conditionMessage(e))
+  },
+  omophub_auth_error = function(e) {
+    message("Check your API key: ", e$error_code)
   },
   omophub_api_error = function(e) {
-    message("API error: ", e$message)
+    message("API error ", e$status_code, ": ", conditionMessage(e))
   }
 )
 ```

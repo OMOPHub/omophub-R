@@ -17,7 +17,7 @@ SearchResource <- R6::R6Class(
     #' @description
     #' Basic concept search.
     #'
-    #' @param query Search query string.
+    #' @param query Search query string (3-500 characters).
     #' @param vocabulary_ids Filter by vocabulary IDs.
     #' @param domain_ids Filter by domain IDs.
     #' @param concept_class_ids Filter by concept class IDs.
@@ -45,7 +45,7 @@ SearchResource <- R6::R6Class(
                      page_size = 20,
                      sort_by = NULL,
                      sort_order = NULL) {
-      checkmate::assert_string(query, min.chars = 1)
+      checkmate::assert_string(query, min.chars = 3, max.chars = 500)
       pag <- validate_pagination(page, page_size)
 
       params <- list(
@@ -205,10 +205,8 @@ SearchResource <- R6::R6Class(
     #' @param max_suggestions Deprecated alias for `page_size`. Ignored, with a
     #'   warning, when `page_size` is also supplied.
     #'
-    #' @returns A list containing `query` and `suggestions`. Each suggestion is
-    #'   a flat list with `suggestion`, `concept_id`, `concept_code`,
-    #'   `vocabulary_id`, `domain_id`, `concept_class_id`, and
-    #'   `standard_concept`.
+    #' @returns A list containing `query`, `suggestions`, and `page_size`. Each
+    #'   compact suggestion contains `suggestion`, `type`, and `count`.
     autocomplete = function(query,
                             vocabulary_ids = NULL,
                             domain_ids = NULL,
@@ -246,7 +244,7 @@ SearchResource <- R6::R6Class(
         params$domain_ids <- join_params(selected_domains)
       }
 
-      perform_get(private$.base_req, "search/suggest", query = params)
+      perform_get(private$.base_req, "search/autocomplete", query = params)
     },
 
     #' @description

@@ -39,6 +39,27 @@ build_request <- function(base_url, api_key, timeout = 30, max_retries = 3,
   req
 }
 
+#' Perform a Request, Raising OMOPHub Conditions on Failure
+#'
+#' `req_error()` makes httr2 raise `httr2_http_*` for 4xx/5xx and
+#' `httr2_failure` for transport errors (after `req_retry()` has given up).
+#' Those are translated here into the documented `omophub_*` condition
+#' hierarchy; see [abort_http_error()].
+#'
+#' @param req The request to perform.
+#' @param endpoint API endpoint path, for the error message.
+#' @param call The calling environment reported on the condition.
+#'
+#' @returns The httr2 response.
+#' @keywords internal
+perform_request <- function(req, endpoint, call = rlang::caller_env()) {
+  tryCatch(
+    httr2::req_perform(req),
+    httr2_http = function(cnd) abort_http_error(cnd$resp, endpoint, call = call),
+    httr2_failure = function(cnd) abort_connection_error(cnd, endpoint, call = call)
+  )
+}
+
 #' Perform GET Request
 #'
 #' @param base_req Base request object.
@@ -73,7 +94,7 @@ perform_get <- function(base_req, endpoint, query = NULL,
     req <- httr2::req_url(req, httr2::url_build(url))
   }
 
-  resp <- httr2::req_perform(req)
+  resp <- perform_request(req, endpoint, call = rlang::caller_env())
   body <- httr2::resp_body_json(resp)
 
   # Check if response has pagination info - if so, preserve structure for pagination
@@ -134,7 +155,7 @@ perform_post <- function(base_req, endpoint, body = NULL, query = NULL,
     req <- httr2::req_body_json(req, body)
   }
 
-  resp <- httr2::req_perform(req)
+  resp <- perform_request(req, endpoint, call = rlang::caller_env())
   resp_body <- httr2::resp_body_json(resp)
 
   # Unwrap data field if present (matching Python SDK behavior)
