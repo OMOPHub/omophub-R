@@ -7,7 +7,7 @@
 
     <a class="navbar-brand me-2" href="../index.html">omophub</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">1.9.1</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">1.10.0</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -32,7 +32,7 @@
   <main id="main" class="col-md-9"><div class="page-header">
 
       <h1>Abort with OMOPHub API Error</h1>
-      <small class="dont-index">Source: <a href="https://github.com/omopHub/omophub-R/blob/v1.9.1/R/utils.R" class="external-link"><code>R/utils.R</code></a></small>
+      <small class="dont-index">Source: <a href="https://github.com/omopHub/omophub-R/blob/main/R/utils.R" class="external-link"><code>R/utils.R</code></a></small>
       <div class="d-none name"><code>abort_api_error.Rd</code></div>
     </div>
 
@@ -42,7 +42,18 @@
 
     <div class="section level2">
     <h2 id="ref-usage">Usage<a class="anchor" aria-label="anchor" href="#ref-usage"></a></h2>
-    <div class="sourceCode"><pre class="sourceCode r"><code><span><span class="fu">abort_api_error</span><span class="op">(</span><span class="va">status</span>, <span class="va">message</span>, <span class="va">endpoint</span>, call <span class="op">=</span> <span class="fu">rlang</span><span class="fu">::</span><span class="fu"><a href="https://rlang.r-lib.org/reference/stack.html" class="external-link">caller_env</a></span><span class="op">(</span><span class="op">)</span><span class="op">)</span></span></code></pre></div>
+    <div class="sourceCode"><pre class="sourceCode r"><code><span><span class="fu">abort_api_error</span><span class="op">(</span></span>
+<span>  <span class="va">status</span>,</span>
+<span>  <span class="va">message</span>,</span>
+<span>  <span class="va">endpoint</span>,</span>
+<span>  error_code <span class="op">=</span> <span class="cn">NULL</span>,</span>
+<span>  details <span class="op">=</span> <span class="cn">NULL</span>,</span>
+<span>  request_id <span class="op">=</span> <span class="cn">NULL</span>,</span>
+<span>  class <span class="op">=</span> <span class="cn">NULL</span>,</span>
+<span>  hint <span class="op">=</span> <span class="cn">NULL</span>,</span>
+<span>  <span class="va">...</span>,</span>
+<span>  call <span class="op">=</span> <span class="fu">rlang</span><span class="fu">::</span><span class="fu"><a href="https://rlang.r-lib.org/reference/stack.html" class="external-link">caller_env</a></span><span class="op">(</span><span class="op">)</span></span>
+<span><span class="op">)</span></span></code></pre></div>
     </div>
 
     <div class="section level2">
@@ -59,6 +70,31 @@
 
 <dt id="arg-endpoint">endpoint<a class="anchor" aria-label="anchor" href="#arg-endpoint"></a></dt>
 <dd><p>API endpoint that failed.</p></dd>
+
+
+<dt id="arg-error-code">error_code<a class="anchor" aria-label="anchor" href="#arg-error-code"></a></dt>
+<dd><p>The server's <code>error.code</code>, if any.</p></dd>
+
+
+<dt id="arg-details">details<a class="anchor" aria-label="anchor" href="#arg-details"></a></dt>
+<dd><p>The server's <code>error.details</code>, if any.</p></dd>
+
+
+<dt id="arg-request-id">request_id<a class="anchor" aria-label="anchor" href="#arg-request-id"></a></dt>
+<dd><p>The request ID, if any.</p></dd>
+
+
+<dt id="arg-class">class<a class="anchor" aria-label="anchor" href="#arg-class"></a></dt>
+<dd><p>Additional condition classes, most specific first. They are
+placed ahead of <code>omophub_api_error</code>.</p></dd>
+
+
+<dt id="arg-hint">hint<a class="anchor" aria-label="anchor" href="#arg-hint"></a></dt>
+<dd><p>Optional extra <code>i</code> bullet for the message.</p></dd>
+
+
+<dt id="arg--">...<a class="anchor" aria-label="anchor" href="#arg--"></a></dt>
+<dd><p>Additional fields stored on the condition.</p></dd>
 
 
 <dt id="arg-call">call<a class="anchor" aria-label="anchor" href="#arg-call"></a></dt>

@@ -22,7 +22,7 @@
 
     <a class="navbar-brand me-2" href="index.html">omophub</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">1.9.1</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">1.10.0</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -393,15 +393,15 @@
 </h3>
 <p>Verify codes exist and are valid:</p>
 <div class="sourceCode" id="cb14"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="co"># Check if condition codes are valid. HTTP 404 responses come through</span></span>
-<span><span class="co"># as httr2's `httr2_http_404` condition class.</span></span>
+<code class="sourceCode R"><span><span class="co"># Check if condition codes are valid. HTTP 404 responses are raised as</span></span>
+<span><span class="co"># `omophub_not_found`.</span></span>
 <span><span class="va">condition_codes</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"E11.9"</span>, <span class="st">"I10"</span>, <span class="st">"J44.9"</span><span class="op">)</span></span>
 <span></span>
 <span><span class="kw">for</span> <span class="op">(</span><span class="va">code</span> <span class="kw">in</span> <span class="va">condition_codes</span><span class="op">)</span> <span class="op">{</span></span>
 <span>  <span class="kw"><a href="https://rdrr.io/r/base/conditions.html" class="external-link">tryCatch</a></span><span class="op">(</span><span class="op">{</span></span>
 <span>    <span class="va">concept</span> <span class="op">&lt;-</span> <span class="va">client</span><span class="op">$</span><span class="va">concepts</span><span class="op">$</span><span class="fu">get_by_code</span><span class="op">(</span><span class="st">"ICD10CM"</span>, <span class="va">code</span><span class="op">)</span></span>
 <span>    <span class="fu"><a href="https://rdrr.io/r/base/message.html" class="external-link">message</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/sprintf.html" class="external-link">sprintf</a></span><span class="op">(</span><span class="st">"OK %s: %s"</span>, <span class="va">code</span>, <span class="va">concept</span><span class="op">$</span><span class="va">concept_name</span><span class="op">)</span><span class="op">)</span></span>
-<span>  <span class="op">}</span>, httr2_http_404 <span class="op">=</span> <span class="kw">function</span><span class="op">(</span><span class="va">e</span><span class="op">)</span> <span class="op">{</span></span>
+<span>  <span class="op">}</span>, omophub_not_found <span class="op">=</span> <span class="kw">function</span><span class="op">(</span><span class="va">e</span><span class="op">)</span> <span class="op">{</span></span>
 <span>    <span class="fu"><a href="https://rdrr.io/r/base/message.html" class="external-link">message</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/sprintf.html" class="external-link">sprintf</a></span><span class="op">(</span><span class="st">"ERROR %s: Invalid code!"</span>, <span class="va">code</span><span class="op">)</span><span class="op">)</span></span>
 <span>  <span class="op">}</span><span class="op">)</span></span>
 <span><span class="op">}</span></span></code></pre></div>
@@ -541,27 +541,78 @@
 <div class="section level2">
 <h2 id="error-handling">Error Handling<a class="anchor" aria-label="anchor" href="#error-handling"></a>
 </h2>
-<p>HTTP errors are raised as <a href="https://httr2.r-lib.org/reference/req_error.html" class="external-link">httr2 condition classes</a> (<code>httr2_http_404</code>, <code>httr2_http_401</code>, <code>httr2_http_429</code>, <code>httr2_http_403</code>, etc.). Pre-request input-validation errors use the SDK’s <code>omophub_validation_error</code> class.</p>
+<p>Failures are raised as classed R conditions. Catch the most specific class you care about:</p>
+<table class="table">
+<colgroup>
+<col width="47%">
+<col width="52%">
+</colgroup>
+<thead><tr>
+<th>Condition</th>
+<th>Raised for</th>
+</tr></thead>
+<tbody>
+<tr>
+<td><code>omophub_validation_error</code></td>
+<td>HTTP 400, or invalid input caught before the request</td>
+</tr>
+<tr>
+<td><code>omophub_auth_error</code></td>
+<td>HTTP 401 (<code>invalid_api_key</code>, <code>missing_api_key</code>)</td>
+</tr>
+<tr>
+<td><code>omophub_forbidden_error</code></td>
+<td>HTTP 403 - valid key, but not permitted (e.g. restricted vocabulary)</td>
+</tr>
+<tr>
+<td><code>omophub_not_found</code></td>
+<td>HTTP 404</td>
+</tr>
+<tr>
+<td><code>omophub_rate_limit_error</code></td>
+<td>HTTP 429, after the SDK’s automatic retries</td>
+</tr>
+<tr>
+<td><code>omophub_server_error</code></td>
+<td>HTTP 5xx</td>
+</tr>
+<tr>
+<td><code>omophub_api_error</code></td>
+<td>Any HTTP error (parent of all of the above except pre-request validation)</td>
+</tr>
+<tr>
+<td><code>omophub_connection_error</code></td>
+<td>Network failure or timeout</td>
+</tr>
+<tr>
+<td><code>omophub_error</code></td>
+<td>Every SDK error</td>
+</tr>
+</tbody>
+</table>
+<p>API errors carry <code>status_code</code>, <code>error_code</code> (the server’s <code>error.code</code>), <code>details</code>, <code>request_id</code>, <code>endpoint</code>, and for 429 <code>retry_after</code>.</p>
 <div class="sourceCode" id="cb19"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="kw"><a href="https://rdrr.io/r/base/conditions.html" class="external-link">tryCatch</a></span><span class="op">(</span><span class="op">{</span></span>
 <span>  <span class="va">result</span> <span class="op">&lt;-</span> <span class="va">client</span><span class="op">$</span><span class="va">concepts</span><span class="op">$</span><span class="fu">get</span><span class="op">(</span><span class="fl">999999999</span><span class="op">)</span></span>
-<span><span class="op">}</span>, httr2_http_404 <span class="op">=</span> <span class="kw">function</span><span class="op">(</span><span class="va">e</span><span class="op">)</span> <span class="op">{</span></span>
-<span>  <span class="fu"><a href="https://rdrr.io/r/base/message.html" class="external-link">message</a></span><span class="op">(</span><span class="st">"Concept not found: "</span>, <span class="fu"><a href="https://rdrr.io/r/base/conditions.html" class="external-link">conditionMessage</a></span><span class="op">(</span><span class="va">e</span><span class="op">)</span><span class="op">[[</span><span class="fl">1</span><span class="op">]</span><span class="op">]</span><span class="op">)</span></span>
-<span><span class="op">}</span>, httr2_http_401 <span class="op">=</span> <span class="kw">function</span><span class="op">(</span><span class="va">e</span><span class="op">)</span> <span class="op">{</span></span>
-<span>  <span class="fu"><a href="https://rdrr.io/r/base/message.html" class="external-link">message</a></span><span class="op">(</span><span class="st">"Unauthorized - check your API key"</span><span class="op">)</span></span>
-<span><span class="op">}</span>, httr2_http_403 <span class="op">=</span> <span class="kw">function</span><span class="op">(</span><span class="va">e</span><span class="op">)</span> <span class="op">{</span></span>
+<span><span class="op">}</span>, omophub_not_found <span class="op">=</span> <span class="kw">function</span><span class="op">(</span><span class="va">e</span><span class="op">)</span> <span class="op">{</span></span>
+<span>  <span class="fu"><a href="https://rdrr.io/r/base/message.html" class="external-link">message</a></span><span class="op">(</span><span class="st">"Concept not found: "</span>, <span class="fu"><a href="https://rdrr.io/r/base/conditions.html" class="external-link">conditionMessage</a></span><span class="op">(</span><span class="va">e</span><span class="op">)</span><span class="op">)</span></span>
+<span><span class="op">}</span>, omophub_auth_error <span class="op">=</span> <span class="kw">function</span><span class="op">(</span><span class="va">e</span><span class="op">)</span> <span class="op">{</span></span>
+<span>  <span class="fu"><a href="https://rdrr.io/r/base/message.html" class="external-link">message</a></span><span class="op">(</span><span class="st">"Unauthorized - check your API key ("</span>, <span class="va">e</span><span class="op">$</span><span class="va">error_code</span>, <span class="st">")"</span><span class="op">)</span></span>
+<span><span class="op">}</span>, omophub_forbidden_error <span class="op">=</span> <span class="kw">function</span><span class="op">(</span><span class="va">e</span><span class="op">)</span> <span class="op">{</span></span>
 <span>  <span class="fu"><a href="https://rdrr.io/r/base/message.html" class="external-link">message</a></span><span class="op">(</span><span class="st">"Forbidden - API key lacks permission or vocabulary restricted"</span><span class="op">)</span></span>
-<span><span class="op">}</span>, httr2_http_429 <span class="op">=</span> <span class="kw">function</span><span class="op">(</span><span class="va">e</span><span class="op">)</span> <span class="op">{</span></span>
+<span><span class="op">}</span>, omophub_rate_limit_error <span class="op">=</span> <span class="kw">function</span><span class="op">(</span><span class="va">e</span><span class="op">)</span> <span class="op">{</span></span>
 <span>  <span class="co"># The SDK already auto-retries 429 via httr2::req_retry() with</span></span>
 <span>  <span class="co"># exponential backoff; handle here only for custom logging.</span></span>
 <span>  <span class="fu"><a href="https://rdrr.io/r/base/message.html" class="external-link">message</a></span><span class="op">(</span><span class="st">"Rate limited ("</span>, <span class="va">e</span><span class="op">$</span><span class="va">retry_after</span> <span class="op"><a href="https://rdrr.io/r/base/Control.html" class="external-link">%||%</a></span> <span class="st">"?"</span>, <span class="st">"s)"</span><span class="op">)</span></span>
-<span><span class="op">}</span>, httr2_http <span class="op">=</span> <span class="kw">function</span><span class="op">(</span><span class="va">e</span><span class="op">)</span> <span class="op">{</span></span>
-<span>  <span class="co"># Generic HTTP error fallback (any 4xx/5xx not caught above)</span></span>
-<span>  <span class="fu"><a href="https://rdrr.io/r/base/message.html" class="external-link">message</a></span><span class="op">(</span><span class="st">"HTTP error: "</span>, <span class="fu"><a href="https://rdrr.io/r/base/conditions.html" class="external-link">conditionMessage</a></span><span class="op">(</span><span class="va">e</span><span class="op">)</span><span class="op">[[</span><span class="fl">1</span><span class="op">]</span><span class="op">]</span><span class="op">)</span></span>
 <span><span class="op">}</span>, omophub_validation_error <span class="op">=</span> <span class="kw">function</span><span class="op">(</span><span class="va">e</span><span class="op">)</span> <span class="op">{</span></span>
-<span>  <span class="co"># Pre-request validation (bad concept_id type, empty query, etc.)</span></span>
-<span>  <span class="fu"><a href="https://rdrr.io/r/base/message.html" class="external-link">message</a></span><span class="op">(</span><span class="st">"Validation error: "</span>, <span class="fu"><a href="https://rdrr.io/r/base/conditions.html" class="external-link">conditionMessage</a></span><span class="op">(</span><span class="va">e</span><span class="op">)</span><span class="op">[[</span><span class="fl">1</span><span class="op">]</span><span class="op">]</span><span class="op">)</span></span>
+<span>  <span class="co"># HTTP 400 from the server, or pre-request validation</span></span>
+<span>  <span class="co"># (bad concept_id type, empty query, etc.)</span></span>
+<span>  <span class="fu"><a href="https://rdrr.io/r/base/message.html" class="external-link">message</a></span><span class="op">(</span><span class="st">"Validation error: "</span>, <span class="fu"><a href="https://rdrr.io/r/base/conditions.html" class="external-link">conditionMessage</a></span><span class="op">(</span><span class="va">e</span><span class="op">)</span><span class="op">)</span></span>
+<span><span class="op">}</span>, omophub_api_error <span class="op">=</span> <span class="kw">function</span><span class="op">(</span><span class="va">e</span><span class="op">)</span> <span class="op">{</span></span>
+<span>  <span class="co"># Any other HTTP error; quote e$request_id when contacting support</span></span>
+<span>  <span class="fu"><a href="https://rdrr.io/r/base/message.html" class="external-link">message</a></span><span class="op">(</span><span class="st">"API error "</span>, <span class="va">e</span><span class="op">$</span><span class="va">status_code</span>, <span class="st">" ["</span>, <span class="va">e</span><span class="op">$</span><span class="va">request_id</span>, <span class="st">"]"</span><span class="op">)</span></span>
 <span><span class="op">}</span><span class="op">)</span></span></code></pre></div>
+<p>The conditions also keep httr2’s own classes (<code>httr2_http_404</code>, <code>httr2_http</code>, <code>httr2_failure</code>) and the raw response in <code>e$resp</code>, so handlers written against httr2 continue to work.</p>
 <p>See <a href="inst/examples/error_handling.R"><code>inst/examples/error_handling.R</code></a> for the full set of patterns including graceful degradation and batch error collection.</p>
 </div>
 <div class="section level2">
@@ -694,8 +745,6 @@
 <h2 id="license">License<a class="anchor" aria-label="anchor" href="#license"></a>
 </h2>
 <p>MIT License - see <a href="LICENSE">LICENSE</a> for details.</p>
-<hr>
-<p><em>Built for the OHDSI community</em></p>
 </div>
 </div>
   </main><aside class="col-md-3"><div class="links">

@@ -5,7 +5,7 @@ Perform GET Request
 ## Usage
 
 ``` r
-perform_get(base_req, endpoint, query = NULL)
+perform_get(base_req, endpoint, query = NULL, endpoint_encoded = FALSE)
 ```
 
 ## Arguments
@@ -21,6 +21,10 @@ perform_get(base_req, endpoint, query = NULL)
 - query:
 
   Named list of query parameters.
+
+- endpoint_encoded:
+
+  Whether `endpoint` is already percent-encoded.
 
 ## Value
 

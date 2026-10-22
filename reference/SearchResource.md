@@ -10,9 +10,8 @@ A tibble of all matching concepts.
 
 Search results with facets and metadata.
 
-A list containing `query` and `suggestions`. Each suggestion is a flat
-list with `suggestion`, `concept_id`, `concept_code`, `vocabulary_id`,
-`domain_id`, `concept_class_id`, and `standard_concept`.
+A list containing `query`, `suggestions`, and `page_size`. Each compact
+suggestion contains `suggestion`, `type`, and `count`.
 
 List with results and pagination metadata.
 
@@ -106,7 +105,7 @@ Basic concept search.
 
 - `query`:
 
-  Search query string.
+  Search query string (3-500 characters).
 
 - `vocabulary_ids`:
 

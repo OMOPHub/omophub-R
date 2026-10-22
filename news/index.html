@@ -7,7 +7,7 @@
 
     <a class="navbar-brand me-2" href="../index.html">omophub</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">1.9.1</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">1.10.0</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -32,11 +32,30 @@
   <main id="main" class="col-md-9"><div class="page-header">
 
       <h1>Changelog</h1>
-      <small>Source: <a href="https://github.com/omopHub/omophub-R/blob/v1.9.1/NEWS.md" class="external-link"><code>NEWS.md</code></a></small>
+      <small>Source: <a href="https://github.com/omopHub/omophub-R/blob/main/NEWS.md" class="external-link"><code>NEWS.md</code></a></small>
     </div>
 
     <div class="section level2">
-<h2 class="pkg-version" data-toc-text="1.9.1" id="omophub-191">omophub 1.9.1<a class="anchor" aria-label="anchor" href="#omophub-191"></a></h2>
+<h2 class="pkg-version" data-toc-text="1.10.0" id="omophub-1100">omophub 1.10.0<a class="anchor" aria-label="anchor" href="#omophub-1100"></a></h2>
+<div class="section level3">
+<h3 id="bug-fixes-1-10-0">Bug Fixes<a class="anchor" aria-label="anchor" href="#bug-fixes-1-10-0"></a></h3>
+<ul><li><p>Batch concept requests preserve JSON arrays for single concept IDs and vocabulary filters, including named input vectors. Vocabulary filters must contain non-missing strings; invalid filter types are rejected before sending.</p></li>
+<li><p>Recommendations now preserve JSON arrays for single source concepts and single-item relationship, vocabulary, and domain filters. Named vectors also remain arrays. Filters reject missing strings before sending. Boolean flags and pagination values retain their scalar types.</p></li>
+<li><p><code>get_by_code()</code> percent-encodes vocabulary IDs and concept codes as individual path segments, including literal percent sequences and slashes such as ICD-O <code>8032/3</code>, with or without hierarchy, synonym, relationship, or vocabulary-release query options.</p></li>
+<li>
+<p>HTTP failures now raise the documented OMOPHub condition classes instead of only httr2’s generic ones (<a href="https://github.com/omopHub/omophub-R/issues/137" class="external-link">#137</a>): 400 → <code>omophub_validation_error</code>, 401 or <code>invalid_api_key</code> / <code>missing_api_key</code> → <code>omophub_auth_error</code>, 403 → <code>omophub_forbidden_error</code> (new; kept distinct from invalid credentials), 404 → <code>omophub_not_found</code>, 429 → <code>omophub_rate_limit_error</code>, 5xx → <code>omophub_server_error</code>, other statuses → <code>omophub_api_error</code>. Network failures raise <code>omophub_connection_error</code>. API conditions carry <code>status_code</code>, <code>error_code</code>, <code>details</code>, <code>request_id</code>, <code>endpoint</code>, and (for</p>
+<ol start="429" style="list-style-type: decimal"><li>
+<code>retry_after</code>. The httr2 classes (<code>httr2_http_404</code>, <code>httr2_http</code>, <code>httr2_failure</code>, …) and <code>e$resp</code> are preserved, so existing handlers keep working. Empty error-message arrays or objects fall back to the HTTP status without masking the original failure.</li>
+</ol></li>
+</ul></div>
+<div class="section level3">
+<h3 id="changed-1-10-0">Changed<a class="anchor" aria-label="anchor" href="#changed-1-10-0"></a></h3>
+<ul><li>Autocomplete now calls the canonical <code>/search/autocomplete</code> endpoint and returns its compact <code>suggestion</code>, <code>type</code>, and <code>count</code> fields. <code>domain_ids</code>, <code>page_size</code>, and the warned compatibility aliases remain supported.</li>
+<li>Basic search now validates the API’s required 3-500 character query contract before sending a request.</li>
+</ul></div>
+</div>
+    <div class="section level2">
+<h2 class="pkg-version" data-toc-text="1.9.1" id="omophub-191">omophub 1.9.1<a class="anchor" aria-label="anchor" href="#omophub-191"></a></h2><p class="text-muted">CRAN release: 2026-09-07</p>
 <div class="section level3">
 <h3 id="new-features-1-9-1">New Features<a class="anchor" aria-label="anchor" href="#new-features-1-9-1"></a></h3>
 <ul><li>Similarity search now supports pagination and the API’s complete filter and response metadata, including <code>source_concept</code> and lower-bound totals.</li>
