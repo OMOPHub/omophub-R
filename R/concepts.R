@@ -124,7 +124,8 @@ ConceptsResource <- R6::R6Class(
         body$include_mappings <- TRUE
       }
       if (!is.null(vocabulary_filter)) {
-        body$vocabulary_filter <- unname(as.list(as.character(vocabulary_filter)))
+        checkmate::assert_character(vocabulary_filter, any.missing = FALSE)
+        body$vocabulary_filter <- unname(as.list(vocabulary_filter))
       }
       if (isTRUE(standard_only)) {
         body$standard_only <- TRUE

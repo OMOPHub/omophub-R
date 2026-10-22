@@ -61,3 +61,17 @@ test_that("batch drops input names and leaves omitted filters absent", {
   expect_false("include_synonyms" %in% names(body))
   expect_false("include_mappings" %in% names(body))
 })
+
+test_that("batch rejects invalid vocabulary filters before making a request", {
+  resource <- ConceptsResource$new(httr2::request("https://api.omophub.test/v1"))
+  local_mocked_bindings(
+    perform_post = function(...) stop("request should not be sent"),
+    .package = "omophub"
+  )
+  for (filter in list(123, TRUE, list("SNOMED"), NA_character_)) {
+    expect_error(
+      resource$batch(201826L, vocabulary_filter = filter),
+      "vocabulary_filter", class = "simpleError"
+    )
+  }
+})
