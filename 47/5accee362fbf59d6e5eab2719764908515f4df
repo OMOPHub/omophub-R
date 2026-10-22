@@ -1,0 +1,27 @@
+NEWS.md
+  s_01a48dc551d115::t_6cdd03d2d12346 13-17
+R/concepts.R
+  s_01a48dc551d115::t_71df2a3643328e 91-98
+R/request.R
+  s_01a48dc551d115::t_ceaca467a2ea6a 68,74-79,89-96
+man/perform_get.Rd
+  s_01a48dc551d115::t_50cc01b0d56bc3 7,15-16
+tests/testthat/test-concepts.R
+  s_01a48dc551d115::t_eaa74b53b411b3 111,122-143,150,494-552
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.7.5",
+  "base_commit_sha": "475accee362fbf59d6e5eab2719764908515f4df",
+  "prompts": {},
+  "sessions": {
+    "s_01a48dc551d115": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "01a16038-b441-7c21-be6c-6253c947f491",
+        "model": "unknown"
+      },
+      "human_author": "alex-omophub <alex@omophub.com>"
+    }
+  }
+}
